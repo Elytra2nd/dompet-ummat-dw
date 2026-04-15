@@ -1,39 +1,56 @@
-import dynamic from 'next/dynamic'
-import { prisma } from '@/lib/prisma'
-import { StatCard } from '@/components/ui/StatCard'
+import AddMustahikForm from '@/components/mustahik/AddMustahikForm'
+import { Button } from '@/components/ui/button' // Perbaikan: kutip tunggal di awal dan akhir
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
-// Load map secara dinamis (tanpa SSR)
-const MainMap = dynamic(() => import('@/components/map/MapContainer'), { 
-  ssr: false,
-  loading: () => <div className="h-[500px] w-full animate-pulse bg-gray-200 rounded-xl" />
-})
-
-export default async function DashboardPage() {
-  // Ambil data statistik langsung dari Prisma (Server Side)
-  const totalMustahik = await prisma.dim_mustahik.count()
-  const mapData = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/mustahik/locations`).then(res => res.json())
+export default function NewMustahikPage() {
+  const kategoriEnum = [
+    "Sosial",
+    "Pasien Ambulan",
+    "Kesehatan",
+    "Ekonomi",
+    "Pendidikan",
+    "Penyalur Ekonomi",
+    "Penyalur Kesehatan",
+    "Penyalur Pendidikan",
+    "Penyalur Sosial",
+    "Petugas",
+    "Program Donasi"
+  ];
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">DW Dompet Ummat Dashboard</h1>
-          <p className="text-gray-500">Monitoring Data Spasial & Kelayakan</p>
-        </header>
-
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <StatCard title="Total Mustahik" value={totalMustahik} icon="👥" color="bg-blue-600" />
-          <StatCard title="Titik Lokasi" value={mapData.length} icon="📍" color="bg-emerald-600" />
-          <StatCard title="Update Terbaru" value="15 April 2026" icon="📅" color="bg-amber-600" />
-        </div>
-
-        <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold">Sebaran Mustahik Melawi</h2>
+    <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
+      <div className="bg-white border-b mb-8 shadow-sm">
+        <div className="max-w-7xl mx-auto px-8 py-6">
+          <div className="flex items-center gap-4 mb-2">
+            <Button variant="ghost" size="sm" asChild className="-ml-2 text-slate-500 hover:text-emerald-600 transition-colors">
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Kembali ke Dashboard
+              </Link>
+            </Button>
           </div>
-          <MainMap data={mapData} />
+          
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                Registrasi <span className="text-emerald-600">Mustahik Baru</span>
+              </h1>
+              <p className="text-slate-500 mt-1 font-medium">
+                Sistem Penomoran ID Otomatis Dompet Ummat
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </main>
+
+      <div className="max-w-7xl mx-auto px-8">
+        <AddMustahikForm categoryOptions={kategoriEnum} />
+        
+        <footer className="mt-12 text-center text-slate-400 text-sm italic">
+          <p>© 2026 Dompet Ummat - Sistem Informasi Geospasial</p>
+        </footer>
+      </div>
+    </div>
   )
 }
