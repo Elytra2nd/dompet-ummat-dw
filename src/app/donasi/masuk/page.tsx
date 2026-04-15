@@ -54,7 +54,7 @@ export default function DonasiMasukPage() {
                 Penerimaan <span className="text-indigo-600">Donasi</span>
               </h1>
               <p className="text-slate-500 mt-1 font-medium">
-                Pencatatan dana Ziswaf masuk untuk pemberdayaan ummat Melawi
+                Pencatatan dana Ziswaf masuk untuk pemberdayaan ummat
               </p>
             </div>
             {loading && (

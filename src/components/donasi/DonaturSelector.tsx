@@ -6,10 +6,11 @@ import { Search, Heart, Phone, MapPin, Loader2, X, Plus } from 'lucide-react'
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
+// Sesuaikan interface dengan kolom database asli
 interface Donatur {
   id_donatur: string;
-  nama_donatur: string;
-  no_hp: string;
+  nama_lengkap: string; // Sebelumnya nama_donatur
+  kontak_utama: string; // Sebelumnya no_hp
   alamat: string;
 }
 
@@ -39,16 +40,20 @@ export default function DonaturSelector({ onSelect, selectedId }: DonaturSelecto
   // Logika pencarian dengan Debounce
   useEffect(() => {
     const searchDonatur = async () => {
-      if (query.length < 2 || (selectedId && query === results.find(r => r.id_donatur === selectedId)?.nama_donatur)) {
+      // Pastikan pencarian tidak trigger jika query kosong atau sudah terpilih
+      if (query.length < 2 || (selectedId && query === results.find(r => r.id_donatur === selectedId)?.nama_lengkap)) {
         return
       }
       
       setLoading(true)
       try {
-        const res = await fetch(`/api/donasi/donatur/search?q=${query}`)
-        const data = await res.json()
-        setResults(data)
-        setIsOpen(true)
+        // Panggil route utama donatur
+        const res = await fetch(`/api/donasi/donatur?q=${encodeURIComponent(query)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setResults(data)
+          setIsOpen(true)
+        }
       } catch (e) {
         console.error("Gagal mencari donatur", e)
       } finally {
@@ -65,7 +70,7 @@ export default function DonaturSelector({ onSelect, selectedId }: DonaturSelecto
       <div className="relative">
         <Input
           placeholder="Cari Nama Donatur atau No. HP..."
-          value={query}
+          value={query ?? ''} // Fix Error Controlled Input
           onChange={(e) => {
             setQuery(e.target.value)
             setIsOpen(true)
@@ -78,6 +83,7 @@ export default function DonaturSelector({ onSelect, selectedId }: DonaturSelecto
           {loading && <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />}
           {query && (
             <button 
+              type="button" // Mencegah form submit tidak sengaja
               onClick={() => { setQuery(''); onSelect(''); setIsOpen(false) }}
               className="text-slate-400 hover:text-red-500"
             >
@@ -96,7 +102,7 @@ export default function DonaturSelector({ onSelect, selectedId }: DonaturSelecto
                   key={d.id_donatur}
                   onClick={() => {
                     onSelect(d.id_donatur)
-                    setQuery(d.nama_donatur)
+                    setQuery(d.nama_lengkap) // Gunakan nama_lengkap
                     setIsOpen(false)
                   }}
                   className="p-4 hover:bg-indigo-50 cursor-pointer border-b last:border-0 transition-colors group"
@@ -107,10 +113,15 @@ export default function DonaturSelector({ onSelect, selectedId }: DonaturSelecto
                         <Heart className="h-4 w-4 text-indigo-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-800">{d.nama_donatur}</p>
+                        {/* Sinkronkan dengan database core */}
+                        <p className="text-sm font-bold text-slate-800">{d.nama_lengkap}</p>
                         <div className="flex items-center gap-3 text-[10px] text-slate-500 mt-1">
-                          <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {d.no_hp}</span>
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {d.alamat || 'Alamat tidak tersedia'}</span>
+                          <span className="flex items-center gap-1">
+                            <Phone className="h-3 w-3" /> {d.kontak_utama}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {d.alamat || 'Alamat tidak tersedia'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -123,8 +134,15 @@ export default function DonaturSelector({ onSelect, selectedId }: DonaturSelecto
             ) : query.length >= 2 ? (
               <div className="p-4 text-center">
                 <p className="text-sm text-slate-500 mb-3">Donatur tidak ditemukan</p>
-                <Button size="sm" variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
-                  <Plus className="h-3 w-3 mr-2" /> Tambah Donatur Baru
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                  asChild
+                >
+                  <a href="/donasi/donatur">
+                    <Plus className="h-3 w-3 mr-2" /> Tambah Donatur Baru
+                  </a>
                 </Button>
               </div>
             ) : null}
