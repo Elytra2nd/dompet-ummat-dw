@@ -1,0 +1,635 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model dim_date {
+  sk_date                                                     Int                   @id
+  tanggal                                                     DateTime              @db.Date
+  tahun                                                       Int?                  @db.SmallInt
+  bulan                                                       Int?                  @db.TinyInt
+  nama_bulan                                                  String?               @db.VarChar(20)
+  kuartal                                                     Int?                  @db.TinyInt
+  hari                                                        Int?                  @db.TinyInt
+  nama_hari                                                   String?               @db.VarChar(20)
+  tipe_hari                                                   dim_date_tipe_hari?
+  fact_penyaluran_fact_penyaluran_sk_tgl_berkasTodim_date     fact_penyaluran[]     @relation("fact_penyaluran_sk_tgl_berkasTodim_date")
+  fact_penyaluran_fact_penyaluran_sk_tgl_disalurkanTodim_date fact_penyaluran[]     @relation("fact_penyaluran_sk_tgl_disalurkanTodim_date")
+  fact_skor_kelayakan                                         fact_skor_kelayakan[]
+  fact_survey                                                 fact_survey[]
+}
+
+model dim_donatur {
+  sk_donatur   Int               @id @default(autoincrement())
+  id_donatur   String            @unique(map: "id_donatur") @db.VarChar(50)
+  nama_lengkap String?           @db.VarChar(255)
+  alamat       String?           @db.Text
+  perusahaan   String?           @db.VarChar(255)
+  tipe         dim_donatur_tipe?
+  kontak_utama String?           @db.VarChar(100)
+  valid_from   DateTime?         @default(dbgenerated("'2018-01-01'")) @db.Date
+  valid_to     DateTime?         @default(dbgenerated("'9999-12-31'")) @db.Date
+  is_active    Boolean?          @default(true)
+  fact_donasi  fact_donasi[]
+}
+
+model dim_jalur_pembayaran {
+  sk_jalur_pembayaran Int                                @id @default(autoincrement())
+  metode_bayar        dim_jalur_pembayaran_metode_bayar?
+  cara_donasi         String?                            @db.VarChar(100)
+  bank_asal           String?                            @db.VarChar(100)
+  kategori_bank       String?                            @db.VarChar(100)
+  fact_donasi         fact_donasi[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model dim_lokasi {
+  sk_lokasi              Int                      @id @default(autoincrement())
+  provinsi               String?                  @default("Kalimantan Barat") @db.VarChar(100)
+  kabupaten_kota         String?                  @db.VarChar(100)
+  kecamatan              String?                  @db.VarChar(100)
+  desa_kelurahan         String?                  @db.VarChar(100)
+  latitude               Decimal?                 @db.Decimal(10, 8)
+  longitude              Decimal?                 @db.Decimal(11, 8)
+  dim_mustahik           dim_mustahik[]
+  fact_aktivitas_ambulan fact_aktivitas_ambulan[]
+  fact_layanan_ambulan   fact_layanan_ambulan[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model dim_mustahik {
+  sk_mustahik         Int                       @id @default(autoincrement())
+  id_mustahik         String                    @unique(map: "id_mustahik") @db.VarChar(50)
+  nik                 String?                   @db.VarChar(50)
+  kk                  String?                   @db.VarChar(50)
+  nama                String?                   @db.VarChar(255)
+  gender              dim_mustahik_gender?
+  no_hp               String?                   @db.VarChar(50)
+  kategori_pm         dim_mustahik_kategori_pm? @default(To_Be_Determined)
+  alamat              String?                   @db.Text
+  desa                String?                   @db.VarChar(100)
+  kelurahan_kecamatan String?                   @db.VarChar(100)
+  kabupaten_kota      String?                   @db.VarChar(100)
+  alasan_dibantu      String?                   @db.Text
+  skoring             Decimal?                  @db.Decimal(10, 2)
+  jumlah_jiwa         Int?
+  valid_from          DateTime?                 @default(dbgenerated("'2018-01-01'")) @db.Date
+  valid_to            DateTime?                 @default(dbgenerated("'9999-12-31'")) @db.Date
+  is_active           Boolean?                  @default(true)
+  sk_lokasi           Int?                      @default(-1)
+  dim_lokasi          dim_lokasi?               @relation(fields: [sk_lokasi], references: [sk_lokasi], onDelete: Restrict, map: "fk_mustahik_lokasi")
+  fact_penyaluran     fact_penyaluran[]
+  fact_skor_kelayakan fact_skor_kelayakan[]
+  fact_survey         fact_survey[]
+
+  @@index([sk_lokasi], map: "fk_mustahik_lokasi")
+}
+
+model dim_pasien_ambulan {
+  sk_pasien            Int                                @id @default(autoincrement())
+  id_pasien            String                             @unique(map: "id_pasien") @db.VarChar(50)
+  nama_pasien          String?                            @db.VarChar(255)
+  gender               dim_pasien_ambulan_gender?
+  no_hp                String?                            @db.VarChar(50)
+  status_ekonomi       dim_pasien_ambulan_status_ekonomi?
+  alamat_jemput        String?                            @db.Text
+  desa                 String?                            @db.VarChar(100)
+  kelurahan_kecamatan  String?                            @db.VarChar(100)
+  kabupaten_kota       String?                            @db.VarChar(100)
+  fact_layanan_ambulan fact_layanan_ambulan[]
+}
+
+model dim_penyalur_master {
+  sk_penyalur     Int               @id @default(autoincrement())
+  id_penyalur     String            @unique(map: "id_penyalur") @db.VarChar(50)
+  nama_penyalur   String?           @db.VarChar(255)
+  fact_penyaluran fact_penyaluran[]
+}
+
+model dim_pertanyaan_survey {
+  sk_pertanyaan      Int                  @id @default(autoincrement())
+  kode_pertanyaan    String?              @db.VarChar(50)
+  grup_pertanyaan    String?              @db.VarChar(100)
+  teks_pertanyaan    String?              @db.Text
+  fact_survey_detail fact_survey_detail[]
+}
+
+model dim_petugas {
+  sk_petugas          Int                       @id @default(autoincrement())
+  id_petugas          String                    @unique(map: "id_petugas") @db.VarChar(50)
+  nama_petugas        String?                   @db.VarChar(255)
+  tipe_petugas        dim_petugas_tipe_petugas?
+  fact_donasi         fact_donasi[]
+  fact_skor_kelayakan fact_skor_kelayakan[]
+}
+
+model dim_program_donasi {
+  sk_program_donasi Int                                @id @default(autoincrement())
+  id_program_donasi String                             @unique(map: "id_program_donasi") @db.VarChar(50)
+  program_induk     dim_program_donasi_program_induk?
+  sub_program       dim_program_donasi_sub_program?    @default(To_Be_Determined)
+  kategori_minat    dim_program_donasi_kategori_minat? @default(To_Be_Determined)
+  fact_donasi       fact_donasi[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fact_aktivitas_ambulan {
+  sk_fakta_aktivitas_ambulan Int                                        @id @default(autoincrement())
+  id_transaksi               String                                     @db.VarChar(100)
+  sk_tanggal_aktivitas       Int?
+  jam                        fact_aktivitas_ambulan_jam?
+  armada                     fact_aktivitas_ambulan_armada?
+  kategori_aktivitas         fact_aktivitas_ambulan_kategori_aktivitas?
+  sk_lokasi                  Int?                                       @default(-1)
+  biaya_operasional          Decimal?                                   @default(0.00) @db.Decimal(15, 2)
+  jumlah_aktivitas           Int?                                       @default(1) @db.TinyInt
+  dim_lokasi                 dim_lokasi?                                @relation(fields: [sk_lokasi], references: [sk_lokasi], onDelete: Restrict, map: "fk_aktivitas_lokasi")
+
+  @@index([sk_lokasi], map: "fk_aktivitas_lokasi")
+}
+
+model fact_donasi {
+  sk_fakta_donasi      Int                   @id @default(autoincrement())
+  id_transaksi_donasi  String                @db.VarChar(50)
+  sk_donatur           Int?
+  sk_petugas           Int?
+  sk_program_donasi    Int?
+  sk_jalur_pembayaran  Int?
+  sk_tgl_bersih        Int?
+  nominal_valid        Decimal?              @db.Decimal(15, 2)
+  no_ref               String?               @db.VarChar(100)
+  dim_donatur          dim_donatur?          @relation(fields: [sk_donatur], references: [sk_donatur], onDelete: NoAction, onUpdate: NoAction, map: "fact_donasi_ibfk_1")
+  dim_petugas          dim_petugas?          @relation(fields: [sk_petugas], references: [sk_petugas], onDelete: NoAction, onUpdate: NoAction, map: "fact_donasi_ibfk_2")
+  dim_program_donasi   dim_program_donasi?   @relation(fields: [sk_program_donasi], references: [sk_program_donasi], onDelete: NoAction, onUpdate: NoAction, map: "fact_donasi_ibfk_3")
+  dim_jalur_pembayaran dim_jalur_pembayaran? @relation(fields: [sk_jalur_pembayaran], references: [sk_jalur_pembayaran], onDelete: NoAction, onUpdate: NoAction, map: "fact_donasi_ibfk_4")
+
+  @@index([sk_donatur], map: "sk_donatur")
+  @@index([sk_jalur_pembayaran], map: "sk_jalur_pembayaran")
+  @@index([sk_petugas], map: "sk_petugas")
+  @@index([sk_program_donasi], map: "sk_program_donasi")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fact_layanan_ambulan {
+  sk_fakta_layanan_ambulan Int                                    @id @default(autoincrement())
+  id_transaksi             String                                 @db.VarChar(100)
+  sk_pasien                Int?
+  sk_tanggal_layanan       Int?
+  jam                      fact_layanan_ambulan_jam?
+  armada                   fact_layanan_ambulan_armada?
+  kategori_layanan         fact_layanan_ambulan_kategori_layanan?
+  jumlah_layanan           Int?                                   @default(1) @db.TinyInt
+  sk_lokasi                Int?                                   @default(-1)
+  dim_pasien_ambulan       dim_pasien_ambulan?                    @relation(fields: [sk_pasien], references: [sk_pasien], onDelete: NoAction, onUpdate: NoAction, map: "fact_layanan_ambulan_ibfk_1")
+  dim_lokasi               dim_lokasi?                            @relation(fields: [sk_lokasi], references: [sk_lokasi], onDelete: Restrict, map: "fk_ambulan_lokasi")
+
+  @@index([sk_lokasi], map: "fk_ambulan_lokasi")
+  @@index([sk_pasien], map: "sk_pasien")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fact_penyaluran {
+  sk_fakta_penyaluran                                  Int                                      @id @default(autoincrement())
+  id_transaksi                                         String                                   @db.VarChar(100)
+  no_referensi_lama                                    String?                                  @db.VarChar(100)
+  sk_mustahik                                          Int?
+  sk_penyalur                                          Int?
+  domain_program                                       fact_penyaluran_domain_program?
+  kategori_program                                     fact_penyaluran_kategori_program?
+  sk_tgl_berkas                                        Int?
+  sk_tgl_disalurkan                                    Int?
+  jenis_bantuan                                        fact_penyaluran_jenis_bantuan?
+  dana_tersalur                                        Decimal?                                 @db.Decimal(15, 2)
+  status_pengajuan                                     fact_penyaluran_status_pengajuan?
+  kategori_penyakit                                    fact_penyaluran_kategori_penyakit?       @default(Tidak_Ada_Not_Applicable)
+  kategori_alasan_ditolak                              fact_penyaluran_kategori_alasan_ditolak? @default(Tidak_Ditolak__Disetujui_)
+  dim_mustahik                                         dim_mustahik?                            @relation(fields: [sk_mustahik], references: [sk_mustahik], onDelete: NoAction, onUpdate: NoAction, map: "fact_penyaluran_ibfk_1")
+  dim_penyalur_master                                  dim_penyalur_master?                     @relation(fields: [sk_penyalur], references: [sk_penyalur], onDelete: NoAction, onUpdate: NoAction, map: "fact_penyaluran_ibfk_2")
+  dim_date_fact_penyaluran_sk_tgl_berkasTodim_date     dim_date?                                @relation("fact_penyaluran_sk_tgl_berkasTodim_date", fields: [sk_tgl_berkas], references: [sk_date], onDelete: Restrict, map: "fk_penyaluran_tgl_berkas")
+  dim_date_fact_penyaluran_sk_tgl_disalurkanTodim_date dim_date?                                @relation("fact_penyaluran_sk_tgl_disalurkanTodim_date", fields: [sk_tgl_disalurkan], references: [sk_date], onDelete: Restrict, map: "fk_penyaluran_tgl_cair")
+
+  @@index([sk_tgl_berkas], map: "fk_penyaluran_tgl_berkas")
+  @@index([sk_tgl_disalurkan], map: "fk_penyaluran_tgl_cair")
+  @@index([sk_mustahik], map: "sk_mustahik")
+  @@index([sk_penyalur], map: "sk_penyalur")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fact_skor_kelayakan {
+  sk_fakta_skor_kelayakan Int                                         @id @default(autoincrement())
+  id_survey               String                                      @db.VarChar(100)
+  sk_mustahik             Int?
+  sk_program_donasi       Int?
+  sk_petugas              Int?
+  sk_tgl_survey           Int?
+  pendapatan_bulanan      Decimal?                                    @default(0.00) @db.Decimal(15, 2)
+  pengeluaran_bulanan     Decimal?                                    @default(0.00) @db.Decimal(15, 2)
+  skor_akhir              Decimal?                                    @default(0.00) @db.Decimal(10, 2)
+  jumlah_tanggungan       Int?                                        @default(0)
+  status_kelayakan        fact_skor_kelayakan_status_kelayakan?
+  kategori_asnaf          fact_skor_kelayakan_kategori_asnaf?
+  kondisi_tempat_tinggal  fact_skor_kelayakan_kondisi_tempat_tinggal?
+  kategori_rekomendasi    fact_skor_kelayakan_kategori_rekomendasi?
+  dim_mustahik            dim_mustahik?                               @relation(fields: [sk_mustahik], references: [sk_mustahik], onDelete: NoAction, onUpdate: NoAction, map: "fk_survey_mustahik")
+  dim_petugas             dim_petugas?                                @relation(fields: [sk_petugas], references: [sk_petugas], onDelete: NoAction, onUpdate: NoAction, map: "fk_survey_petugas")
+  dim_date                dim_date?                                   @relation(fields: [sk_tgl_survey], references: [sk_date], onDelete: NoAction, onUpdate: NoAction, map: "fk_survey_tanggal")
+
+  @@index([sk_mustahik], map: "fk_survey_mustahik")
+  @@index([sk_petugas], map: "fk_survey_petugas")
+  @@index([sk_tgl_survey], map: "fk_survey_tanggal")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fact_survey {
+  sk_survey            Int                               @id @default(autoincrement())
+  no_register          String?                           @db.VarChar(50)
+  sk_mustahik          Int?
+  sk_tgl_survey        Int?
+  golongan_penerima    fact_survey_golongan_penerima?
+  kelayakan_sistem     fact_survey_kelayakan_sistem?
+  total_skor_sistem    Decimal?                          @default(0.00) @db.Decimal(10, 2)
+  kategori_rekomendasi fact_survey_kategori_rekomendasi?
+  bentuk_bantuan       fact_survey_bentuk_bantuan?       @default(Tidak_Ada_Data)
+  sifat_bantuan        fact_survey_sifat_bantuan?        @default(Tidak_Ada_Data)
+  dim_mustahik         dim_mustahik?                     @relation(fields: [sk_mustahik], references: [sk_mustahik], onDelete: NoAction, onUpdate: NoAction, map: "fk_header_mustahik")
+  dim_date             dim_date?                         @relation(fields: [sk_tgl_survey], references: [sk_date], onDelete: NoAction, onUpdate: NoAction, map: "fk_header_tanggal")
+  fact_survey_detail   fact_survey_detail[]
+
+  @@index([sk_mustahik], map: "fk_header_mustahik")
+  @@index([sk_tgl_survey], map: "fk_header_tanggal")
+}
+
+model fact_survey_detail {
+  sk_detail             Int                    @id @default(autoincrement())
+  sk_survey             Int?
+  sk_pertanyaan         Int?
+  skor_angka            Decimal?               @db.Decimal(10, 2)
+  fact_survey           fact_survey?           @relation(fields: [sk_survey], references: [sk_survey], onDelete: NoAction, onUpdate: NoAction, map: "fk_detail_header")
+  dim_pertanyaan_survey dim_pertanyaan_survey? @relation(fields: [sk_pertanyaan], references: [sk_pertanyaan], onDelete: NoAction, onUpdate: NoAction, map: "fk_detail_pertanyaan")
+
+  @@index([sk_survey], map: "fk_detail_header")
+  @@index([sk_pertanyaan], map: "fk_detail_pertanyaan")
+}
+
+enum dim_jalur_pembayaran_metode_bayar {
+  Transfer_Bank    @map("Transfer Bank")
+  Tunai
+  QRIS
+  E_Wallet         @map("E-Wallet")
+  Virtual_Account  @map("Virtual Account")
+  Jemput_Donasi    @map("Jemput Donasi")
+  Lainnya
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum dim_program_donasi_program_induk {
+  Pendidikan
+  Kesehatan
+  Ekonomi
+  Sosial_Kemanusiaan @map("Sosial Kemanusiaan")
+  Dakwah___Advokasi  @map("Dakwah & Advokasi")
+  Operasional
+  To_Be_Determined   @map("To Be Determined")
+  Not_Applicable     @map("Not Applicable")
+  Data_Corrupted     @map("Data Corrupted")
+}
+
+enum dim_pasien_ambulan_gender {
+  L
+  P
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_aktivitas_ambulan_jam {
+  Pagi__06_00_12_00_  @map("Pagi (06:00-12:00)")
+  Siang__12_00_15_00_ @map("Siang (12:00-15:00)")
+  Sore__15_00_18_00_  @map("Sore (15:00-18:00)")
+  Malam__18_00_06_00_ @map("Malam (18:00-06:00)")
+  To_Be_Determined    @map("To Be Determined")
+  Not_Applicable      @map("Not Applicable")
+  Data_Corrupted      @map("Data Corrupted")
+}
+
+enum dim_petugas_tipe_petugas {
+  Fundraiser
+  Surveyor
+  Supir_Ambulan    @map("Supir Ambulan")
+  Admin
+  Manajemen
+  Ekonomi
+  Kesehatan
+  Pendidikan
+  Sosial
+  Lainnya
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum dim_program_donasi_sub_program {
+  Beasiswa_Utama       @map("Beasiswa Utama")
+  Kesehatan_Gratis     @map("Kesehatan Gratis")
+  Pemberdayaan_Ekonomi @map("Pemberdayaan Ekonomi")
+  Dakwah_Pedalaman     @map("Dakwah Pedalaman")
+  Bantuan_Pangan       @map("Bantuan Pangan")
+  Ambulans_Gratis      @map("Ambulans Gratis")
+  Zakat_Mal            @map("Zakat Mal")
+  Inbuser
+  Infak_Umum           @map("Infak Umum")
+  Zakat_Profesi        @map("Zakat Profesi")
+  Vue
+  Lainnya
+  Ota
+  Ta_Jil_Ontheroad     @map("Ta'Jil Ontheroad")
+  Ett
+  Institut_Muallaf     @map("Institut Muallaf")
+  Cicilan_Kurban       @map("Cicilan Kurban")
+  Akikah_Kita          @map("Akikah Kita")
+  Wakaf
+  Infak_Tpa            @map("Infak Tpa")
+  Zakat_Pertanian      @map("Zakat Pertanian")
+  Fidyah
+  Zakat_Fitrah         @map("Zakat Fitrah")
+  Paket_Buka_Puasa     @map("Paket Buka Puasa")
+  Infak_Praktis        @map("Infak Praktis")
+  Dompet_Tvri_Peduli   @map("Dompet Tvri Peduli")
+  Kurban_Tfk           @map("Kurban/Tfk")
+  Paket_Lebaran        @map("Paket Lebaran")
+  Paket_Ta_Jil         @map("Paket Ta'Jil")
+  To_Be_Determined     @map("To Be Determined")
+  Not_Applicable       @map("Not Applicable")
+  Data_Corrupted       @map("Data Corrupted")
+}
+
+enum fact_survey_golongan_penerima {
+  Fakir
+  Miskin
+  Amil
+  Muallaf
+  Riqab
+  Gharimin
+  Fisabilillah
+  Ibnu_Sabil       @map("Ibnu Sabil")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_layanan_ambulan_jam {
+  Pagi__06_00_12_00_  @map("Pagi (06:00-12:00)")
+  Siang__12_00_15_00_ @map("Siang (12:00-15:00)")
+  Sore__15_00_18_00_  @map("Sore (15:00-18:00)")
+  Malam__18_00_06_00_ @map("Malam (18:00-06:00)")
+  To_Be_Determined    @map("To Be Determined")
+  Not_Applicable      @map("Not Applicable")
+  Data_Corrupted      @map("Data Corrupted")
+}
+
+enum dim_program_donasi_kategori_minat {
+  Pendidikan
+  Kesehatan
+  Ekonomi
+  Kemanusiaan
+  Keagamaan
+  Ziswaf
+  Sosial_Kemanusiaan @map("Sosial Kemanusiaan")
+  Dakwah___advokasi  @map("Dakwah & advokasi")
+  To_Be_Determined   @map("To Be Determined")
+  Not_Applicable     @map("Not Applicable")
+  Data_Corrupted     @map("Data Corrupted")
+}
+
+enum fact_aktivitas_ambulan_armada {
+  Ambulan_1__KB_1234_XX_ @map("Ambulan 1 (KB 1234 XX)")
+  Ambulan_2__KB_5678_YY_ @map("Ambulan 2 (KB 5678 YY)")
+  Lainnya
+  To_Be_Determined       @map("To Be Determined")
+  Not_Applicable         @map("Not Applicable")
+  Data_Corrupted         @map("Data Corrupted")
+}
+
+enum fact_layanan_ambulan_armada {
+  Ambulan_1__KB_1234_XX_ @map("Ambulan 1 (KB 1234 XX)")
+  Ambulan_2__KB_5678_YY_ @map("Ambulan 2 (KB 5678 YY)")
+  Lainnya
+  To_Be_Determined       @map("To Be Determined")
+  Not_Applicable         @map("Not Applicable")
+  Data_Corrupted         @map("Data Corrupted")
+}
+
+enum fact_aktivitas_ambulan_kategori_aktivitas {
+  Isi_Bensin         @map("Isi Bensin")
+  Servis_Rutin       @map("Servis Rutin")
+  Ganti_Suku_Cadang  @map("Ganti Suku Cadang")
+  Pajak_Administrasi @map("Pajak/Administrasi")
+  Lainnya
+  To_Be_Determined   @map("To Be Determined")
+  Not_Applicable     @map("Not Applicable")
+  Data_Corrupted     @map("Data Corrupted")
+}
+
+enum dim_donatur_tipe {
+  Individu
+  Lembaga_Korporasi @map("Lembaga/Korporasi")
+  Komunitas
+  To_Be_Determined  @map("To Be Determined")
+  Not_Applicable    @map("Not Applicable")
+  Data_Corrupted    @map("Data Corrupted")
+}
+
+enum dim_mustahik_gender {
+  L
+  P
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_survey_kelayakan_sistem {
+  Sangat_Layak     @map("Sangat Layak")
+  Layak
+  Dipertimbangkan
+  Tidak_Layak      @map("Tidak Layak")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_penyaluran_domain_program {
+  Pendidikan
+  Kesehatan
+  Ekonomi
+  Sosial_Kemanusiaan @map("Sosial Kemanusiaan")
+  Dakwah___Advokasi  @map("Dakwah & Advokasi")
+  Operasional
+  To_Be_Determined   @map("To Be Determined")
+  Not_Applicable     @map("Not Applicable")
+  Data_Corrupted     @map("Data Corrupted")
+}
+
+enum dim_pasien_ambulan_status_ekonomi {
+  Dhuafa
+  Menengah
+  Mampu
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_penyaluran_kategori_program {
+  Beasiswa
+  Bantuan_Biaya_Pengobatan @map("Bantuan Biaya Pengobatan")
+  Modal_Usaha              @map("Modal Usaha")
+  Sembako
+  Santunan_Tunai           @map("Santunan Tunai")
+  Lainnya
+  To_Be_Determined         @map("To Be Determined")
+  Not_Applicable           @map("Not Applicable")
+}
+
+enum fact_layanan_ambulan_kategori_layanan {
+  Antar_Pasien     @map("Antar Pasien")
+  Jemput_Pasien    @map("Jemput Pasien")
+  Layanan_Jenazah  @map("Layanan Jenazah")
+  Gawat_Darurat    @map("Gawat Darurat")
+  Lainnya
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_survey_kategori_rekomendasi {
+  Bantuan_Konsumtif__Sembako_Uang_ @map("Bantuan Konsumtif (Sembako/Uang)")
+  Bantuan_Produktif__Modal_Usaha_  @map("Bantuan Produktif (Modal Usaha)")
+  Bantuan_Medis                    @map("Bantuan Medis")
+  Bantuan_Pendidikan               @map("Bantuan Pendidikan")
+  Lainnya
+  Tidak_Direkomendasikan           @map("Tidak Direkomendasikan")
+  To_Be_Determined                 @map("To Be Determined")
+  Not_Applicable                   @map("Not Applicable")
+}
+
+enum dim_mustahik_kategori_pm {
+  Fakir
+  Miskin
+  Amil
+  Muallaf
+  Riqab
+  Gharimin
+  Fisabilillah
+  Ibnu_Sabil       @map("Ibnu Sabil")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum dim_date_tipe_hari {
+  Hari_Kerja       @map("Hari Kerja")
+  Akhir_Pekan      @map("Akhir Pekan")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_survey_bentuk_bantuan {
+  Uang
+  Barang
+  Lainnya
+  Tidak_Ada_Data @map("Tidak Ada Data")
+}
+
+enum fact_survey_sifat_bantuan {
+  Rutin
+  Insidentil
+  Tidak_Ada_Data @map("Tidak Ada Data")
+}
+
+enum fact_penyaluran_jenis_bantuan {
+  Tunai
+  Barang_Logistik  @map("Barang/Logistik")
+  Jasa_Layanan     @map("Jasa/Layanan")
+  Lainnya
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+}
+
+enum fact_skor_kelayakan_status_kelayakan {
+  Sangat_Layak     @map("Sangat Layak")
+  Layak
+  Dipertimbangkan
+  Tidak_Layak      @map("Tidak Layak")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_penyaluran_status_pengajuan {
+  Proses
+  Disetujui
+  Ditolak
+  Batal
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_skor_kelayakan_kategori_asnaf {
+  Fakir
+  Miskin
+  Amil
+  Muallaf
+  Riqab
+  Gharimin
+  Fisabilillah
+  Ibnu_Sabil       @map("Ibnu Sabil")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_skor_kelayakan_kondisi_tempat_tinggal {
+  Sangat_Baik      @map("Sangat Baik")
+  Baik
+  Cukup
+  Buruk
+  Sangat_Buruk     @map("Sangat Buruk")
+  To_Be_Determined @map("To Be Determined")
+  Not_Applicable   @map("Not Applicable")
+  Data_Corrupted   @map("Data Corrupted")
+}
+
+enum fact_penyaluran_kategori_penyakit {
+  Penyakit_Kronis          @map("Penyakit Kronis")
+  Penyakit_Menular         @map("Penyakit Menular")
+  Penyakit_Ringan          @map("Penyakit Ringan")
+  Gawat_Darurat_Kecelakaan @map("Gawat Darurat/Kecelakaan")
+  Tidak_Ada_Not_Applicable @map("Tidak Ada/Not Applicable")
+}
+
+enum fact_penyaluran_kategori_alasan_ditolak {
+  Berkas_Tidak_Lengkap        @map("Berkas Tidak Lengkap")
+  Tidak_Memenuhi_Syarat_Asnaf @map("Tidak Memenuhi Syarat Asnaf")
+  Kuota_Dana_Habis            @map("Kuota Dana Habis")
+  Penerima_Ganda              @map("Penerima Ganda")
+  Lainnya
+  Tidak_Ditolak__Disetujui_   @map("Tidak Ditolak (Disetujui)")
+}
+
+enum fact_skor_kelayakan_kategori_rekomendasi {
+  Bantuan_Konsumtif__Sembako_Uang_ @map("Bantuan Konsumtif (Sembako/Uang)")
+  Bantuan_Produktif__Modal_Usaha_  @map("Bantuan Produktif (Modal Usaha)")
+  Bantuan_Medis                    @map("Bantuan Medis")
+  Bantuan_Pendidikan               @map("Bantuan Pendidikan")
+  Lainnya
+  Tidak_Direkomendasikan           @map("Tidak Direkomendasikan")
+  To_Be_Determined                 @map("To Be Determined")
+  Not_Applicable                   @map("Not Applicable")
+}
