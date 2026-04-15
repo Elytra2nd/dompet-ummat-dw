@@ -6,7 +6,7 @@ export async function GET() {
     const locations = await prisma.dim_mustahik.findMany({
       select: {
         sk_mustahik: true,
-        nama_lengkap: true,
+        nama: true,
         dim_lokasi: {
           select: {
             latitude: true,

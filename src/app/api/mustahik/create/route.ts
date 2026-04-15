@@ -6,11 +6,12 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { 
       nama, nik, kk, gender, no_hp, alamat, desa, 
-      kelurahan_kecamatan, latitude, longitude, 
-      kategori_pm, program_induk 
+      kelurahan_kecamatan, kabupaten_kota, provinsi,
+      latitude, longitude, kategori_pm, program_induk,
+      sub_program, jumlah_jiwa, dana_tersalur 
     } = body
 
-    // --- 1. LOGIKA AUTO-ID ---
+    // --- 1. LOGIKA AUTO-ID BERDASARKAN PROGRAM_INDUK ---
     let prefix = "MST-GEN" 
     const prog = (program_induk || "").toUpperCase()
 
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
     }
     const autoId = `${prefix}-${nextNumber.toString().padStart(4, '0')}`
 
-    // --- 2. TRANSACTION ---
+    // --- 2. TRANSACTION (LOKASI -> MUSTAHIK -> PENYALURAN) ---
     const result = await prisma.$transaction(async (tx) => {
       
       // A. Simpan ke dim_lokasi
@@ -44,8 +45,8 @@ export async function POST(req: Request) {
           longitude: parseFloat(longitude),
           desa_kelurahan: desa,
           kecamatan: kelurahan_kecamatan,
-          kabupaten_kota: "Melawi",
-          provinsi: "Kalimantan Barat"
+          kabupaten_kota: kabupaten_kota || "Melawi",
+          provinsi: provinsi || "Kalimantan Barat"
         }
       })
 
@@ -56,24 +57,34 @@ export async function POST(req: Request) {
           nama,
           nik: nik || null,
           kk: kk || null,
-          /**
-           * PERBAIKAN ENUM: 
-           * Prisma mengubah spasi menjadi underscore untuk tipe Enum.
-           * Pastikan value sesuai dengan yang digenerate di prisma/client.
-           */
           gender: gender === 'L' ? 'L' : gender === 'P' ? 'P' : 'To_Be_Determined',
           no_hp: no_hp || null,
           alamat,
           desa,
-          kelurahan_kecamatan: kelurahan_kecamatan,
-          kabupaten_kota: "Melawi",
-          // kategori_pm (Asnaf) juga menggunakan underscore jika ada spasi di Enum
+          kelurahan_kecamatan,
+          kabupaten_kota: kabupaten_kota || "Melawi",
           kategori_pm: (kategori_pm as any) || 'To_Be_Determined', 
           sk_lokasi: newLocation.sk_lokasi,
-          is_active: true, 
+          jumlah_jiwa: parseInt(jumlah_jiwa) || 1,
+          is_active: true,
           valid_from: new Date(),
         }
       })
+
+      // C. Simpan ke fact_penyaluran (Jika ada dana yang diinput)
+      if (parseFloat(dana_tersalur) > 0) {
+        await tx.fact_penyaluran.create({
+          data: {
+            id_transaksi: `TX-${Date.now()}-${autoId}`,
+            sk_mustahik: mustahik.sk_mustahik,
+            dana_tersalur: parseFloat(dana_tersalur),
+            domain_program: (program_induk as any) || 'To_Be_Determined',
+            status_pengajuan: 'Disetujui',
+            // Smart Date Key: YYYYMMDD (Standar Data Warehouse)
+            sk_tgl_disalurkan: parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
+          }
+        })
+      }
 
       return { mustahik, autoId }
     })
