@@ -1,3 +1,5 @@
+'use client'
+
 import AddLayananForm from '@/components/ambulan/AddLayananForm'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Ambulance } from 'lucide-react'
