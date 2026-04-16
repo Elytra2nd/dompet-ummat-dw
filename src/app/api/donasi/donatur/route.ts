@@ -7,23 +7,28 @@ export async function GET(req: Request) {
 
   try {
     const donatur = await prisma.dim_donatur.findMany({
-      where: query ? {
-        OR: [
-          { nama_lengkap: { contains: query } },
-          { kontak_utama: { contains: query } },
-          { id_donatur: { contains: query } }
-        ]
-      } : {},
+      where: query
+        ? {
+            OR: [
+              { nama_lengkap: { contains: query } },
+              { kontak_utama: { contains: query } },
+              { id_donatur: { contains: query } },
+            ],
+          }
+        : {},
       take: 10,
-      orderBy: { sk_donatur: 'desc' }
+      orderBy: { sk_donatur: 'desc' },
     })
-    
+
     return NextResponse.json(donatur)
   } catch (error: any) {
-    return NextResponse.json({ 
-      error: "Gagal memuat data donatur", 
-      message: error.message 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Gagal memuat data donatur',
+        message: error.message,
+      },
+      { status: 500 },
+    )
   }
 }
 
@@ -40,11 +45,11 @@ export async function POST(req: Request) {
       data: {
         id_donatur,
         nama_lengkap: nama_donatur, // Map ke kolom database
-        kontak_utama: no_hp,        // Map ke kolom database
+        kontak_utama: no_hp, // Map ke kolom database
         alamat: alamat,
         tipe: kategori_donatur as any, // Map ke kolom database (Enum)
-        is_active: true
-      }
+        is_active: true,
+      },
     })
 
     return NextResponse.json({ success: true, data: newDonatur })

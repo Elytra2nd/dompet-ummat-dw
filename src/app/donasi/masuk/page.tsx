@@ -12,7 +12,7 @@ export default function DonasiMasukPage() {
     totalDonasi: 0,
     jumlahDonatur: 0,
     targetBulanan: 100000000, // Kamu bisa sesuaikan targetnya di sini
-    pertumbuhan: 0
+    pertumbuhan: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -25,7 +25,7 @@ export default function DonasiMasukPage() {
         setStats(data)
       }
     } catch (error) {
-      console.error("Gagal memuat statistik donasi:", error)
+      console.error('Gagal memuat statistik donasi:', error)
     } finally {
       setLoading(false)
     }
@@ -37,28 +37,33 @@ export default function DonasiMasukPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
-      <div className="bg-white border-b mb-8 shadow-sm">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center gap-4 mb-2">
-            <Button variant="ghost" size="sm" asChild className="-ml-2 text-slate-500 hover:text-indigo-600 transition-colors">
+      <div className="mb-8 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-8 py-6">
+          <div className="mb-2 flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="-ml-2 text-slate-500 transition-colors hover:text-indigo-600"
+            >
               <Link href="/">
-                <ArrowLeft className="h-4 w-4 mr-2" /> Kembali ke Dashboard
+                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Dashboard
               </Link>
             </Button>
           </div>
-          
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+              <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
                 <HeartHandshake className="h-8 w-8 text-indigo-600" />
                 Penerimaan <span className="text-indigo-600">Donasi</span>
               </h1>
-              <p className="text-slate-500 mt-1 font-medium">
+              <p className="mt-1 font-medium text-slate-500">
                 Pencatatan dana Ziswaf masuk untuk pemberdayaan ummat
               </p>
             </div>
             {loading && (
-              <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+              <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Sinkronisasi Data...
               </div>
@@ -67,13 +72,13 @@ export default function DonasiMasukPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 space-y-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-8">
         {/* WIDGET STATISTIK DINAMIS */}
-        <DonationStats 
-          totalDonasi={stats.totalDonasi} 
-          jumlahDonatur={stats.jumlahDonatur} 
-          targetBulanan={stats.targetBulanan} 
-          pertumbuhan={stats.pertumbuhan} 
+        <DonationStats
+          totalDonasi={stats.totalDonasi}
+          jumlahDonatur={stats.jumlahDonatur}
+          targetBulanan={stats.targetBulanan}
+          pertumbuhan={stats.pertumbuhan}
         />
 
         {/* FORM UTAMA */}

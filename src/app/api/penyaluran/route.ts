@@ -5,28 +5,28 @@ import { generateSkDate } from '@/lib/utils-ambulan'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { 
-      id_mustahik, 
-      sk_penyalur, 
-      domain_program, 
-      kategori_program, 
-      jenis_bantuan, 
-      dana_tersalur, 
-      status_pengajuan, 
+    const {
+      id_mustahik,
+      sk_penyalur,
+      domain_program,
+      kategori_program,
+      jenis_bantuan,
+      dana_tersalur,
+      status_pengajuan,
       kategori_penyakit,
-      no_referensi_lama
+      no_referensi_lama,
     } = body
 
     // 1. Validasi: Cari sk_mustahik berdasarkan ID (Natural Key)
     // Ingat: Tabel fakta butuh Surrogate Key (sk_)
     const mustahik = await prisma.dim_mustahik.findUnique({
-      where: { id_mustahik: id_mustahik }
+      where: { id_mustahik: id_mustahik },
     })
 
     if (!mustahik) {
       return NextResponse.json(
-        { error: "ID Mustahik tidak ditemukan di database." }, 
-        { status: 404 }
+        { error: 'ID Mustahik tidak ditemukan di database.' },
+        { status: 404 },
       )
     }
 
@@ -48,20 +48,19 @@ export async function POST(req: Request) {
         dana_tersalur: parseFloat(dana_tersalur),
         sk_tgl_berkas: sk_tgl,
         sk_tgl_disalurkan: sk_tgl,
-      }
+      },
     })
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Transaksi penyaluran berhasil dicatat",
-      id: transaksi.id_transaksi 
+    return NextResponse.json({
+      success: true,
+      message: 'Transaksi penyaluran berhasil dicatat',
+      id: transaksi.id_transaksi,
     })
-
   } catch (error: any) {
-    console.error("ERROR_PENYALURAN_POST:", error)
+    console.error('ERROR_PENYALURAN_POST:', error)
     return NextResponse.json(
-      { error: "Gagal menyimpan transaksi penyaluran", details: error.message }, 
-      { status: 500 }
+      { error: 'Gagal menyimpan transaksi penyaluran', details: error.message },
+      { status: 500 },
     )
   }
 }

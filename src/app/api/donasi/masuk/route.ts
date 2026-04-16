@@ -5,25 +5,28 @@ import { generateSkDate } from '@/lib/utils-ambulan'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { 
-      id_donatur, 
-      sk_petugas, 
-      jenis_donasi, 
-      nominal_donasi, 
-      metode_pembayaran, 
-      bank_tujuan, 
-      keterangan 
+    const {
+      id_donatur,
+      sk_petugas,
+      jenis_donasi,
+      nominal_donasi,
+      metode_pembayaran,
+      bank_tujuan,
+      keterangan,
     } = body
 
     // 1. Cari sk_donatur berdasarkan id_donatur (Natural Key dari UI)
     const donatur = await prisma.dim_donatur.findUnique({
-      where: { id_donatur: id_donatur }
+      where: { id_donatur: id_donatur },
     })
 
     if (!donatur) {
       return NextResponse.json(
-        { error: "Donatur tidak ditemukan. Pastikan data master donatur sudah ada." }, 
-        { status: 404 }
+        {
+          error:
+            'Donatur tidak ditemukan. Pastikan data master donatur sudah ada.',
+        },
+        { status: 404 },
       )
     }
 
@@ -42,20 +45,19 @@ export async function POST(req: Request) {
         metode_pembayaran: metode_pembayaran,
         bank_tujuan: bank_tujuan,
         keterangan: keterangan || null,
-      }
+      },
     })
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Data donasi berhasil dicatat ke sistem!",
-      id: transaksi.id_transaksi_donasi 
+    return NextResponse.json({
+      success: true,
+      message: 'Data donasi berhasil dicatat ke sistem!',
+      id: transaksi.id_transaksi_donasi,
     })
-
   } catch (error: any) {
-    console.error("DATABASE_ERROR_DONASI:", error)
+    console.error('DATABASE_ERROR_DONASI:', error)
     return NextResponse.json(
-      { error: "Gagal menyimpan transaksi donasi", details: error.message }, 
-      { status: 500 }
+      { error: 'Gagal menyimpan transaksi donasi', details: error.message },
+      { status: 500 },
     )
   }
 }

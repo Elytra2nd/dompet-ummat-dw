@@ -1,28 +1,39 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
-  Table, TableBody, TableCell, TableHead,
-  TableHeader, TableRow
-} from "@/components/ui/table"
-import { toast } from "sonner"
-import { 
-  Users, Plus, Search, Loader2, 
-  Mail, Phone, MapPin, Heart, ArrowLeft 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { toast } from 'sonner'
+import {
+  Users,
+  Plus,
+  Search,
+  Loader2,
+  Mail,
+  Phone,
+  MapPin,
+  Heart,
+  ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Donatur {
-  id_donatur: string;
-  nama_donatur: string;
-  no_hp: string;
-  email: string;
-  alamat: string;
-  kategori_donatur: string;
+  id_donatur: string
+  nama_donatur: string
+  no_hp: string
+  email: string
+  alamat: string
+  kategori_donatur: string
 }
 
 export default function ManajemenDonaturPage() {
@@ -37,7 +48,7 @@ export default function ManajemenDonaturPage() {
     no_hp: '',
     email: '',
     alamat: '',
-    kategori_donatur: 'Individu'
+    kategori_donatur: 'Individu',
   })
 
   useEffect(() => {
@@ -50,7 +61,7 @@ export default function ManajemenDonaturPage() {
       const data = await res.json()
       if (Array.isArray(data)) setDonatur(data)
     } catch (e) {
-      toast.error("Gagal memuat data donatur")
+      toast.error('Gagal memuat data donatur')
     } finally {
       setLoading(false)
     }
@@ -63,90 +74,167 @@ export default function ManajemenDonaturPage() {
       const res = await fetch('/api/donasi/donatur', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDonatur)
+        body: JSON.stringify(newDonatur),
       })
       if (res.ok) {
-        toast.success("Donatur baru berhasil didaftarkan")
+        toast.success('Donatur baru berhasil didaftarkan')
         setIsAdding(false)
-        setNewDonatur({ nama_donatur: '', no_hp: '', email: '', alamat: '', kategori_donatur: 'Individu' })
+        setNewDonatur({
+          nama_donatur: '',
+          no_hp: '',
+          email: '',
+          alamat: '',
+          kategori_donatur: 'Individu',
+        })
         fetchDonatur()
       }
     } catch (e) {
-      toast.error("Gagal menyimpan")
+      toast.error('Gagal menyimpan')
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredDonatur = donatur.filter(d => 
-    d.nama_donatur.toLowerCase().includes(search.toLowerCase()) ||
-    d.no_hp.includes(search)
-  )
+  const filteredDonatur = donatur.filter((d) => {
+    // Gunakan Optional Chaining (?.) dan fallback string kosong ("")
+    const nama = (d.nama_donatur || '').toLowerCase()
+    const kontak = d.no_hp || ''
+    const searchLower = (search || '').toLowerCase()
+
+    return nama.includes(searchLower) || kontak.includes(search)
+  })
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* HEADER SECTION */}
-      <div className="bg-white border-b mb-8 shadow-sm">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center gap-4 mb-2">
-            <Button variant="ghost" size="sm" asChild className="-ml-2 text-slate-500 hover:text-indigo-600">
+      <div className="mb-8 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-8 py-6">
+          <div className="mb-2 flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="-ml-2 text-slate-500 hover:text-indigo-600"
+            >
               <Link href="/donasi/masuk">
-                <ArrowLeft className="h-4 w-4 mr-2" /> Kembali ke Input Donasi
+                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Input Donasi
               </Link>
             </Button>
           </div>
-          
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+              <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
                 <Users className="h-8 w-8 text-indigo-600" />
                 Database <span className="text-indigo-600">Donatur</span>
               </h1>
-              <p className="text-slate-500 mt-1 font-medium italic">
+              <p className="mt-1 font-medium text-slate-500 italic">
                 Pusat data Muzakki dan Munfiq Dompet Ummat Kalimantan Barat
               </p>
             </div>
-            <Button onClick={() => setIsAdding(!isAdding)} className="bg-indigo-600 hover:bg-indigo-700 font-bold shadow-lg shadow-indigo-100">
-              {isAdding ? "Batal" : <><Plus className="h-4 w-4 mr-2" /> Tambah Donatur</>}
+            <Button
+              onClick={() => setIsAdding(!isAdding)}
+              className="bg-indigo-600 font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700"
+            >
+              {isAdding ? (
+                'Batal'
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
+                </>
+              )}
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6 px-8">
         {/* FORM TAMBAH (COLLAPSIBLE) */}
         {isAdding && (
-          <Card className="border-2 border-indigo-100 shadow-xl animate-in fade-in slide-in-from-top-4">
-            <CardHeader className="bg-indigo-50/50 border-b py-4">
-              <CardTitle className="text-sm font-bold text-indigo-700 flex items-center gap-2">
+          <Card className="animate-in fade-in slide-in-from-top-4 border-2 border-indigo-100 shadow-xl">
+            <CardHeader className="border-b bg-indigo-50/50 py-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-indigo-700">
                 <Heart className="h-4 w-4" /> Registrasi Donatur Baru
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <form
+                onSubmit={handleSave}
+                className="grid grid-cols-1 gap-6 md:grid-cols-3"
+              >
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase">Nama Lengkap / Instansi</Label>
-                  <Input placeholder="Contoh: H. Ahmad" required value={newDonatur.nama_donatur} onChange={e => setNewDonatur({...newDonatur, nama_donatur: e.target.value})} />
+                  <Label className="text-xs font-bold uppercase">
+                    Nama Lengkap / Instansi
+                  </Label>
+                  <Input
+                    placeholder="Contoh: H. Ahmad"
+                    required
+                    value={newDonatur.nama_donatur}
+                    onChange={(e) =>
+                      setNewDonatur({
+                        ...newDonatur,
+                        nama_donatur: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase">No. WhatsApp</Label>
-                  <Input placeholder="08..." required value={newDonatur.no_hp} onChange={e => setNewDonatur({...newDonatur, no_hp: e.target.value})} />
+                  <Label className="text-xs font-bold uppercase">
+                    No. WhatsApp
+                  </Label>
+                  <Input
+                    placeholder="08..."
+                    required
+                    value={newDonatur.no_hp}
+                    onChange={(e) =>
+                      setNewDonatur({ ...newDonatur, no_hp: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase">Kategori</Label>
-                  <select className="flex h-10 w-full rounded-md border bg-white px-3 text-sm" value={newDonatur.kategori_donatur} onChange={e => setNewDonatur({...newDonatur, kategori_donatur: e.target.value})}>
+                  <Label className="text-xs font-bold uppercase">
+                    Kategori
+                  </Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border bg-white px-3 text-sm"
+                    value={newDonatur.kategori_donatur}
+                    onChange={(e) =>
+                      setNewDonatur({
+                        ...newDonatur,
+                        kategori_donatur: e.target.value,
+                      })
+                    }
+                  >
                     <option value="Individu">Individu</option>
-                    <option value="Lembaga/Perusahaan">Lembaga/Perusahaan</option>
+                    <option value="Lembaga/Perusahaan">
+                      Lembaga/Perusahaan
+                    </option>
                     <option value="Komunitas">Komunitas</option>
                   </select>
                 </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-xs font-bold uppercase">Alamat Lengkap</Label>
-                  <Input placeholder="Jl. Juang, Melawi..." value={newDonatur.alamat} onChange={e => setNewDonatur({...newDonatur, alamat: e.target.value})} />
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-xs font-bold uppercase">
+                    Alamat Lengkap
+                  </Label>
+                  <Input
+                    placeholder="Jl. Juang, Melawi..."
+                    value={newDonatur.alamat}
+                    onChange={(e) =>
+                      setNewDonatur({ ...newDonatur, alamat: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="flex items-end">
-                  <Button type="submit" disabled={loading} className="w-full bg-slate-900 h-10">
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Data Donatur"}
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="h-10 w-full bg-slate-900"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Simpan Data Donatur'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -155,15 +243,15 @@ export default function ManajemenDonaturPage() {
         )}
 
         {/* TABEL DATA */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="py-4 border-b">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b py-4">
             <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="Cari nama atau no. hp..." 
-                className="pl-9 h-10" 
+              <Search className="absolute top-2.5 left-3 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Cari nama atau no. hp..."
+                className="h-10 pl-9"
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </CardHeader>
@@ -181,37 +269,55 @@ export default function ManajemenDonaturPage() {
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center">
-                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-indigo-400" />
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-indigo-400" />
                     </TableCell>
                   </TableRow>
                 ) : filteredDonatur.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-slate-500 italic">
+                    <TableCell
+                      colSpan={4}
+                      className="h-24 text-center text-slate-500 italic"
+                    >
                       Data donatur tidak ditemukan.
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredDonatur.map((d) => (
-                    <TableRow key={d.id_donatur} className="hover:bg-indigo-50/30 transition-colors">
-                      <TableCell className="font-mono text-xs font-bold text-indigo-600">{d.id_donatur}</TableCell>
+                    <TableRow
+                      key={d.id_donatur}
+                      className="transition-colors hover:bg-indigo-50/30"
+                    >
+                      <TableCell className="font-mono text-xs font-bold text-indigo-600">
+                        {d.id_donatur}
+                      </TableCell>
                       <TableCell>
-                        <p className="font-bold text-slate-800">{d.nama_donatur}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">Terdaftar sebagai Muzakki</p>
+                        <p className="font-bold text-slate-800">
+                          {d.nama_donatur}
+                        </p>
+                        <p className="text-[10px] font-medium text-slate-400">
+                          Terdaftar sebagai Muzakki
+                        </p>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-xs text-slate-600">
-                            <Phone className="h-3 w-3 text-indigo-400" /> {d.no_hp}
+                            <Phone className="h-3 w-3 text-indigo-400" />{' '}
+                            {d.no_hp}
                           </div>
                           <div className="flex items-center gap-2 text-xs text-slate-600">
-                            <MapPin className="h-3 w-3 text-slate-400" /> {d.alamat || '-'}
+                            <MapPin className="h-3 w-3 text-slate-400" />{' '}
+                            {d.alamat || '-'}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                          d.kategori_donatur === 'Individu' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                        }`}>
+                        <span
+                          className={`rounded-full px-2 py-1 text-[10px] font-black tracking-tighter uppercase ${
+                            d.kategori_donatur === 'Individu'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-purple-100 text-purple-700'
+                          }`}
+                        >
                           {d.kategori_donatur}
                         </span>
                       </TableCell>

@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
   try {
-    const { sk_mustahik, latitude, longitude, desa, kecamatan } = await req.json()
+    const { sk_mustahik, latitude, longitude, desa, kecamatan } =
+      await req.json()
 
     // 1. Buat baris baru di dim_lokasi
     const newLocation = await prisma.dim_lokasi.create({
@@ -12,20 +13,26 @@ export async function POST(req: Request) {
         longitude: parseFloat(longitude),
         desa_kelurahan: desa,
         kecamatan: kecamatan,
-        kabupaten_kota: "Melawi", // Default sesuai lingkup project
-        provinsi: "Kalimantan Barat"
-      }
+        kabupaten_kota: 'Melawi', // Default sesuai lingkup project
+        provinsi: 'Kalimantan Barat',
+      },
     })
 
     // 2. Update sk_lokasi di dim_mustahik
     await prisma.dim_mustahik.update({
       where: { sk_mustahik: parseInt(sk_mustahik) },
-      data: { sk_lokasi: newLocation.sk_lokasi }
+      data: { sk_lokasi: newLocation.sk_lokasi },
     })
 
-    return NextResponse.json({ success: true, message: "Lokasi berhasil disimpan!" })
+    return NextResponse.json({
+      success: true,
+      message: 'Lokasi berhasil disimpan!',
+    })
   } catch (error) {
     console.error(error)
-    return NextResponse.json({ error: "Gagal menyimpan lokasi" }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Gagal menyimpan lokasi' },
+      { status: 500 },
+    )
   }
 }
