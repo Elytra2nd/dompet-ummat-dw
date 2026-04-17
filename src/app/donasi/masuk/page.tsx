@@ -78,8 +78,7 @@ export default function DonasiMasukPage() {
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
           targetBulanan={stats.targetBulanan}
-          pertumbuhan={stats.pertumbuhan}
-        />
+          pertumbuhan={stats.pertumbuhan} sebaranWilayah={0}        />
 
         {/* FORM UTAMA */}
         <AddDonasiForm />
