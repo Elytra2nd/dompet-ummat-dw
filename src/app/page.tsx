@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { 
   Users, 
-  Ambulance, 
+  HeartHandshake, 
   Map as MapIcon, 
   ArrowRight,
   TrendingUp,
@@ -20,9 +20,10 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({
     totalDonasi: 0,
     jumlahDonatur: 0,
+    jumlahMustahik: 0,
     pertumbuhan: 0,
+    dana_tersalur: 0,
     layananAmbulan: 0,
-    sebaranWilayah: 0
   })
   const [loading, setLoading] = useState(true)
 
@@ -37,9 +38,10 @@ export default function DashboardPage() {
           setStats({
             totalDonasi: data.totalDonasi || 0,
             jumlahDonatur: data.jumlahDonatur || 0,
+            jumlahMustahik: data.jumlahMustahik || 0,
             pertumbuhan: data.pertumbuhan || 0,
             layananAmbulan: data.layananAmbulan || 0,
-            sebaranWilayah: data.sebaranWilayah || 0
+            dana_tersalur: data.dana_tersalur || 0
           })
         }
       } catch (error) {
@@ -83,7 +85,7 @@ export default function DashboardPage() {
               </Button>
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100 font-bold transition-all">
                 <Link href="/ambulan/layanan">
-                  <Ambulance className="mr-2 h-4 w-4" /> Layanan Ambulans
+                  <HeartHandshake className="mr-2 h-4 w-4" />Layanan Dompet Ummat
                 </Link>
               </Button>
             </div>
@@ -106,9 +108,9 @@ export default function DashboardPage() {
           <DonationStats 
             totalDonasi={stats.totalDonasi}
             jumlahDonatur={stats.jumlahDonatur}
+            jumlahMustahik={stats.jumlahMustahik}
             pertumbuhan={stats.pertumbuhan}
-            targetBulanan={2000000000} // Target 2 Milyar
-            sebaranWilayah={stats.sebaranWilayah}
+            dana_tersalur={stats.dana_tersalur}
           />
         )}
 

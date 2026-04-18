@@ -11,6 +11,7 @@ export default function DonasiMasukPage() {
   const [stats, setStats] = useState({
     totalDonasi: 0,
     jumlahDonatur: 0,
+    dana_tersalur: 0,
     targetBulanan: 100000000, // Kamu bisa sesuaikan targetnya di sini
     pertumbuhan: 0,
   })
@@ -77,6 +78,7 @@ export default function DonasiMasukPage() {
         <DonationStats
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
+          dana_tersalur={stats.dana_tersalur}
           targetBulanan={stats.targetBulanan}
           pertumbuhan={stats.pertumbuhan} sebaranWilayah={0}        />
 
