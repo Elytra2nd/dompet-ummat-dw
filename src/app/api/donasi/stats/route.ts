@@ -3,18 +3,14 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    // 1. Agregasi menggunakan nama kolom yang benar: nominal_valid
     const aggregateDonasi = await prisma.fact_donasi.aggregate({
       _sum: {
         nominal_valid: true,
       },
     })
 
-    // 2. Hitung Jumlah Donatur Unik (Muzakki)
     const totalDonatur = await prisma.dim_donatur.count()
 
-    // 3. Ambil data dengan proteksi fallback jika null/undefined
-    // Kita gunakan optional chaining dan nullish coalescing (??)
     const totalUang = aggregateDonasi?._sum?.nominal_valid
       ? Number(aggregateDonasi._sum.nominal_valid)
       : 0

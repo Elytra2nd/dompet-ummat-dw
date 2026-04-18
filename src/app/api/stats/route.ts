@@ -21,9 +21,19 @@ export async function GET() {
       'SELECT SUM(jumlah_layanan) as total FROM fact_layanan_ambulan'
     );
 
+    const penyaluranRows = await conn.query(
+      'SELECT SUM(dana_tersalur) as total FROM fact_penyaluran'
+    );
+
+    const mustahikRows = await conn.query(
+      'SELECT COUNT(*) as total FROM dim_mustahik WHERE is_active = 1'
+    );
+
     return NextResponse.json({
       totalDonasi: donasiRows[0].total || 0,
       jumlahDonatur: Number(donaturRows[0].total) || 0,
+      jumlahMustahik: Number(mustahikRows[0].total) || 0,
+      dana_tersalur: penyaluranRows[0].total || 0,
       layananAmbulan: ambulanRows[0].total || 0,
       pertumbuhan: 12.5,
     });
