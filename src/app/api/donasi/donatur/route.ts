@@ -11,12 +11,13 @@ export async function GET(req: Request) {
   try {
     const donatur = await prisma.dim_donatur.findMany({
       where: {
-        is_active: true, // Hanya ambil yang aktif
+        is_active: true, 
         ...(query && {
           OR: [
             { nama_lengkap: { contains: query } },
             { kontak_utama: { contains: query } },
             { id_donatur: { contains: query } },
+            { perusahaan: { contains: query } },
           ],
         }),
       },
@@ -34,7 +35,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { nama_donatur, no_hp, alamat, kategori_donatur } = body
+    // Menambah 'perusahaan' sesuai skema
+    const { nama_donatur, no_hp, alamat, kategori_donatur, perusahaan } = body
 
     const count = await prisma.dim_donatur.count()
     const year = new Date().getFullYear()
@@ -46,13 +48,15 @@ export async function POST(req: Request) {
         nama_lengkap: nama_donatur,
         kontak_utama: no_hp,
         alamat: alamat || '-',
-        tipe: kategori_donatur || 'PERSONAL',
+        perusahaan: perusahaan || '-', // Tambahan kolom perusahaan
+        tipe: kategori_donatur, // Menggunakan enum dim_donatur_tipe
         is_active: true,
       },
     })
 
     return NextResponse.json({ success: true, data: newDonatur })
   } catch (error: any) {
+    console.error("Error Create Donatur:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
@@ -61,7 +65,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json()
-    const { sk_donatur, nama_donatur, no_hp, alamat, kategori_donatur } = body
+    const { sk_donatur, nama_donatur, no_hp, alamat, kategori_donatur, perusahaan } = body
 
     if (!sk_donatur) throw new Error("Surrogate Key (sk_donatur) diperlukan")
 
@@ -71,6 +75,7 @@ export async function PUT(req: Request) {
         nama_lengkap: nama_donatur,
         kontak_utama: no_hp,
         alamat: alamat,
+        perusahaan: perusahaan || '-',
         tipe: kategori_donatur,
       },
     })
@@ -82,7 +87,7 @@ export async function PUT(req: Request) {
   }
 }
 
-// --- DELETE (DELETE) - Soft Delete ---
+// --- DELETE (DELETE) ---
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
@@ -92,7 +97,7 @@ export async function DELETE(req: Request) {
 
     await prisma.dim_donatur.update({
       where: { sk_donatur: Number(sk) },
-      data: { is_active: false }, // Soft delete untuk integritas data DW
+      data: { is_active: false }, 
     })
 
     return NextResponse.json({ success: true, message: "Donatur berhasil dinonaktifkan" })
