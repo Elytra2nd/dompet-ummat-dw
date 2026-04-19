@@ -37,16 +37,16 @@ interface AuditLog {
 export default function AuditLogPage() {
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   // PAGINATION STATE
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 15
 
-  // 2. Fungsi Fetch dengan Cache Buster (PENTING untuk SCD)
+  // 2. Fungsi Fetch dengan Cache Buster
   const fetchLogs = async () => {
     try {
       setLoading(true)
-      // Menambahkan timestamp (?t=) agar browser selalu mengambil data terbaru dari TiDB
       const res = await fetch(`/api/audit?t=${new Date().getTime()}`, {
         cache: 'no-store',
         headers: {
@@ -70,6 +70,7 @@ export default function AuditLogPage() {
   }
 
   useEffect(() => {
+    setMounted(true)
     fetchLogs()
   }, [])
 
@@ -79,6 +80,20 @@ export default function AuditLogPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
+
+  // Fungsi helper untuk render tanggal aman (Hydration Safe)
+  const formatDate = (dateStr: string) => {
+    if (!mounted) return "..." 
+    try {
+      return new Date(dateStr).toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric' 
+      })
+    } catch (e) {
+      return dateStr
+    }
+  }
 
   return (
     <div className="space-y-6 p-4 md:p-8 bg-slate-50/30 min-h-screen font-sans">
@@ -127,7 +142,7 @@ export default function AuditLogPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {loading && logs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="py-20 text-center">
                     <div className="flex flex-col items-center gap-3">
@@ -139,7 +154,6 @@ export default function AuditLogPage() {
               ) : currentLogs.length > 0 ? (
                 currentLogs.map((log, i) => (
                   <TableRow key={i} className={`hover:bg-slate-50/50 transition-colors ${!log.is_active ? 'opacity-75' : ''}`}>
-                    {/* ENTITAS */}
                     <TableCell>
                       <Badge 
                         className={`font-black text-[9px] uppercase tracking-wider px-2 py-1 border-none ${
@@ -153,26 +167,23 @@ export default function AuditLogPage() {
                       </Badge>
                     </TableCell>
 
-                    {/* ID & NAMA */}
                     <TableCell>
                       <p className="font-mono text-[10px] font-black text-indigo-500 mb-0.5">{log.id_bisnis}</p>
                       <p className="font-black text-slate-900 uppercase tracking-tighter text-sm">{log.nama}</p>
                     </TableCell>
 
-                    {/* TIMELINE (SCD TYPE 2) */}
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-black text-slate-700">
-                          {new Date(log.valid_from).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        <span suppressHydrationWarning className="text-[10px] font-black text-slate-700">
+                          {formatDate(log.valid_from)}
                         </span>
                         <div className="h-2 w-px bg-slate-300 my-1" />
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">
-                          {log.is_active ? 'PRESENT (NOW)' : new Date(log.valid_to).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        <span suppressHydrationWarning className="text-[10px] font-bold text-slate-400 uppercase">
+                          {log.is_active ? 'PRESENT (NOW)' : formatDate(log.valid_to)}
                         </span>
                       </div>
                     </TableCell>
 
-                    {/* STATUS RECORD */}
                     <TableCell className="text-center">
                       <Badge 
                         variant="outline"
@@ -200,10 +211,9 @@ export default function AuditLogPage() {
             </TableBody>
           </Table>
 
-          {/* PAGINASI */}
           <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-              Record {Math.min(logs.length, (currentPage - 1) * itemsPerPage + 1)} - {Math.min(logs.length, currentPage * itemsPerPage)} of {logs.length}
+              Record {logs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(logs.length, currentPage * itemsPerPage)} of {logs.length}
             </p>
             <div className="flex items-center gap-2">
               <Button 
