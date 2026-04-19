@@ -5,10 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-
     const [rows] = await db.query(`
       SELECT * FROM (
-        -- Histori Donatur
+        -- Histori Donatur (Filter SK > 0 untuk menghindari data sistem/negatif)
         SELECT 
           id_donatur AS id_bisnis, 
           nama_lengkap AS nama, 
@@ -17,11 +16,12 @@ export async function GET() {
           valid_to, 
           is_active,
           CASE 
-            WHEN is_active = 1 AND valid_to >= CURDATE() THEN 'Active (Current)'
-            WHEN is_active = 0 AND valid_to < '9999-12-31' THEN 'Archived (History)'
-            ELSE 'Deleted'
+            WHEN is_active = 1 THEN 'Active (Current)'
+            WHEN is_active = 0 THEN 'Archived (History)'
+            ELSE 'Unknown'
           END AS status_record
         FROM dim_donatur
+        WHERE sk_donatur > 0
 
         UNION ALL
 
@@ -34,11 +34,11 @@ export async function GET() {
           valid_to, 
           is_active,
           CASE 
-            WHEN is_active = 1 AND valid_to >= CURDATE() THEN 'Active (Current)'
-            WHEN is_active = 0 AND valid_to < '9999-12-31' THEN 'Archived (History)'
-            ELSE 'Deleted'
+            WHEN is_active = 1 THEN 'Active (Current)'
+            ELSE 'Archived (History)'
           END AS status_record
         FROM dim_mustahik
+        WHERE sk_mustahik > 0
 
         UNION ALL
 
@@ -51,11 +51,11 @@ export async function GET() {
           valid_to, 
           is_active,
           CASE 
-            WHEN is_active = 1 AND valid_to >= CURDATE() THEN 'Active (Current)'
-            WHEN is_active = 0 AND valid_to < '9999-12-31' THEN 'Archived (History)'
-            ELSE 'Deleted'
+            WHEN is_active = 1 THEN 'Active (Current)'
+            ELSE 'Archived (History)'
           END AS status_record
         FROM dim_petugas
+        WHERE sk_petugas > 0
 
         UNION ALL
 
@@ -68,18 +68,19 @@ export async function GET() {
           valid_to, 
           is_active,
           CASE 
-            WHEN is_active = 1 AND valid_to >= CURDATE() THEN 'Active (Current)'
-            WHEN is_active = 0 AND valid_to < '9999-12-31' THEN 'Archived (History)'
-            ELSE 'Deleted'
+            WHEN is_active = 1 THEN 'Active (Current)'
+            ELSE 'Archived (History)'
           END AS status_record
         FROM dim_pasien_ambulan
+        WHERE sk_pasien > 0
       ) AS unified_audit
-      ORDER BY valid_from DESC, nama ASC
+      -- Urutkan berdasarkan valid_from terbaru agar hasil edit langsung muncul di atas
+      ORDER BY valid_from DESC
       LIMIT 1000
     `);
 
-    // 2. Logging untuk audit internal
-    console.log(`[DW Audit] Menampilkan ${Array.isArray(rows) ? rows.length : 0} jejak histori.`);
+    // 2. Logging untuk debugging di terminal
+    console.log(`[DW Audit] Menampilkan ${Array.isArray(rows) ? rows.length : 0} baris histori.`);
 
     const data = Array.isArray(rows) ? rows : [];
 
