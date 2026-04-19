@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 // --- READ (GET) ---
-// Hanya mengambil record yang is_active: true (Versi Terbaru/Aktif)
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const query = searchParams.get('q')
@@ -38,9 +37,18 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { nama_donatur, no_hp, alamat, kategori_donatur, perusahaan } = body
 
-    const count = await prisma.dim_donatur.count()
+    // Mengambil id_donatur terakhir untuk increment yang lebih akurat di SCD environment
+    const lastRecord = await prisma.dim_donatur.findFirst({
+      orderBy: { sk_donatur: 'desc' },
+      select: { id_donatur: true }
+    })
+
+    const lastIdNumber = lastRecord?.id_donatur 
+      ? parseInt(lastRecord.id_donatur.split('-').pop() || '0') 
+      : 0
+
     const year = new Date().getFullYear()
-    const id_donatur = `DNR-${year}-${(count + 1).toString().padStart(4, '0')}`
+    const id_donatur = `DNR-${year}-${(lastIdNumber + 1).toString().padStart(4, '0')}`
 
     const newDonatur = await prisma.dim_donatur.create({
       data: {
@@ -70,36 +78,34 @@ export async function PUT(req: Request) {
 
     if (!sk_donatur) return NextResponse.json({ error: "Surrogate Key (SK) diperlukan" }, { status: 400 })
 
-    // Gunakan transaksi agar proses tutup record lama & buat record baru sinkron
     const transaction = await prisma.$transaction(async (tx) => {
-      // 1. Ambil data lama untuk mendapatkan Business Key (id_donatur)
+      // 1. Ambil data lama
       const oldRecord = await tx.dim_donatur.findUnique({
         where: { sk_donatur: Number(sk_donatur) }
       })
 
       if (!oldRecord) throw new Error("Data master tidak ditemukan")
 
-      // 2. Nonaktifkan record lama (Expiring the current record)
+      // 2. Tutup record lama (Expiring)
       await tx.dim_donatur.update({
         where: { sk_donatur: Number(sk_donatur) },
         data: {
           is_active: false,
-          valid_to: new Date(), // Berakhir detik ini
+          valid_to: new Date(),
         }
       })
 
-      // 3. Buat baris baru dengan data terbaru (Versioning)
-      // Ini aman karena id_donatur sudah tidak UNIQUE di database
+      // 3. Buat baris baru (Versioning)
       return await tx.dim_donatur.create({
         data: {
-          id_donatur: oldRecord.id_donatur, // Tetap pakai ID Bisnis yang sama
+          id_donatur: oldRecord.id_donatur,
           nama_lengkap: nama_donatur,
           kontak_utama: no_hp,
           alamat: alamat,
           perusahaan: perusahaan || '-',
           tipe: kategori_donatur,
           is_active: true,
-          valid_from: new Date(), // Berlaku mulai detik ini
+          valid_from: new Date(),
           valid_to: new Date('9999-12-31'),
         }
       })
@@ -124,7 +130,7 @@ export async function DELETE(req: Request) {
       where: { sk_donatur: Number(sk) },
       data: { 
         is_active: false,
-        valid_to: new Date() // Record berakhir saat dihapus
+        valid_to: new Date()
       }, 
     })
 
