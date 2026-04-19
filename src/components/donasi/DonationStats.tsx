@@ -72,7 +72,7 @@ export default function DonationDashboard({
         const years = await res.json()
         setAvailableYears(years)
         if (years.length > 0 && !years.includes(filterYear)) {
-          setFilterYear(years[years.length - 1]) // Pilih tahun terbaru secara otomatis
+          setFilterYear(years[years.length - 1])
         }
       } catch (error) {
         console.error(error)
@@ -113,23 +113,25 @@ export default function DonationDashboard({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* 1. STATS GRID - Mobile Friendly Layout */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         
-        {/* CARD 1: TOTAL DONASI (Full width on very small screens) */}
+        {/* CARD 1: TOTAL DONASI */}
         <Card className="col-span-2 lg:col-span-1 relative overflow-hidden border-none bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <HeartHandshake size={100} />
           </div>
           <CardContent className="relative z-10 p-5 md:p-6">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] md:text-xs font-black tracking-widest uppercase opacity-80">Total ZISWAF</p>
+              <p className="text-[10px] md:text-xs font-black tracking-widest uppercase opacity-80 whitespace-nowrap">Total ZISWAF</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <Zap className="h-4 w-4 text-yellow-300 fill-yellow-300" />
               </div>
             </div>
-            <div className="mt-4">
-              <h3 className="text-xl md:text-2xl font-black tracking-tight">{formatRupiah(totalDonasi)}</h3>
+            <div className="mt-4 overflow-hidden">
+              {/* PERBAIKAN: Font size adaptif dan break-all untuk angka panjang */}
+              <h3 className="text-base sm:text-lg md:text-xl xl:text-2xl font-black tracking-tighter leading-tight break-all">
+                {formatRupiah(totalDonasi)}
+              </h3>
               <div className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${isPositive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
                 {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                 {Math.abs(pertumbuhan)}%
@@ -139,14 +141,16 @@ export default function DonationDashboard({
         </Card>
 
         {/* CARD 2: DANA TERSALUR */}
-        <Card className="border-2 border-slate-100 bg-white shadow-sm hover:border-orange-200 transition-colors">
+        <Card className="border-2 border-slate-100 bg-white shadow-sm hover:border-orange-200 transition-colors overflow-hidden">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tersalurkan</p>
               <HandCoins className="h-4 w-4 text-orange-500" />
             </div>
-            <div className="mt-3">
-              <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight">{formatRupiah(dana_tersalur)}</h3>
+            <div className="mt-3 overflow-hidden">
+              <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 leading-tight break-all">
+                {formatRupiah(dana_tersalur)}
+              </h3>
               <p className="mt-1 text-[9px] font-bold text-orange-600 uppercase">Realisasi Manfaat</p>
             </div>
           </CardContent>
@@ -163,7 +167,7 @@ export default function DonationDashboard({
               <h3 className="text-lg md:text-xl font-black text-sky-900">{persentasePenyaluran.toFixed(1)}%</h3>
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-sky-200/50">
                 <div 
-                  className="h-full bg-sky-500 rounded-full" 
+                  className="h-full bg-sky-500 rounded-full transition-all duration-1000" 
                   style={{ width: `${Math.min(persentasePenyaluran, 100)}%` }} 
                 />
               </div>
@@ -179,11 +183,11 @@ export default function DonationDashboard({
               <Users className="h-4 w-4 text-emerald-600" />
             </div>
             <div className="mt-3">
-              <h3 className="text-lg md:text-xl font-black text-slate-900">
+              <h3 className="text-lg md:text-xl font-black text-slate-900 truncate">
                 {jumlahDonatur.toLocaleString()} <span className="text-[10px] text-slate-400">Jiwa</span>
               </h3>
               <p className="mt-1 flex items-center gap-1 text-[9px] font-bold text-emerald-600 uppercase">
-                <span className="h-1 w-1 rounded-full bg-emerald-500 animate-ping" /> Munfiq Aktif
+                <span className="h-1 w-1 rounded-full bg-emerald-500 animate-ping" /> Aktif
               </p>
             </div>
           </CardContent>
@@ -197,19 +201,19 @@ export default function DonationDashboard({
               <Users className="h-4 w-4 text-indigo-600" />
             </div>
             <div className="mt-3">
-              <h3 className="text-lg md:text-xl font-black text-slate-900">
+              <h3 className="text-lg md:text-xl font-black text-slate-900 truncate">
                 {jumlahMustahik.toLocaleString()} <span className="text-[10px] text-slate-400">Jiwa</span>
               </h3>
               <p className="mt-1 flex items-center gap-1 text-[9px] font-bold text-indigo-600 uppercase">
-                 Penerima Manfaat
+                 Penerima
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 2. CHART SECTION */}
       <Card className="border-none shadow-xl bg-white overflow-hidden">
+        {/* ... (Sisa kode Chart tetap sama) ... */}
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 p-6 pb-2">
           <div>
             <CardTitle className="text-xl font-black text-slate-900">Tren Penghimpunan</CardTitle>
