@@ -37,7 +37,6 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { nama_donatur, no_hp, alamat, kategori_donatur, perusahaan } = body
 
-    // Mengambil id_donatur terakhir untuk increment yang lebih akurat di SCD environment
     const lastRecord = await prisma.dim_donatur.findFirst({
       orderBy: { sk_donatur: 'desc' },
       select: { id_donatur: true }
@@ -70,13 +69,13 @@ export async function POST(req: Request) {
   }
 }
 
-// --- UPDATE (PUT) - Implementasi Full SCD Type 2 ---
+// --- UPDATE (PUT) - Implementasi SCD Type 2 dengan Precision Timestamp ---
 export async function PUT(req: Request) {
   try {
     const body = await req.json()
     const { sk_donatur, nama_donatur, no_hp, alamat, kategori_donatur, perusahaan } = body
 
-    if (!sk_donatur) return NextResponse.json({ error: "Surrogate Key (SK) diperlukan" }, { status: 400 })
+    if (!sk_donatur) return NextResponse.json({ error: "SK diperlukan" }, { status: 400 })
 
     const transaction = await prisma.$transaction(async (tx) => {
       // 1. Ambil data lama
@@ -86,12 +85,16 @@ export async function PUT(req: Request) {
 
       if (!oldRecord) throw new Error("Data master tidak ditemukan")
 
+      const now = new Date()
+      // Tambahkan 1 detik untuk valid_from record baru agar sorting di audit log 100% akurat
+      const nextSecond = new Date(now.getTime() + 1000)
+
       // 2. Tutup record lama (Expiring)
       await tx.dim_donatur.update({
         where: { sk_donatur: Number(sk_donatur) },
         data: {
           is_active: false,
-          valid_to: new Date(),
+          valid_to: now,
         }
       })
 
@@ -105,10 +108,12 @@ export async function PUT(req: Request) {
           perusahaan: perusahaan || '-',
           tipe: kategori_donatur,
           is_active: true,
-          valid_from: new Date(),
+          valid_from: nextSecond,
           valid_to: new Date('9999-12-31'),
         }
       })
+    }, {
+      timeout: 10000 // Menghindari timeout pada TiDB Cloud
     })
 
     return NextResponse.json({ success: true, data: transaction })
