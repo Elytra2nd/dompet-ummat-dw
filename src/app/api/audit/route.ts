@@ -2,12 +2,14 @@ import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   try {
+    // Gunakan query yang lebih sederhana untuk tes pertama
     const [rows] = await db.query(`
       SELECT * FROM (
-        -- Histori Donatur (Filter SK > 0 untuk menghindari data sistem/negatif)
+        -- 1. Cabang Donatur
         SELECT 
           id_donatur AS id_bisnis, 
           nama_lengkap AS nama, 
@@ -17,15 +19,14 @@ export async function GET() {
           is_active,
           CASE 
             WHEN is_active = 1 THEN 'Active (Current)'
-            WHEN is_active = 0 THEN 'Archived (History)'
-            ELSE 'Unknown'
+            ELSE 'Archived (History)'
           END AS status_record
         FROM dim_donatur
         WHERE sk_donatur > 0
 
         UNION ALL
 
-        -- Histori Mustahik
+        -- 2. Cabang Mustahik (Pastikan nama kolom id_mustahik & nama benar)
         SELECT 
           id_mustahik AS id_bisnis, 
           nama AS nama, 
@@ -42,7 +43,7 @@ export async function GET() {
 
         UNION ALL
 
-        -- Histori Petugas / Amil
+        -- 3. Cabang Petugas (Pastikan nama kolom id_petugas & nama_petugas benar)
         SELECT 
           id_petugas AS id_bisnis, 
           nama_petugas AS nama, 
@@ -56,39 +57,17 @@ export async function GET() {
           END AS status_record
         FROM dim_petugas
         WHERE sk_petugas > 0
-
-        UNION ALL
-
-        -- Histori Pasien Ambulan
-        SELECT 
-          id_pasien AS id_bisnis, 
-          nama_pasien AS nama, 
-          'Pasien' AS entitas, 
-          valid_from, 
-          valid_to, 
-          is_active,
-          CASE 
-            WHEN is_active = 1 THEN 'Active (Current)'
-            ELSE 'Archived (History)'
-          END AS status_record
-        FROM dim_pasien_ambulan
-        WHERE sk_pasien > 0
       ) AS unified_audit
-      -- Urutkan berdasarkan valid_from terbaru agar hasil edit langsung muncul di atas
       ORDER BY valid_from DESC
-      LIMIT 1000
+      LIMIT 500
     `);
 
-    // 2. Logging untuk debugging di terminal
-    console.log(`[DW Audit] Menampilkan ${Array.isArray(rows) ? rows.length : 0} baris histori.`);
-
-    const data = Array.isArray(rows) ? rows : [];
-
-    return NextResponse.json(data);
+    return NextResponse.json(Array.isArray(rows) ? rows : []);
   } catch (error: any) {
-    console.error("Audit Log Warehouse Error:", error.message);
+    // Log error ini sangat penting untuk dibaca di konsol Vercel
+    console.error("CRITICAL AUDIT ERROR:", error.message);
     return NextResponse.json({ 
-      error: "Gagal memuat histori data terpadu",
+      error: "Query SQL Gagal", 
       details: error.message 
     }, { status: 500 });
   }
