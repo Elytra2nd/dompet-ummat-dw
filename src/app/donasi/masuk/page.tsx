@@ -8,22 +8,27 @@ import { ArrowLeft, HeartHandshake, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function DonasiMasukPage() {
+  // 1. Perbarui Initial State agar sinkron dengan interface DonationStatsProps
   const [stats, setStats] = useState({
     totalDonasi: 0,
     jumlahDonatur: 0,
+    jumlahMustahik: 0, // Tambahkan ini
     dana_tersalur: 0,
-    targetBulanan: 100000000, // Kamu bisa sesuaikan targetnya di sini
+    targetBulanan: 100000000,
     pertumbuhan: 0,
+    sebaranWilayah: 0, // Tambahkan ini
   })
+  
   const [loading, setLoading] = useState(true)
 
-  // Fungsi untuk mengambil data statistik dari API
   const fetchStats = async () => {
     try {
       const res = await fetch('/api/donasi/stats')
       if (res.ok) {
         const data = await res.json()
-        setStats(data)
+        // Gunakan spread untuk menjaga nilai default (seperti targetBulanan) 
+        // jika API tidak mengirimkan semua field
+        setStats((prev) => ({ ...prev, ...data }))
       }
     } catch (error) {
       console.error('Gagal memuat statistik donasi:', error)
@@ -74,13 +79,16 @@ export default function DonasiMasukPage() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-8 px-8">
-        {/* WIDGET STATISTIK DINAMIS */}
+        {/* 2. Kirim Props secara lengkap ke komponen DonationStats */}
         <DonationStats
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
+          jumlahMustahik={stats.jumlahMustahik}
           dana_tersalur={stats.dana_tersalur}
           targetBulanan={stats.targetBulanan}
-          pertumbuhan={stats.pertumbuhan} sebaranWilayah={0}        />
+          pertumbuhan={stats.pertumbuhan}
+          sebaranWilayah={stats.sebaranWilayah}
+        />
 
         {/* FORM UTAMA */}
         <AddDonasiForm />

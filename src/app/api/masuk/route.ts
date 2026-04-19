@@ -8,10 +8,10 @@ export async function POST(req: Request) {
     const {
       id_donatur,
       sk_petugas,
-      jenis_donasi,
-      nominal_donasi,
-      metode_pembayaran,
-      bank_tujuan,
+      jenis_donasi,      // Ini akan dipetakan ke sk_program_donasi
+      nominal_donasi,    // Ini akan dipetakan ke nominal_valid
+      metode_pembayaran, // Ini akan dipetakan ke sk_jalur_pembayaran
+      bank_tujuan,       // Sementara masuk ke no_ref karena kolom bank_tujuan tidak ada di skema
       keterangan,
     } = body
 
@@ -30,19 +30,17 @@ export async function POST(req: Request) {
     // 2. Generate Smart Date Key (YYYYMMDD)
     const sk_tgl = generateSkDate()
 
-    // 3. Simpan Transaksi ke fact_donasi
-    // Kita buat ID Transaksi unik dengan prefix TRX-IN
+    // 3. Simpan Transaksi ke fact_donasi sesuai schema.prisma
     const transaksi = await prisma.fact_donasi.create({
       data: {
         id_transaksi_donasi: `TRX-IN-${Date.now()}`,
         sk_donatur: donatur.sk_donatur,
         sk_petugas: parseInt(sk_petugas) || 1,
+        sk_program_donasi: parseInt(jenis_donasi) || 1, // Disesuaikan dengan skema
+        sk_jalur_pembayaran: parseInt(metode_pembayaran) || 1, // Disesuaikan dengan skema
         sk_tgl_bersih: sk_tgl,
-        jenis_donasi: jenis_donasi as any,
-        nominal_donasi: parseFloat(nominal_donasi),
-        metode_pembayaran: metode_pembayaran as any,
-        bank_tujuan: bank_tujuan as any,
-        keterangan: keterangan || null,
+        nominal_valid: parseFloat(nominal_donasi), // Nama kolom asli: nominal_valid
+        no_ref: bank_tujuan || keterangan || null, // Mapping darurat karena kolom tidak ada
       },
     })
 
