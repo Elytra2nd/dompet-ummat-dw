@@ -1,202 +1,314 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { 
-  Users, 
-  HeartHandshake, 
-  Map as MapIcon, 
-  ArrowRight,
-  TrendingUp,
-  ShieldCheck,
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+// Import Alert Dialog Components
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { toast } from 'sonner'
+import {
+  Users,
+  Plus,
+  Search,
   Loader2,
-  PlusCircle
+  Phone,
+  MapPin,
+  Heart,
+  ArrowLeft,
+  X,
+  Edit3,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import DonationStats from '@/components/donasi/DonationStats'
 
-export default function DashboardPage() {
-  const [stats, setStats] = useState({
-    totalDonasi: 0,
-    jumlahDonatur: 0,
-    jumlahMustahik: 0,
-    pertumbuhan: 0,
-    dana_tersalur: 0,
-    layananAmbulan: 0,
-  })
+interface Donatur {
+  sk_donatur: number
+  id_donatur: string
+  nama_lengkap: string
+  kontak_utama: string
+  alamat: string
+  tipe: string
+}
+
+export default function ManajemenDonaturPage() {
+  const [donatur, setDonatur] = useState<Donatur[]>([])
   const [loading, setLoading] = useState(true)
+  const [isAdding, setIsAdding] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    async function fetchDashboardStats() {
-      try {
-        const response = await fetch('/api/stats')
-        const data = await response.json()
-        
-        if (data) {
-          setStats({
-            totalDonasi: data.totalDonasi || 0,
-            jumlahDonatur: data.jumlahDonatur || 0,
-            jumlahMustahik: data.jumlahMustahik || 0,
-            pertumbuhan: data.pertumbuhan || 0,
-            layananAmbulan: data.layananAmbulan || 0,
-            dana_tersalur: data.dana_tersalur || 0
-          })
-        }
-      } catch (error) {
-        console.error("Gagal mengambil data dari Data Warehouse:", error)
-      } finally {
-        setLoading(false)
-      }
+  const [formData, setFormData] = useState({
+    sk_donatur: 0,
+    nama_donatur: '',
+    no_hp: '',
+    alamat: '',
+    kategori_donatur: 'Individu',
+  })
+
+  // Enum sesuai standar Data Warehouse kamu
+  const kategoriEnum = [
+    'Individu',
+    'Lembaga/Korporasi',
+    'Komunitas',
+    'To Be Determined',
+    'Not Applicable',
+    'Data Corrupted'
+  ]
+
+  useEffect(() => { fetchDonatur() }, [])
+
+  const fetchDonatur = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch('/api/donasi/donatur')
+      const data = await res.json()
+      if (Array.isArray(data)) setDonatur(data)
+    } catch (e) {
+      toast.error('Gagal memuat data')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    fetchDashboardStats()
-  }, [])
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    const method = isEditing ? 'PUT' : 'POST'
+    try {
+      const res = await fetch('/api/donasi/donatur', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      if (res.ok) {
+        toast.success(isEditing ? 'Data diperbarui' : 'Donatur baru terdaftar')
+        resetForm()
+        fetchDonatur()
+      }
+    } catch (e) { toast.error('Gagal memproses data') } 
+    finally { setLoading(false) }
+  }
+
+  const handleDelete = async (sk: number, nama: string) => {
+    try {
+      const res = await fetch(`/api/donasi/donatur?sk=${sk}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success(`Donatur ${nama} berhasil dinonaktifkan`)
+        fetchDonatur()
+      }
+    } catch (e) { toast.error('Gagal menghapus data') }
+  }
+
+  const startEdit = (d: Donatur) => {
+    setFormData({
+      sk_donatur: d.sk_donatur,
+      nama_donatur: d.nama_lengkap,
+      no_hp: d.kontak_utama,
+      alamat: d.alamat,
+      kategori_donatur: d.tipe,
+    })
+    setIsEditing(true)
+    setIsAdding(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const resetForm = () => {
+    setIsAdding(false)
+    setIsEditing(false)
+    setFormData({ sk_donatur: 0, nama_donatur: '', no_hp: '', alamat: '', kategori_donatur: 'Individu' })
+  }
+
+  const filteredDonatur = donatur.filter((d) => {
+    const nama = (d.nama_lengkap || '').toLowerCase()
+    const kontak = d.kontak_utama || ''
+    return nama.includes(search.toLowerCase()) || kontak.includes(search)
+  })
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-12 font-sans">
-      {/* 1. HERO / GREETING SECTION */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${loading ? 'bg-slate-100 text-slate-400' : 'bg-emerald-100 text-emerald-700'}`}>
-                  {loading ? (
-                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Connecting...</>
-                  ) : 'OLAP Core Connected'}
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest">
-                  SVM AI Active
-                </span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-                Dashboard <span className="text-emerald-600 font-extrabold">Amil</span> Analitik
-              </h1>
-              <p className="text-slate-500 font-medium max-w-xl text-sm md:text-base leading-relaxed">
-                Sistem pendukung keputusan berbasis <span className="text-slate-900">Data Warehouse</span> untuk optimalisasi penghimpunan ZISWAF.
-              </p>
-            </div>
-            
-            {/* Quick Actions - Mobile Grid */}
-            <div className="grid grid-cols-1 sm:flex gap-3">
-              <Button asChild variant="outline" className="w-full sm:w-auto border-2 font-bold py-6 md:py-2">
-                <Link href="/donasi/masuk">
-                  <PlusCircle className="mr-2 h-4 w-4" /> Input Transaksi
-                </Link>
+    <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
+      {/* HEADER SECTION */}
+      <div className="mb-8 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors">
+            <Link href="/donasi/masuk"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
+          </Button>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
+              <Users className="h-8 w-8 text-indigo-600" /> Database <span className="text-indigo-600">Donatur</span>
+            </h1>
+            {!isAdding && (
+              <Button onClick={() => setIsAdding(true)} className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 transition-all">
+                <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
               </Button>
-              <Button asChild className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100 font-bold py-6 md:py-2 transition-all">
-                <Link href="/ambulan/layanan">
-                  <HeartHandshake className="mr-2 h-4 w-4" /> Layanan Utama
-                </Link>
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
-        
-        {/* 2. STATS OVERVIEW */}
-        <section>
-          {loading ? (
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i} className="h-24 md:h-32 border-2 border-slate-100 bg-white shadow-none animate-pulse flex items-center justify-center">
-                   <div className="h-4 w-12 bg-slate-100 rounded" />
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <DonationStats 
-              totalDonasi={stats.totalDonasi}
-              jumlahDonatur={stats.jumlahDonatur}
-              jumlahMustahik={stats.jumlahMustahik}
-              pertumbuhan={stats.pertumbuhan}
-              dana_tersalur={stats.dana_tersalur}
-            />
-          )}
-        </section>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          
-          {/* 3. MODUL CEPAT */}
-          <div className="lg:col-span-2 space-y-4 md:space-y-6">
-            <h2 className="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2">
-              <ShieldCheck className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" /> Modul Operasional
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              <Link href="/donasi/donatur">
-                <Card className="hover:border-indigo-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
-                  <CardContent className="p-5 md:p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="p-3 bg-indigo-50 rounded-xl group-hover:bg-indigo-600 transition-colors">
-                        <Users className="h-5 w-5 md:h-6 md:w-6 text-indigo-600 group-hover:text-white" />
-                      </div>
-                      <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-indigo-600 transition-all group-hover:translate-x-1" />
-                    </div>
-                    <h3 className="mt-4 font-black text-lg text-slate-900">Database Donatur</h3>
-                    <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
-                      Manajemen profil Muzakki melalui skema tabel dimensi.
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link href="/ambulan/layanan">
-                <Card className="hover:border-red-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
-                  <CardContent className="p-5 md:p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="p-3 bg-red-50 rounded-xl group-hover:bg-red-600 transition-colors">
-                        <MapIcon className="h-5 w-5 md:h-6 md:w-6 text-red-600 group-hover:text-white" />
-                      </div>
-                      <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-red-600 transition-all group-hover:translate-x-1" />
-                    </div>
-                    <h3 className="mt-4 font-black text-lg text-slate-900">Pemetaan Spasial</h3>
-                    <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
-                      Analisis sebaran mustahik berbasis koordinat GIS.
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-            </div>
-          </div>
-
-          {/* 4. AKTIVITAS TERKINI */}
-          <Card className="border-2 shadow-sm bg-white overflow-hidden flex flex-col h-full">
-            <CardHeader className="bg-slate-50/50 border-b py-4">
-              <CardTitle className="text-xs md:text-sm font-black flex items-center gap-2 text-slate-700 uppercase tracking-wider">
-                <TrendingUp className="h-4 w-4 text-emerald-500" /> Log Warehouse (SCD)
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
+        {/* FORM SECTION (ADD/EDIT) */}
+        {isAdding && (
+          <Card className="animate-in fade-in slide-in-from-top-4 border-2 border-indigo-100 shadow-xl overflow-hidden bg-white">
+            <CardHeader className="bg-indigo-50/50 py-4 border-b">
+              <CardTitle className="flex items-center justify-between text-sm font-black text-indigo-700 uppercase tracking-widest">
+                <span className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" /> {isEditing ? 'Update Dimensi Donatur' : 'Registrasi Donatur Baru'}
+                </span>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-600" onClick={resetForm}><X className="h-4 w-4" /></Button>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 flex-grow">
-              <div className="divide-y">
-                {[
-                  { msg: "Data PM Sosial diperbarui via AI", time: "Baru saja", type: "AI" },
-                  { msg: "Batch ETL Donasi Berhasil", time: "1 jam lalu", type: "DW" },
-                  { msg: "Mapping Wilayah: Kubu Raya", time: "3 jam lalu", type: "GIS" },
-                  { msg: "SCD Type 2: Update Alamat", time: "5 jam lalu", type: "SCD" },
-                ].map((log, i) => (
-                  <div key={i} className="p-4 hover:bg-slate-50 transition-colors">
-                    <p className="text-[11px] font-bold text-slate-800 leading-tight">{log.msg}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[9px] font-black text-indigo-500 border border-indigo-200 px-1.5 rounded uppercase">{log.type}</span>
-                      <span className="text-[9px] text-slate-400 font-bold">{log.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="pt-6">
+              <form onSubmit={handleSave} className="grid grid-cols-1 gap-6 md:grid-cols-4">
+                <div className="md:col-span-2 space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Nama Lengkap</Label>
+                  <Input required className="font-bold border-slate-200 focus:border-indigo-500 transition-all" value={formData.nama_donatur} onChange={(e) => setFormData({...formData, nama_donatur: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">No. WhatsApp</Label>
+                  <Input required value={formData.no_hp} onChange={(e) => setFormData({...formData, no_hp: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Kategori</Label>
+                  <select 
+                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all"
+                    value={formData.kategori_donatur}
+                    onChange={(e) => setFormData({...formData, kategori_donatur: e.target.value})}
+                  >
+                    {kategoriEnum.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-3 space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Alamat</Label>
+                  <Input value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} />
+                </div>
+                <div className="flex items-end">
+                  <Button type="submit" disabled={loading} className="w-full bg-indigo-600 font-black uppercase tracking-tighter hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Simpan Perubahan' : 'Push to Warehouse')}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
-            <div className="p-3 bg-slate-50/30 border-t text-center mt-auto">
-              <Button variant="ghost" className="w-full text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-all">
-                Audit Full Logs
-              </Button>
-            </div>
           </Card>
+        )}
 
-        </div>
+        {/* TABLE SECTION */}
+        <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+          <CardHeader className="border-b py-4 bg-slate-50/50">
+            <div className="relative max-w-sm">
+              <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
+              <Input 
+                placeholder="Cari nama atau kontak..." 
+                className="pl-10 font-bold border-slate-200 focus:border-indigo-500 transition-all" 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader className="bg-slate-50/80">
+                <TableRow>
+                  <TableHead className="font-black text-[10px] uppercase text-slate-500">ID & Tipe</TableHead>
+                  <TableHead className="font-black text-[10px] uppercase text-slate-500">Profil Donatur</TableHead>
+                  <TableHead className="font-black text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && !donatur.length ? (
+                  <TableRow><TableCell colSpan={3} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-indigo-400" /></TableCell></TableRow>
+                ) : filteredDonatur.map((d) => (
+                  <TableRow key={d.sk_donatur} className="group hover:bg-indigo-50/30 transition-colors">
+                    <TableCell>
+                      <p className="font-mono text-[11px] font-black text-indigo-500 mb-1">{d.id_donatur}</p>
+                      <span className="px-2 py-0.5 text-[9px] font-black rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                        {d.tipe}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-black text-slate-900 uppercase leading-none mb-1 tracking-tight">{d.nama_lengkap}</p>
+                      <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
+                        <Phone className="h-3 w-3 text-emerald-500"/> {d.kontak_utama}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-4">
+                      <div className="flex items-center justify-end gap-1">
+                        {/* EDIT BUTTON */}
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all" 
+                          onClick={() => startEdit(d)}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+
+                        {/* ALERT DIALOG DELETE */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-2xl border-2 shadow-2xl">
+                            <AlertDialogHeader>
+                              <div className="flex items-center gap-3 text-rose-600 mb-2">
+                                <div className="p-2 bg-rose-50 rounded-full">
+                                  <AlertTriangle className="h-6 w-6" />
+                                </div>
+                                <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Hapus Donatur?</AlertDialogTitle>
+                              </div>
+                              <AlertDialogDescription className="font-medium text-slate-500 text-sm leading-relaxed">
+                                Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. <br />
+                                Data ini tetap tersimpan secara historis di <strong>Data Warehouse</strong>, namun tidak akan muncul lagi di modul operasional.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-6 gap-2">
+                              <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px] tracking-widest border-2 hover:bg-slate-50 transition-all">Batal</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDelete(d.sk_donatur, d.nama_lengkap)}
+                                className="bg-rose-600 hover:bg-rose-700 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-rose-100 transition-all"
+                              >
+                                Ya, Nonaktifkan
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
