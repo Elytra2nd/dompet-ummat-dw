@@ -50,17 +50,15 @@ export async function POST(req: Request) {
     const year = new Date().getFullYear()
     const id_donatur = `DNR-${year}-${(count + 1).toString().padStart(4, '0')}`
 
-    // 2. Simpan ke Database
+    // 2. Simpan ke Database - Versi Stabil (Tanpa SCD fields yang belum terdaftar)
     const newDonatur = await prisma.dim_donatur.create({
       data: {
         id_donatur,
         nama_lengkap: nama_donatur,
         kontak_utama: no_hp,
         alamat: alamat || '-',
-        tipe: kategori_donatur || 'PERSONAL', // Pastikan sesuai Enum di Prisma
+        tipe: kategori_donatur || 'PERSONAL', // Pastikan sesuai Enum/String di Prisma
         is_active: true,
-        version: 1, // Jika menggunakan SCD Type 2
-        is_current: true,
       },
     })
 
