@@ -292,7 +292,7 @@ export default function SegmentasiPage() {
                         </Pie>
                         <Tooltip
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px rgba(0,0,0,0.1)' }}
-                          formatter={(value: any, name: string) => [`${value} donatur`, name]}
+                          formatter={(value: any, name: string | number | undefined) => [`${value} donatur`, String(name ?? '')]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
