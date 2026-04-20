@@ -1,36 +1,62 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
-    // 1. Pastikan query benar
-    // Di MySQL/TiDB, hasil db.query mengembalikan [rows, fields]
-    const [rows] = await db.query(`
-      SELECT 
-        nama_donatur, 
-        alamat, 
-        tgl_mulai, 
-        tgl_akhir, 
-        is_active,
-        CASE 
-          WHEN is_active = 1 THEN 'Active (Current)'
-          ELSE 'Archived (History)'
-        END as status_record
-      FROM dim_donatur 
-      ORDER BY nama_donatur, tgl_mulai DESC 
-      LIMIT 50
+    // UNTUK MARIADB: Jangan gunakan [rows] tapi langsung rows
+    const rows = await db.query(`
+      SELECT * FROM (
+        SELECT 
+          id_donatur AS id_bisnis, 
+          nama_lengkap AS nama, 
+          'Donatur' AS entitas, 
+          valid_from, 
+          valid_to, 
+          is_active,
+          CASE 
+            WHEN is_active = 1 THEN 'Active (Current)'
+            ELSE 'Archived (History)'
+          END AS status_record
+        FROM dim_donatur
+        WHERE sk_donatur > 0
+
+        UNION ALL
+
+        SELECT 
+          id_mustahik AS id_bisnis, nama AS nama, 'Mustahik' AS entitas, 
+          valid_from, valid_to, is_active,
+          CASE WHEN is_active = 1 THEN 'Active (Current)' ELSE 'Archived (History)' END AS status_record
+        FROM dim_mustahik
+        WHERE sk_mustahik > 0
+
+        UNION ALL
+
+        SELECT 
+          id_petugas AS id_bisnis, nama_petugas AS nama, 'Petugas' AS entitas, 
+          valid_from, valid_to, is_active,
+          CASE WHEN is_active = 1 THEN 'Active (Current)' ELSE 'Archived (History)' END AS status_record
+        FROM dim_petugas
+        WHERE sk_petugas > 0
+      ) AS unified_audit
+      ORDER BY valid_from DESC
+      LIMIT 1000
     `);
 
-    // 2. LOG UNTUK DEBUGGING (Cek di terminal laragon)
-    console.log("Data dari DB:", rows);
+    // Tambahkan log untuk memastikan data terbaca
+    console.log(`[MARIADB DEBUG] Berhasil menarik ${rows.length} baris.`);
 
-    // 3. VALIDASI: Jika rows bukan array, paksa jadi array kosong
-    const data = Array.isArray(rows) ? rows : [];
+    // MariaDB mengembalikan data dengan format yang terkadang mengandung metadata, 
+    // kita bungkus dengan Array.from atau pastikan itu array murni.
+    const cleanData = JSON.parse(JSON.stringify(rows, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    ));
 
-    return NextResponse.json(data);
+    return NextResponse.json(cleanData);
   } catch (error: any) {
-    console.error("Database Error:", error.message);
-    // Jika error, kirim array kosong agar frontend tidak crash
-    return NextResponse.json([]);
+    console.error("AUDIT ERROR:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

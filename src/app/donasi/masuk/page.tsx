@@ -16,7 +16,6 @@ export default function DonasiMasukPage() {
     dana_tersalur: 0,
     targetBulanan: 100000000,
     pertumbuhan: 0,
-    sebaranWilayah: 0, // Tambahkan ini
   })
   
   const [loading, setLoading] = useState(true)
@@ -87,7 +86,6 @@ export default function DonasiMasukPage() {
           dana_tersalur={stats.dana_tersalur}
           targetBulanan={stats.targetBulanan}
           pertumbuhan={stats.pertumbuhan}
-          sebaranWilayah={stats.sebaranWilayah}
         />
 
         {/* FORM UTAMA */}

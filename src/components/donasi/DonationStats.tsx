@@ -24,21 +24,22 @@ import {
   ArrowDownRight,
   HeartHandshake,
   Zap,
+  UserCheck,
   HandCoins,
   PieChart,
   Calendar,
+  Loader2,
 } from 'lucide-react'
 import { formatRupiah } from '@/lib/utils-ambulan'
 
-// 1. Perbaikan Interface agar sinkron dengan Page.tsx
 interface DonationStatsProps {
   totalDonasi: number
   jumlahDonatur: number
   jumlahMustahik: number
   dana_tersalur: number
   pertumbuhan: number
-  targetBulanan?: number   // Opsional agar tidak error jika tidak dikirim
-  sebaranWilayah?: number  // Opsional
+  targetBulanan?: number
+  sebaranWilayah?: number
 }
 
 interface TrendItem {
@@ -53,11 +54,10 @@ export default function DonationDashboard({
   jumlahMustahik = 0,
   pertumbuhan = 0,
   dana_tersalur = 0,
-  // targetBulanan ditambahkan jika ingin digunakan di visualisasi nantinya
 }: DonationStatsProps) {
   const [availableYears, setAvailableYears] = useState<string[]>([])
   const [isMounted, setIsMounted] = useState(false)
-  const [filterYear, setFilterYear] = useState('2024')
+  const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString())
   const [chartData, setChartData] = useState<TrendItem[]>([])
   const [loadingChart, setLoadingChart] = useState(false)
 
@@ -73,11 +73,10 @@ export default function DonationDashboard({
         const years = await res.json()
         setAvailableYears(years)
         if (years.length > 0 && !years.includes(filterYear)) {
-          setFilterYear(years[0])
+          setFilterYear(years[years.length - 1])
         }
       } catch (error) {
         console.error(error)
-        setAvailableYears([])
       }
     }
     fetchYears()
@@ -115,158 +114,266 @@ export default function DonationDashboard({
 
   return (
     <div className="space-y-6 font-sans">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         {/* CARD 1: TOTAL DONASI */}
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg">
+        <Card className="col-span-2 lg:col-span-1 relative overflow-hidden border-none bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <HeartHandshake size={100} />
           </div>
-          <CardContent className="relative z-10 p-6">
+          <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold tracking-tight uppercase opacity-90">Total Dana ZISWAF</p>
-              <div className="rounded-lg bg-white/20 p-2 backdrop-blur-sm">
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-wider">
+                Total ZISWAF
+              </p>
+              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <Zap className="h-4 w-4 text-yellow-300 fill-yellow-300" />
               </div>
             </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-black tracking-tight">{formatRupiah(totalDonasi)}</h3>
-              <p className="mt-2 flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
-                {isPositive ? <ArrowUpRight className="h-3 w-3 text-emerald-300" /> : <ArrowDownRight className="h-3 w-3 text-rose-300" />}
-                <span className={isPositive ? 'text-emerald-300' : 'text-rose-300'}>{Math.abs(pertumbuhan)}%</span>
-                Efektivitas Fundraising
-              </p>
+            <div className="mt-3 overflow-hidden">
+              <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
+                {formatRupiah(totalDonasi)}
+              </h3>
+
+              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${isPositive
+                ? 'bg-emerald-500/20 text-emerald-300'
+                : 'bg-rose-500/20 text-rose-300'
+                }`}>
+                {isPositive
+                  ? <ArrowUpRight className="h-3 w-3" />
+                  : <ArrowDownRight className="h-3 w-3" />
+                }
+                {Math.abs(pertumbuhan)}%
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* CARD 2: DANA TERSALUR */}
-        <Card className="border-2 border-orange-100 bg-white shadow-sm">
-          <CardContent className="p-6">
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-xl">
+          <div className="absolute top-[-10px] right-[-10px] opacity-10">
+            <HandCoins size={100} />
+          </div>
+
+          <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold tracking-tighter text-slate-500 uppercase">Dana Tersalurkan</p>
-              <div className="rounded-lg bg-orange-50 p-2"><HandCoins className="h-4 w-4 text-orange-600" /></div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-black text-slate-900">{formatRupiah(dana_tersalur)}</h3>
-              <p className="mt-1 flex items-center gap-1 text-[10px] font-bold text-orange-600 uppercase">
-                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-orange-500"></span>
-                Realisasi Manfaat
+              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">
+                Tersalurkan
               </p>
+              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
+                <HandCoins className="h-4 w-4 text-white" />
+              </div>
+            </div>
+
+            <div className="mt-3 overflow-hidden">
+              <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
+                {formatRupiah(dana_tersalur)}
+              </h3>
+
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+                Realisasi Manfaat
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* CARD 3: RASIO PENYALURAN */}
-        <Card className="border-2 border-sky-100 bg-sky-50/30 shadow-sm border-dashed">
-          <CardContent className="p-6">
+        {/* CARD 3: RASIO */}
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-xl">
+          <div className="absolute top-[-10px] right-[-10px] opacity-10">
+            <PieChart size={100} />
+          </div>
+
+          <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold tracking-tighter text-sky-700 uppercase">Rasio Penyaluran</p>
-              <div className="rounded-lg bg-sky-100 p-2"><PieChart className="h-4 w-4 text-sky-600" /></div>
-            </div>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-end justify-between">
-                <h3 className="text-2xl font-black text-sky-900">{persentasePenyaluran.toFixed(2)}%</h3>
-                <p className="mb-1 text-[9px] font-bold text-sky-600/70 uppercase">Absorpsi Dana</p>
+              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">
+                Absorpsi
+              </p>
+              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
+                <PieChart className="h-4 w-4 text-white" />
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-sky-200/50">
-                <div 
-                  className="h-full bg-sky-500 transition-all duration-1000 ease-out" 
-                  style={{ width: `${Math.min(persentasePenyaluran, 100)}%` }} 
+            </div>
+
+            <div className="mt-3">
+              <div className="mt-3 flex items-center gap-2">
+                <h3 className="text-sm sm:text-base md:text-lg font-black">
+                  {persentasePenyaluran.toFixed(1)}%
+                </h3>
+
+                <div className="inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+                  Tingkat Penyaluran
+                </div>
+              </div>
+
+              <div className="mt-2 h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-1000"
+                  style={{ width: `${Math.min(persentasePenyaluran, 100)}%` }}
                 />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* CARD 4: TOTAL MUZAKKI */}
-        <Card className="border-2 border-emerald-100 bg-white shadow-sm">
-          <CardContent className="p-6">
+        {/* CARD 4: MUZAKKI */}
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl">
+          <div className="absolute top-[-10px] right-[-10px] opacity-10">
+            <Users size={100} />
+          </div>
+
+          <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold tracking-tighter text-slate-500 uppercase">Total Muzakki</p>
-              <div className="rounded-lg bg-emerald-50 p-2"><Users className="h-4 w-4 text-emerald-600" /></div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-black text-slate-900">
-                {jumlahDonatur.toLocaleString()} <span className="text-sm font-medium text-slate-400">Jiwa</span>
-              </h3>
-              <p className="mt-1 flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase">
-                <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"></span>
-                Basis Data Munfiq Aktif
+              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">
+                Muzakki
               </p>
+              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
+                <Users className="h-4 w-4 text-white" />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <h3 className="text-base sm:text-lg md:text-xl font-black truncate">
+                {jumlahDonatur.toLocaleString()}
+                <span className="text-[10px] ml-1 text-white/70">Jiwa</span>
+              </h3>
+
+              <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+                <span className="h-1 w-1 rounded-full bg-white animate-ping" />
+                Aktif
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* CARD 5: TOTAL MUSTAHIK */}
-        <Card className="border-2 border-indigo-100 bg-white shadow-sm">
-          <CardContent className="p-6">
+        {/* CARD 5: MUSTAHIK */}
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl">
+          <div className="absolute top-[-10px] right-[-10px] opacity-10">
+            <UserCheck size={100} />
+          </div>
+
+          <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold uppercase tracking-tighter text-slate-500">Total Mustahik</p>
-              <div className="rounded-lg bg-indigo-50 p-2"><Users className="h-4 w-4 text-indigo-600" /></div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-black text-slate-900">
-                {jumlahMustahik.toLocaleString()} <span className="ml-1 text-sm font-medium text-slate-400">Jiwa</span>
-              </h3>
-              <p className="mt-1 flex items-center gap-1 text-[10px] font-bold uppercase text-indigo-600">
-                <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-500"></span>
-                Penerima Bantuan
+              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">
+                Mustahik
               </p>
+              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
+                <UserCheck className="h-4 w-4 text-white" />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <h3 className="text-base sm:text-lg md:text-xl font-black truncate">
+                {jumlahMustahik.toLocaleString()}
+                <span className="text-[10px] ml-1 text-white/70">Jiwa</span>
+              </h3>
+
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+                Penerima
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* CHART SECTION */}
-      <Card className="border-none shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+      <Card className="border-none shadow-xl bg-white overflow-hidden">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 pb-2">
           <div>
-            <CardTitle className="text-xl font-black text-slate-800">Tren Penghimpunan Dana</CardTitle>
-            <CardDescription>Visualisasi pertumbuhan donasi bulanan</CardDescription>
+            <CardTitle className="text-xl font-black text-slate-900">
+              Tren Penghimpunan
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">
+              Visualisasi perolehan donasi bulanan di Kalimantan Barat
+            </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-slate-400" />
+
+          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+            <Calendar className="ml-2 h-4 w-4 text-slate-500" />
             <Select value={filterYear} onValueChange={setFilterYear}>
-              <SelectTrigger className="w-[120px] font-bold">
+              <SelectTrigger className="border-none bg-transparent shadow-none font-bold text-slate-700 focus:ring-0">
                 <SelectValue placeholder="Tahun" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl border-none shadow-2xl">
                 {validYears.map((year) => (
-                  <SelectItem key={year} value={year}>Tahun {year}</SelectItem>
+                  <SelectItem key={year} value={year} className="font-bold">
+                    Tahun {year}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="h-[350px] w-full">
+        <CardContent className="p-0">
+          <div className="w-full h-64">
             {!isMounted || loadingChart ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-500">Memuat data grafik...</div>
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-400">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+                <p className="text-xs font-black uppercase tracking-widest">
+                  Sinkronisasi Data...
+                </p>
+              </div>
             ) : chartData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-500">Belum ada data donasi untuk tahun {filterYear}</div>
+              <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400 italic">
+                Data donasi {filterYear} belum tersedia
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 0 }}
+                >
                   <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#059669" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} dy={10} />
-                  {/* Perbaikan Type Error: (value: number) */}
-                  <YAxis axisLine={false} tickLine={false} tickFormatter={(value: number) => `${value / 1000000}jt`} tick={{ fill: '#64748b', fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                    formatter={(value: any) => {
-                      if (typeof value === 'number') {
-                        return [formatRupiah(value), 'Total Donasi'];
-                      }
-                      return [value, 'Total Donasi'];
-                    }}
+
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#f1f5f9"
                   />
-                  <Area type="monotone" dataKey="total" stroke="#059669" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" animationDuration={1500} />
+
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
+                    interval={0}
+                  />
+
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value: number) =>
+                      value >= 1000000
+                        ? `${value / 1000000}jt`
+                        : value.toLocaleString()
+                    }
+                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                  />
+
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "16px",
+                      border: "none",
+                      boxShadow:
+                        "0 20px 25px -5px rgba(0,0,0,0.1)",
+                      padding: "12px",
+                    }}
+                    itemStyle={{ fontWeight: "900", color: "#065f46" }}
+                    formatter={(value: any) => [
+                      formatRupiah(value),
+                      "Total Donasi",
+                    ]}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorTotal)"
+                    animationDuration={2000}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             )}
