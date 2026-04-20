@@ -84,7 +84,6 @@ export default function DonasiMasukPage() {
           jumlahDonatur={stats.jumlahDonatur}
           jumlahMustahik={stats.jumlahMustahik}
           dana_tersalur={stats.dana_tersalur}
-          targetBulanan={stats.targetBulanan}
           pertumbuhan={stats.pertumbuhan}
         />
 
