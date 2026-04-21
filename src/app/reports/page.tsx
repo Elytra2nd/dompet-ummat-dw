@@ -23,7 +23,8 @@ import {
   TrendingUp,
   Clock,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  Truck
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
