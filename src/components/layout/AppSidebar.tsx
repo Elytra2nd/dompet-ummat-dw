@@ -64,7 +64,6 @@ const sidebarConfig = {
         { title: "Monitoring", url: "/ambulan/monitoring" },
       ],
     },
-    // --- MODUL BARU: SURVEY ---
     {
       title: "Survey & Kelayakan",
       url: "#",
