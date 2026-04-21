@@ -8,7 +8,8 @@ import {
   ChevronRight,
   LogOut,
   BrainCircuit,
-  PanelLeftClose, // Ikon untuk trigger
+  PanelLeftClose,
+  ClipboardCheck, // Ikon baru untuk Survey
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -26,7 +27,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
-  useSidebar, // Hook untuk deteksi status sidebar
+  useSidebar,
 } from '@/components/ui/sidebar'
 import {
   Collapsible,
@@ -60,6 +61,16 @@ const sidebarConfig = {
         { title: "Monitoring", url: "/ambulan/monitoring" },
       ],
     },
+    // --- MODUL BARU: SURVEY ---
+    {
+      title: "Survey & Kelayakan",
+      url: "#",
+      icon: ClipboardCheck,
+      items: [
+        { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan" },
+        { title: "Input Survey Baru", url: "/survey/baru" },
+      ],
+    },
     {
       title: "BIDA Analitik",
       url: "#",
@@ -75,11 +86,10 @@ const sidebarConfig = {
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const { toggleSidebar, state } = useSidebar() // Ambil fungsi toggle
+  const { toggleSidebar, state } = useSidebar()
 
   return (
     <Sidebar collapsible="icon" className="border-r-2 bg-white transition-all duration-300 ease-in-out">
-      {/* HEADER DENGAN TOMBOL ANIMASI BUKA/TUTUP */}
       <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-1.5 overflow-hidden">
         <div className="flex items-center gap-3 transition-opacity duration-300">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-lg">
@@ -91,7 +101,6 @@ export function AppSidebar() {
           </div>
         </div>
         
-        {/* Tombol Trigger Internal */}
         <button 
           onClick={toggleSidebar}
           className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 group-data-[collapsible=icon]:hidden transition-colors"
