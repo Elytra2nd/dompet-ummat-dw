@@ -4,11 +4,19 @@
  * Modul ini berisi logic untuk:
  * 1. RFM Calculation — Recency, Frequency, Monetary
  * 2. Min-Max Normalization
- * 3. K-Means Clustering
- * 4. K-Medoids Clustering
- * 5. Evaluation Metrics (Silhouette, DBI, CHI)
+ * 3. K-Means++ Clustering
+ * 4. Evaluation Metrics (Silhouette, DBI, CHI)
  */
 
-export { calculateRFM } from './rfm'
-export { runKMeans } from './kmeans'
-export { evaluateClusters } from './evaluation'
+export { calculateRFM, minMaxNormalize } from './rfm'
+export type { RFMInput, RFMResult, RFMStats } from './rfm'
+
+export { runKMeans, findOptimalK, euclideanDistance } from './kmeans'
+export type { ClusterResult, OptimalKResult } from './kmeans'
+
+export {
+  silhouetteScore,
+  daviesBouldinIndex,
+  calinskiHarabaszIndex,
+  silhouetteToRating,
+} from './evaluation'
