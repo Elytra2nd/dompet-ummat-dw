@@ -252,7 +252,7 @@ export default function MonitoringAmbulanPage() {
                   <TableCell className="text-right pr-4">
                     <div className="flex justify-end gap-1 items-center">
                       {/* Navigasi Detail disesuaikan ke path operasional */}
-                      <Link href={`/operasional/ambulan/${item.sk_fakta_layanan_ambulan}`}>
+                      <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
                       </Link>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
