@@ -64,6 +64,7 @@ const sidebarConfig = {
         { title: "Input Aktivitas", url: "/ambulan/aktivitas" },
         { title: "Input Layanan", url: "/ambulan/layanan" },
         { title: "Monitoring", url: "/ambulan/monitoring" },
+        { title: "Riwayat Aktivitas", url: "/ambulan/riwayat" },
       ],
     },
     {
