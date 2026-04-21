@@ -61,6 +61,7 @@ const sidebarConfig = {
       url: "#",
       icon: Ambulance,
       items: [
+        { title: "Input Aktivitas", url: "/ambulan/aktivitas" },
         { title: "Input Layanan", url: "/ambulan/layanan" },
         { title: "Monitoring", url: "/ambulan/monitoring" },
       ],
