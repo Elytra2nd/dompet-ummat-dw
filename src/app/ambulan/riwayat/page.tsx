@@ -21,7 +21,8 @@ import {
   X,
   Save,
   AlertCircle,
-  HandHeart // Ikon untuk Layanan Pasien
+  HandHeart,
+  Eye // Ikon Detail Baru
 } from 'lucide-react'
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
@@ -126,20 +127,19 @@ export default function RiwayatAktivitasPage() {
             <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full">
                <Link href="/ambulan"><ArrowLeft size={18}/></Link>
             </Button>
-            <h1 className="text-2xl font-bold tracking-tight">Log Aktivitas & Biaya</h1>
+            <h1 className="text-2xl font-bold tracking-tight uppercase">Log Aktivitas & <span className="text-rose-600">Biaya</span></h1>
           </div>
           <p className="text-slate-500 text-sm pl-10 italic">Manajemen pengeluaran operasional (Internal Armada)</p>
         </div>
         
-        {/* NAVIGASI PINDAH KE LAYANAN PASIEN */}
         <div className="flex gap-3 w-full md:w-auto">
           <Link href="/ambulan/layanan" className="flex-1 md:flex-initial">
-            <Button variant="outline" className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-bold shadow-sm">
-              <HandHeart className="mr-2 h-4 w-4" /> Input Layanan Pasien
+            <Button variant="outline" className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-bold shadow-sm uppercase text-[10px]">
+              <HandHeart className="mr-2 h-4 w-4" /> Layanan Pasien
             </Button>
           </Link>
-          <Button onClick={() => { setIsEditing(false); setIsFormOpen(true); }} className="flex-1 md:flex-initial bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-bold">
-            <Plus className="mr-2 h-4 w-4" /> Catat Biaya Internal
+          <Button onClick={() => { setIsEditing(false); setIsFormOpen(true); }} className="flex-1 md:flex-initial bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-bold uppercase text-[10px]">
+            <Plus className="mr-2 h-4 w-4" /> Catat Biaya
           </Button>
         </div>
       </div>
@@ -151,7 +151,7 @@ export default function RiwayatAktivitasPage() {
           <CardContent className="pt-6 flex justify-between items-center">
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Akumulasi Biaya</p>
-              <h3 className="text-3xl font-black mt-1 text-slate-900">
+              <h3 className="text-3xl font-black mt-1 text-slate-900 tracking-tighter">
                 {loading ? "..." : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(data?.totalExp || 0)}
               </h3>
             </div>
@@ -163,14 +163,14 @@ export default function RiwayatAktivitasPage() {
           <CardContent className="pt-6 flex justify-between items-center">
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Frekuensi Aktivitas</p>
-              <h3 className="text-3xl font-black mt-1 text-slate-900">{loading ? "..." : data?.totalCount || 0} Record</h3>
+              <h3 className="text-3xl font-black mt-1 text-slate-900 tracking-tighter">{loading ? "..." : data?.totalCount || 0} Record</h3>
             </div>
             <div className="p-3 bg-slate-100 rounded-xl text-slate-900"><History size={24} /></div>
           </CardContent>
         </Card>
       </div>
 
-      {/* FORM SECTION (AKTIVITAS INTERNAL) */}
+      {/* FORM SECTION */}
       {isFormOpen && (
         <Card className="border-none shadow-lg animate-in fade-in zoom-in-95 duration-200 bg-white rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
@@ -203,7 +203,7 @@ export default function RiwayatAktivitasPage() {
                 <Input required type="number" placeholder="Contoh: 150000" className="font-medium" value={formData.biaya_operasional} onChange={(e) => setFormData({...formData, biaya_operasional: e.target.value})} />
               </div>
               <div className="flex items-end">
-                <Button type="submit" disabled={loading} className="w-full bg-slate-900 text-white hover:bg-slate-800 font-bold">
+                <Button type="submit" disabled={loading} className="w-full bg-slate-900 text-white hover:bg-slate-800 font-bold uppercase text-[10px]">
                   {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Save className="mr-2 h-4 w-4" />} Simpan Record
                 </Button>
               </div>
@@ -224,10 +224,10 @@ export default function RiwayatAktivitasPage() {
           <Table>
             <TableHeader className="bg-slate-50">
               <TableRow>
-                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">ID & Kategori</TableHead>
-                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">Unit Armada</TableHead>
-                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">Biaya Operasional</TableHead>
-                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500 text-right pr-6">Aksi</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4">ID & Kategori</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Unit Armada</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Biaya Operasional</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-6">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -235,10 +235,10 @@ export default function RiwayatAktivitasPage() {
                 <TableRow><TableCell colSpan={4} className="text-center py-12 text-slate-400 animate-pulse uppercase text-xs font-bold tracking-widest">Sinkronisasi Warehouse...</TableCell></TableRow>
               ) : filteredLogs.length > 0 ? (
                 filteredLogs.map((log: any) => (
-                  <TableRow key={log.sk_fakta_aktivitas_ambulan} className="hover:bg-slate-50 transition-colors border-b last:border-0">
+                  <TableRow key={log.sk_fakta_aktivitas_ambulan} className="hover:bg-slate-50 transition-colors border-b last:border-0 group">
                     <TableCell>
                       <p className="font-bold text-xs text-slate-900 uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ') || 'Umum'}</p>
-                      <p className="text-[10px] font-mono font-semibold text-slate-400 mt-0.5 tracking-tighter">{log.id_transaksi}</p>
+                      <p className="text-[10px] font-mono font-semibold text-slate-400 mt-0.5 tracking-tighter uppercase">{log.id_transaksi}</p>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 uppercase">
@@ -246,27 +246,39 @@ export default function RiwayatAktivitasPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-bold text-sm text-rose-600">
+                      <p className="font-bold text-sm text-rose-600 group-hover:scale-105 transition-transform origin-left">
                         Rp {new Intl.NumberFormat('id-ID').format(log.biaya_operasional || 0)}
                       </p>
                     </TableCell>
                     <TableCell className="text-right pr-4">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(log)}><Edit3 size={16}/></Button>
+                      <div className="flex justify-end gap-1 items-center">
+                        {/* TOMBOL DETAIL BARU */}
+                        <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50">
+                            <Eye size={16} />
+                          </Button>
+                        </Link>
+
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(log)}>
+                          <Edit3 size={16}/>
+                        </Button>
+
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16}/></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50">
+                              <Trash2 size={16}/>
+                            </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-xl">
+                          <AlertDialogContent className="rounded-xl border-2">
                             <AlertDialogHeader>
-                              <AlertDialogTitle className="font-bold text-slate-900 text-lg">Hapus Record Biaya?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-sm text-slate-500">
+                              <AlertDialogTitle className="font-black uppercase text-lg">Hapus Record Biaya?</AlertDialogTitle>
+                              <AlertDialogDescription className="text-sm text-slate-500 font-medium">
                                 Data ID <strong>{log.id_transaksi}</strong> akan dihapus permanen dari tabel fakta aktivitas internal.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(log.sk_fakta_aktivitas_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white">Hapus</AlertDialogAction>
+                              <AlertDialogCancel className="rounded-lg font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(log.sk_fakta_aktivitas_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white font-bold uppercase text-[10px]">Hapus</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -275,7 +287,7 @@ export default function RiwayatAktivitasPage() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow><TableCell colSpan={4} className="text-center py-12 text-slate-400 italic font-medium">Tidak ada aktivitas yang ditemukan.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} className="text-center py-12 text-slate-400 italic font-medium uppercase text-xs">Tidak ada aktivitas yang ditemukan.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
