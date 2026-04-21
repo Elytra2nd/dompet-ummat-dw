@@ -50,6 +50,9 @@ const sidebarConfig = {
       items: [
         { title: "Database Donatur", url: "/donasi/donatur" },
         { title: "Transaksi Masuk", url: "/donasi/masuk" },
+        { title: "Daftar Mustahik", url: "/mustahik/index" },
+        { title: "Input Mustahik", url: "/mustahik/baru" },
+        { title: "Transaksi Keluar", url: "/donasi/keluar" },
       ],
     },
     {
