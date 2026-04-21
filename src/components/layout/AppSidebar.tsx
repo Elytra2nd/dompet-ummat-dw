@@ -9,7 +9,8 @@ import {
   LogOut,
   BrainCircuit,
   PanelLeftClose,
-  ClipboardCheck, // Ikon baru untuk Survey
+  ClipboardCheck,
+  FileBarChart, // Ikon baru untuk Laporan
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -50,7 +51,7 @@ const sidebarConfig = {
       items: [
         { title: "Database Donatur", url: "/donasi/donatur" },
         { title: "Transaksi Masuk", url: "/donasi/masuk" },
-        { title: "Daftar Mustahik", url: "/mustahik/index" },
+        { title: "Daftar Mustahik", url: "/mustahik" },
         { title: "Input Mustahik", url: "/mustahik/baru" },
         { title: "Transaksi Keluar", url: "/donasi/keluar" },
       ],
@@ -69,7 +70,7 @@ const sidebarConfig = {
       url: "#",
       icon: ClipboardCheck,
       items: [
-        { title: "Hasil Survey", url: "/survey/hasil" },
+        { title: "Hasil Survey", url: "/survey" },
         { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan" },
         { title: "Input Survey Baru", url: "/survey/baru" },
       ],
@@ -86,6 +87,14 @@ const sidebarConfig = {
         { title: "Log Audit SCD", url: "/reports/scd" },
       ],
     },
+    {
+      title: "Laporan & Export",
+      url: "#",
+      icon: FileBarChart,
+      items: [
+        { title: "Pusat Laporan", url: "/reports" },
+      ],
+    },
   ],
 }
 
@@ -95,6 +104,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-2 bg-white transition-all duration-300 ease-in-out">
+      {/* HEADER */}
       <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-1.5 overflow-hidden">
         <div className="flex items-center gap-3 transition-opacity duration-300">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-lg">
@@ -168,6 +178,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
+      {/* FOOTER */}
       <SidebarFooter className="p-4 border-t bg-slate-50/50">
         <SidebarMenu>
           <SidebarMenuItem>
