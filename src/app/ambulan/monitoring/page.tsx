@@ -63,7 +63,7 @@ export default function MonitoringAmbulanPage() {
   const [search, setSearch] = useState('')
   const [filterKategori, setFilterKategori] = useState('Semua')
 
-  // Menyesuaikan dengan path API yang baru
+  // API FETCH disesuaikan ke path monitoring
   const fetchAmbulan = async () => {
     try {
       setLoading(true)
@@ -87,13 +87,14 @@ export default function MonitoringAmbulanPage() {
     setLoading(true)
     const method = isEditing ? 'PUT' : 'POST'
     try {
+      // Path disesuaikan ke monitoring untuk operasional CRUD
       const res = await fetch('/api/ambulan/monitoring', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
       if (res.ok) {
-        toast.success(isEditing ? "Versi data diperbarui" : "Layanan baru berhasil dicatat")
+        toast.success(isEditing ? "Data warehouse diperbarui" : "Layanan baru dicatat ke fakta")
         setIsFormOpen(false)
         fetchAmbulan()
       }
@@ -106,9 +107,10 @@ export default function MonitoringAmbulanPage() {
 
   const handleDelete = async (sk: number) => {
     try {
+      // Path disesuaikan ke monitoring dengan query param sk
       const res = await fetch(`/api/ambulan/monitoring?sk=${sk}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success("Catatan layanan berhasil dihapus")
+        toast.success("Log layanan berhasil dihapus")
         fetchAmbulan()
       }
     } catch (error) {
@@ -251,7 +253,7 @@ export default function MonitoringAmbulanPage() {
                   </TableCell>
                   <TableCell className="text-right pr-4">
                     <div className="flex justify-end gap-1 items-center">
-                      {/* Navigasi Detail disesuaikan ke path operasional */}
+                      {/* Navigasi Detail disesuaikan ke path ambulan/[id] */}
                       <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
                       </Link>
