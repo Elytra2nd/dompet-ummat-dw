@@ -1,12 +1,13 @@
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> } 
 ) {
   try {
-    const { id } = params 
+    // Await params dulu sebelum digunakan
+    const { id } = await context.params 
 
     const dataDonatur = await prisma.dim_donatur.findFirst({
       where: { id_donatur: id, is_active: true },
@@ -14,10 +15,8 @@ export async function GET(
         fact_donasi: {
           include: {
             dim_program_donasi: true,
-            // Jika dim_jalur_pembayaran sudah ada di schema, aktifkan ini:
-            // dim_jalur_pembayaran: true 
           },
-          orderBy: { sk_tgl_bersih: 'desc' } // Sesuai kolom di DB
+          orderBy: { sk_tgl_bersih: 'desc' }
         }
       }
     })
@@ -33,6 +32,7 @@ export async function GET(
 
     return NextResponse.json({ donatur: dataDonatur, history })
   } catch (error: any) {
+    console.error("API_ERROR:", error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
