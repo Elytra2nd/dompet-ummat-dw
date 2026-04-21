@@ -40,7 +40,8 @@ import {
   AlertTriangle,
   Building2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Eye // Ikon Detail
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -114,8 +115,8 @@ export default function ManajemenDonaturPage() {
       if (res.ok) {
         toast.success(isEditing ? 'Versi data terbaru disimpan (SCD Type 2)' : 'Donatur baru terdaftar')
         resetForm()
-        await fetchDonatur() // Refresh data untuk mendapatkan SK baru
-        setCurrentPage(1) // Kembali ke halaman pertama untuk melihat update
+        await fetchDonatur()
+        setCurrentPage(1)
       } else {
         toast.error(result.error || 'Gagal menyimpan data')
       }
@@ -156,7 +157,6 @@ export default function ManajemenDonaturPage() {
     setFormData({ sk_donatur: 0, nama_donatur: '', no_hp: '', alamat: '', perusahaan: '', kategori_donatur: 'Individu' })
   }
 
-  // --- LOGIKA FILTERING & PAGINASI ---
   const filteredDonatur = donatur.filter((d) => {
     const nama = (d.nama_lengkap || '').toLowerCase()
     const kontak = d.kontak_utama || ''
@@ -172,7 +172,6 @@ export default function ManajemenDonaturPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
-      {/* HEADER SECTION */}
       <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
@@ -192,7 +191,6 @@ export default function ManajemenDonaturPage() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
-        {/* FORM INPUT SECTION */}
         {isAdding && (
           <Card className="animate-in fade-in slide-in-from-top-4 border-2 border-indigo-100 shadow-xl overflow-hidden bg-white">
             <CardHeader className="bg-indigo-50/50 py-4 border-b">
@@ -243,7 +241,6 @@ export default function ManajemenDonaturPage() {
           </Card>
         )}
 
-        {/* TABLE SECTION */}
         <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
           <CardHeader className="border-b py-4 bg-slate-50/50">
             <div className="relative max-w-sm">
@@ -292,6 +289,18 @@ export default function ManajemenDonaturPage() {
                     </TableCell>
                     <TableCell className="text-right pr-4">
                       <div className="flex items-center justify-end gap-1">
+                        {/* TOMBOL DETAIL REKAM JEJAK */}
+                        <Link href={`/donasi/donatur/${d.id_donatur}`}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                            title="Lihat Rekam Jejak (SCD)"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(d)}>
                           <Edit3 className="h-4 w-4" />
                         </Button>
@@ -329,7 +338,6 @@ export default function ManajemenDonaturPage() {
               </TableBody>
             </Table>
 
-            {/* --- FOOTER PAGINASI --- */}
             <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
                 Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredDonatur.length)} of {filteredDonatur.length} records
