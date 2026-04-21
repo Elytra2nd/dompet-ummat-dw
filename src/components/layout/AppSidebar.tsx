@@ -67,6 +67,7 @@ const sidebarConfig = {
       url: "#",
       icon: ClipboardCheck,
       items: [
+        { title: "Hasil Survey", url: "/survey/hasil" },
         { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan" },
         { title: "Input Survey Baru", url: "/survey/baru" },
       ],
