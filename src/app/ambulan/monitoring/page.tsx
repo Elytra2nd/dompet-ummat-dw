@@ -66,7 +66,7 @@ export default function MonitoringAmbulanPage() {
   const fetchAmbulan = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`/api/layanan/ambulan`, { cache: 'no-store' })
+      const res = await fetch(`/api/ambulan/monitoring`, { cache: 'no-store' })
       const d = await res.json()
       setData(Array.isArray(d) ? d : [])
     } catch (error) {
