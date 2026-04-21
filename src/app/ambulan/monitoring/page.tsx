@@ -63,14 +63,15 @@ export default function MonitoringAmbulanPage() {
   const [search, setSearch] = useState('')
   const [filterKategori, setFilterKategori] = useState('Semua')
 
+  // Menyesuaikan dengan path API yang baru
   const fetchAmbulan = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`/api/ambulan/monitoring`, { cache: 'no-store' })
+      const res = await fetch(`/api/operasional/ambulan`, { cache: 'no-store' })
       const d = await res.json()
       setData(Array.isArray(d) ? d : [])
     } catch (error) {
-      toast.error("Gagal sinkronisasi data")
+      toast.error("Gagal sinkronisasi data warehouse")
     } finally {
       setLoading(false)
     }
@@ -92,12 +93,12 @@ export default function MonitoringAmbulanPage() {
         body: JSON.stringify(formData)
       })
       if (res.ok) {
-        toast.success(isEditing ? "Data diperbarui" : "Layanan berhasil dicatat")
+        toast.success(isEditing ? "Versi data diperbarui" : "Layanan baru berhasil dicatat")
         setIsFormOpen(false)
         fetchAmbulan()
       }
     } catch (error) {
-      toast.error("Gagal memproses data")
+      toast.error("Gagal memproses data fakta")
     } finally {
       setLoading(false)
     }
@@ -107,11 +108,11 @@ export default function MonitoringAmbulanPage() {
     try {
       const res = await fetch(`/api/operasional/ambulan?sk=${sk}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success("Catatan layanan dihapus")
+        toast.success("Catatan layanan berhasil dihapus")
         fetchAmbulan()
       }
     } catch (error) {
-      toast.error("Gagal menghapus data")
+      toast.error("Gagal menghapus data dari warehouse")
     }
   }
 
@@ -147,53 +148,53 @@ export default function MonitoringAmbulanPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 bg-slate-50/50 min-h-screen font-sans">
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2 tracking-tight">
             <Activity className="text-rose-500 h-6 w-6" /> Monitoring Ambulan
           </h1>
-          <p className="text-slate-500 text-sm">Manajemen data transaksi layanan operasional</p>
+          <p className="text-slate-500 text-sm">Dashboard Transaksional Layanan Dompet Ummat</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm">
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Sinkronkan
+          <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm border-slate-200">
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Sync Data
           </Button>
-          <Button onClick={() => { setIsEditing(false); setIsFormOpen(true); }} className="bg-rose-600 hover:bg-rose-700 shadow-sm">
+          <Button onClick={() => { setIsEditing(false); setIsFormOpen(true); }} className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white">
             <Plus className="mr-2 h-4 w-4" /> Catat Layanan
           </Button>
         </div>
       </div>
 
-      {/* FORM SECTION */}
       {isFormOpen && (
-        <Card className="border-none shadow-md animate-in fade-in zoom-in-95 duration-200">
+        <Card className="border-none shadow-lg animate-in fade-in zoom-in-95 duration-200 bg-white">
           <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Truck className="h-4 w-4 text-rose-500" /> {isEditing ? 'Koreksi Data' : 'Tambah Layanan Baru'}
+              <Truck className="h-4 w-4 text-rose-500" /> {isEditing ? 'Koreksi Data Transaksi' : 'Input Layanan Baru'}
             </CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full h-8 w-8"><X className="h-4 w-4"/></Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full h-8 w-8 text-slate-400 hover:text-slate-900"><X className="h-4 w-4"/></Button>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-slate-600">SK Pasien</Label>
+                <Label className="text-xs font-semibold text-slate-600">Surrogate Key Pasien</Label>
                 <Input required type="number" value={formData.sk_pasien} onChange={(e) => setFormData({...formData, sk_pasien: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-slate-600">SK Lokasi Tujuan</Label>
+                <Label className="text-xs font-semibold text-slate-600">Surrogate Key Lokasi</Label>
                 <Input required type="number" value={formData.sk_lokasi} onChange={(e) => setFormData({...formData, sk_lokasi: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-slate-600">Armada</Label>
-                <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm" value={formData.armada} onChange={(e) => setFormData({...formData, armada: e.target.value})}>
+                <Label className="text-xs font-semibold text-slate-600">Unit Armada</Label>
+                <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium" value={formData.armada} onChange={(e) => setFormData({...formData, armada: e.target.value})}>
                   <option value="Ambulan_1__KB_1234_XX_">Unit 1 (KB 1234 XX)</option>
                   <option value="Ambulan_2__KB_5678_YY_">Unit 2 (KB 5678 YY)</option>
+                  <option value="Unit_Jenazah__KB_9999_ZZ_">Unit Layanan Jenazah</option>
                 </select>
               </div>
               <div className="md:col-span-3 flex justify-end">
-                <Button type="submit" disabled={loading} className="bg-slate-900 px-8">
-                  {loading ? <Loader2 className="animate-spin h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />} Simpan Ke Warehouse
+                <Button type="submit" disabled={loading} className="bg-slate-900 px-8 text-white">
+                  {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Save className="mr-2 h-4 w-4" />} 
+                  {isEditing ? 'Update Fact Table' : 'Simpan Transaksi'}
                 </Button>
               </div>
             </form>
@@ -201,16 +202,15 @@ export default function MonitoringAmbulanPage() {
         </Card>
       )}
 
-      {/* FILTER & TABLE */}
       <Card className="border-none shadow-sm overflow-hidden bg-white">
         <div className="p-4 border-b bg-slate-50/50 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Input placeholder="Cari pasien atau ID..." className="pl-10 bg-white" value={search} onChange={(e) => {setSearch(e.target.value); setCurrentPage(1);}} />
+            <Input placeholder="Cari nama pasien atau ID Transaksi..." className="pl-10 bg-white border-slate-200 focus:ring-rose-500" value={search} onChange={(e) => {setSearch(e.target.value); setCurrentPage(1);}} />
           </div>
-          <div className="flex items-center gap-2 bg-white border rounded-md px-3 h-10">
+          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-md px-3 h-10 shadow-sm">
             <Filter className="h-4 w-4 text-slate-400" />
-            <select className="text-sm bg-transparent outline-none min-w-[150px]" value={filterKategori} onChange={(e) => {setFilterKategori(e.target.value); setCurrentPage(1);}}>
+            <select className="text-sm bg-transparent outline-none min-w-[150px] font-medium" value={filterKategori} onChange={(e) => {setFilterKategori(e.target.value); setCurrentPage(1);}}>
               <option value="Semua">Semua Kategori</option>
               <option value="Antar_Pasien">Antar Pasien</option>
               <option value="Jemput_Pasien">Jemput Pasien</option>
@@ -220,53 +220,56 @@ export default function MonitoringAmbulanPage() {
         </div>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-50">
+            <TableHeader className="bg-slate-50 border-b">
               <TableRow>
-                <TableHead className="font-bold text-xs">Layanan</TableHead>
-                <TableHead className="font-bold text-xs">Data Pasien</TableHead>
-                <TableHead className="font-bold text-xs">Logistik</TableHead>
-                <TableHead className="font-bold text-xs text-right pr-6">Aksi</TableHead>
+                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">Layanan & ID</TableHead>
+                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">Identitas Pasien</TableHead>
+                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">Unit & Lokasi</TableHead>
+                <TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500 text-right pr-6">Kelola</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-12 text-slate-400">Memuat data...</TableCell></TableRow>
+              {loading && data.length === 0 ? (
+                <TableRow><TableCell colSpan={4} className="text-center py-16 text-slate-400 font-medium">Menyinkronkan data dari warehouse...</TableCell></TableRow>
               ) : currentItems.map((item) => (
-                <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50 transition-colors">
+                <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0">
                   <TableCell>
-                    <Badge variant="secondary" className="mb-1 font-semibold text-[10px] bg-rose-50 text-rose-700 hover:bg-rose-50 border-none">
+                    <Badge variant="secondary" className="mb-1 font-bold text-[10px] bg-rose-50 text-rose-700 hover:bg-rose-50 border-none px-2 py-0.5">
                       {item.kategori_layanan?.replace(/_/g, ' ')}
                     </Badge>
-                    <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
+                    <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter">{item.id_transaksi}</p>
                   </TableCell>
                   <TableCell>
-                    <p className="font-semibold text-sm text-slate-900">{item.dim_pasien_ambulan?.nama_pasien || 'Pasien Umum'}</p>
-                    <p className="text-xs text-slate-500">{item.dim_pasien_ambulan?.status_ekonomi || '-'}</p>
+                    <p className="font-bold text-sm text-slate-900">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
+                    <p className="text-[10px] text-slate-500 font-semibold uppercase">{item.dim_pasien_ambulan?.status_ekonomi || 'Non-Subsidi'}</p>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="flex items-center text-xs text-slate-600 gap-1"><Truck size={12}/> {item.armada?.split('__')[0].replace(/_/g, ' ')}</div>
-                      <div className="flex items-center text-xs text-slate-400 gap-1"><MapPin size={12} className="text-rose-400"/> {item.dim_lokasi?.kabupaten_kota || 'Pontianak'}</div>
+                      <div className="flex items-center text-xs text-slate-700 font-medium gap-1.5"><Truck size={13} className="text-slate-400"/> {item.armada?.split('__')[0].replace(/_/g, ' ')}</div>
+                      <div className="flex items-center text-[11px] text-slate-400 font-medium gap-1.5"><MapPin size={13} className="text-rose-400"/> {item.dim_lokasi?.kabupaten_kota || 'KALBAR'}</div>
                     </div>
                   </TableCell>
                   <TableCell className="text-right pr-4">
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-1 items-center">
+                      {/* Navigasi Detail disesuaikan ke path operasional */}
                       <Link href={`/operasional/ambulan/${item.sk_fakta_layanan_ambulan}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600"><Eye size={16} /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
                       </Link>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600"><Trash2 size={16} /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16} /></Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="rounded-xl">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Hapus Catatan Layanan?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-sm">Tindakan ini permanen. Data ID <strong>{item.id_transaksi}</strong> akan dihapus dari tabel fakta warehouse.</AlertDialogDescription>
+                            <AlertDialogTitle className="text-slate-900 font-bold">Hapus Record Layanan?</AlertDialogTitle>
+                            <AlertDialogDescription className="text-slate-500 text-sm">
+                              Tindakan ini tidak dapat dibatalkan. Data dengan ID <strong>{item.id_transaksi}</strong> akan dihapus permanen dari tabel fakta.
+                            </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600">Hapus</AlertDialogAction>
+                            <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white">Hapus Permanen</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
@@ -277,12 +280,11 @@ export default function MonitoringAmbulanPage() {
             </TableBody>
           </Table>
 
-          {/* PAGINATION */}
-          <div className="p-4 border-t flex items-center justify-between bg-slate-50/50">
-            <span className="text-xs text-slate-500">Halaman {currentPage} dari {totalPages || 1}</span>
+          <div className="p-4 border-t flex items-center justify-between bg-slate-50/30">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Halaman {currentPage} dari {totalPages || 1}</span>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCurrentPage(p => Math.max(p-1, 1))} disabled={currentPage === 1}><ChevronLeft size={16}/></Button>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}><ChevronRight size={16}/></Button>
+              <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200 shadow-sm" onClick={() => setCurrentPage(p => Math.max(p-1, 1))} disabled={currentPage === 1}><ChevronLeft size={16}/></Button>
+              <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200 shadow-sm" onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}><ChevronRight size={16}/></Button>
             </div>
           </div>
         </CardContent>
