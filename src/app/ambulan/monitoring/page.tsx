@@ -67,7 +67,7 @@ export default function MonitoringAmbulanPage() {
   const fetchAmbulan = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`/api/operasional/ambulan`, { cache: 'no-store' })
+      const res = await fetch(`/api/ambulan/monitoring`, { cache: 'no-store' })
       const d = await res.json()
       setData(Array.isArray(d) ? d : [])
     } catch (error) {
@@ -87,7 +87,7 @@ export default function MonitoringAmbulanPage() {
     setLoading(true)
     const method = isEditing ? 'PUT' : 'POST'
     try {
-      const res = await fetch('/api/operasional/ambulan', {
+      const res = await fetch('/api/ambulan/monitoring', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -106,7 +106,7 @@ export default function MonitoringAmbulanPage() {
 
   const handleDelete = async (sk: number) => {
     try {
-      const res = await fetch(`/api/operasional/ambulan?sk=${sk}`, { method: 'DELETE' })
+      const res = await fetch(`/api/ambulan/monitoring?sk=${sk}`, { method: 'DELETE' })
       if (res.ok) {
         toast.success("Catatan layanan berhasil dihapus")
         fetchAmbulan()
