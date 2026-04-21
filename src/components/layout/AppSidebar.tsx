@@ -83,7 +83,6 @@ const sidebarConfig = {
         { title: "Segmentasi Donatur", url: "/segmentasi" },
         { title: "Perbandingan Segmen", url: "/segmentasi/perbandingan" },
         { title: "Sebaran Spasial", url: "/map/mustahik" },
-        { title: "Prediksi SVM", url: "/analitik/prediksi" },
         { title: "Log Audit SCD", url: "/reports/scd" },
       ],
     },
