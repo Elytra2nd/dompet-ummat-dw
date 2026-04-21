@@ -5,31 +5,28 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    // 1. Grouping Berdasarkan Armada (Existing)
-    const layananPerArmada = await prisma.fact_layanan_ambulan.groupBy({
-      by: ['armada'],
-      _count: { id_transaksi: true },
-    })
+    // 1. Ambil data dasar menggunakan Prisma Client (Paling Aman)
+    const [layananPerArmada, kategoriLayanan, layananPerWaktu, totalLayanan] = await Promise.all([
+      prisma.fact_layanan_ambulan.groupBy({
+        by: ['armada'],
+        _count: { id_transaksi: true },
+      }),
+      prisma.fact_layanan_ambulan.groupBy({
+        by: ['kategori_layanan'],
+        _count: { id_transaksi: true },
+      }),
+      prisma.fact_layanan_ambulan.groupBy({
+        by: ['jam'],
+        _count: { id_transaksi: true },
+      }),
+      prisma.fact_layanan_ambulan.count()
+    ])
 
-    // 2. Grouping Berdasarkan Kategori (Existing)
-    const kategoriLayanan = await prisma.fact_layanan_ambulan.groupBy({
-      by: ['kategori_layanan'],
-      _count: { id_transaksi: true },
-    })
-
-    // 3. INSIGHT BARU: Grouping Berdasarkan Waktu (Jam)
-    // Ini penting untuk melihat beban operasional (Shift mana yang paling sibuk?)
-    const layananPerWaktu = await prisma.fact_layanan_ambulan.groupBy({
-      by: ['jam'],
-      _count: { id_transaksi: true },
-    })
-
-    // 4. INSIGHT BARU: Trend Bulanan (Menggunakan Raw Query untuk ekstraksi Bulan dari SK_Tanggal)
-    // Format SK_Tanggal kamu adalah YYYYMMDD (Int)
-    // Kita ambil 6 digit pertama (YYYYMM) untuk melihat trend bulanan
-    const trendBulanan = await prisma.$queryRaw`
+    // 2. Perbaikan Raw Query untuk Trend Bulanan
+    // Gunakan format yang lebih standar untuk MySQL di Vercel/TiDB
+    const trendBulanan: any[] = await prisma.$queryRaw`
       SELECT 
-        LEFT(CAST(sk_tanggal_layanan AS CHAR), 6) as bulan_layanan,
+        SUBSTRING(CAST(sk_tanggal_layanan AS CHAR), 1, 6) as bulan_layanan,
         COUNT(id_transaksi) as jumlah_trip
       FROM fact_layanan_ambulan
       GROUP BY bulan_layanan
@@ -37,32 +34,33 @@ export async function GET() {
       LIMIT 12
     `
 
-    // 5. INSIGHT BARU: Top 5 Lokasi Tujuan (Hotspots)
-    const sebaranLokasi = await prisma.fact_layanan_ambulan.findMany({
-      take: 1000,
-      include: {
-        dim_lokasi: {
-          select: { kabupaten_kota: true, kecamatan: true }
-        }
-      }
-    })
+    // Mapping hasil untuk memastikan format data konsisten
+    const formattedTrend = trendBulanan.map(t => ({
+      bulan: t.bulan_layanan,
+      total: Number(t.jumlah_trip)
+    }))
 
-    const totalLayanan = await prisma.fact_layanan_ambulan.count()
+    // Sortir untuk mencari Peak Performance agar tidak error jika data kosong
+    const mostBusyArmada = [...layananPerArmada].sort((a, b) => b._count.id_transaksi - a._count.id_transaksi)[0] || { armada: 'N/A', _count: { id_transaksi: 0 } }
+    const peakTime = [...layananPerWaktu].sort((a, b) => b._count.id_transaksi - a._count.id_transaksi)[0] || { jam: 'N/A', _count: { id_transaksi: 0 } }
 
     return NextResponse.json({ 
       total: totalLayanan, 
       perArmada: layananPerArmada,
       perKategori: kategoriLayanan,
       perWaktu: layananPerWaktu,
-      trend: trendBulanan,
-      // Metadata tambahan untuk mempermudah frontend
+      trend: formattedTrend,
       insight_summary: {
-        most_busy_armada: layananPerArmada.sort((a, b) => b._count.id_transaksi - a._count.id_transaksi)[0],
-        peak_time: layananPerWaktu.sort((a, b) => b._count.id_transaksi - a._count.id_transaksi)[0]
+        most_busy_armada: mostBusyArmada,
+        peak_time: peakTime
       }
     })
   } catch (error: any) {
-    console.error("REPORT ERROR:", error.message)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    // Log error ke konsol Vercel agar mudah di-debug
+    console.error("AMBULAN_REPORT_ERROR:", error.message)
+    return NextResponse.json(
+      { error: "Gagal memproses insight operasional", details: error.message }, 
+      { status: 500 }
+    )
   }
 }
