@@ -80,7 +80,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-2 bg-white transition-all duration-300 ease-in-out">
       {/* HEADER DENGAN TOMBOL ANIMASI BUKA/TUTUP */}
-      <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-4 overflow-hidden">
+      <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-1.5 overflow-hidden">
         <div className="flex items-center gap-3 transition-opacity duration-300">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-lg">
             <HeartHandshake className="h-5 w-5" />
