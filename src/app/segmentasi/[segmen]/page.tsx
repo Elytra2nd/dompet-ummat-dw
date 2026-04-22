@@ -22,6 +22,7 @@ import {
   ResponsiveContainer, Tooltip,
 } from 'recharts'
 import { SEGMENT_CONFIGS, getSegmentConfig, SEGMENT_ORDER } from '@/lib/constants-segmentasi'
+import { useSegmentasi } from '@/contexts/SegmentasiContext'
 
 interface DonaturRow {
   sk_donatur: number
@@ -91,30 +92,25 @@ export default function SegmentDetailPage({
   const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | ''>('')
   const [sortAsc, setSortAsc] = useState(true)
 
-  // Fetch segment data via run API
+  const { data: analysisData, loading: analysisLoading, runAnalysis } = useSegmentasi()
+
+  // Use cached data from context
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch('/api/segmentasi/run', { method: 'POST' })
-        if (!res.ok) throw new Error('Gagal memuat data')
-        const data = await res.json()
-
-        const found = data.segments.find((s: SegmentDetail) => s.key === segmen)
-        if (found) setSegment(found)
-
-        setOverallStats({
-          avg_recency: data.stats.avg_recency,
-          avg_frequency: data.stats.avg_frequency,
-          avg_monetary: data.stats.avg_monetary,
-        })
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
+    runAnalysis() // uses cache if available
   }, [segmen])
+
+  useEffect(() => {
+    if (analysisData) {
+      const found = analysisData.segments.find((s: any) => s.key === segmen)
+      if (found) setSegment(found)
+      setOverallStats({
+        avg_recency: analysisData.stats.avg_recency,
+        avg_frequency: analysisData.stats.avg_frequency,
+        avg_monetary: analysisData.stats.avg_monetary,
+      })
+      setLoading(false)
+    }
+  }, [analysisData, segmen])
 
   // Fetch donatur list
   useEffect(() => {
@@ -175,20 +171,32 @@ export default function SegmentDetailPage({
     }
   }
 
-  // Export CSV
-  const exportCSV = () => {
-    if (donaturList.length === 0) return
+  // Export CSV — all donatur in this segment
+  const exportCSV = async (all = false) => {
+    let rows = donaturList
+    if (all) {
+      try {
+        const res = await fetch(`/api/segmentasi/donatur?segment=${segmen}&page=1&limit=99999`)
+        if (res.ok) {
+          const data = await res.json()
+          rows = data.donatur
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    if (rows.length === 0) return
     const headers = ['ID', 'Nama', 'Tipe', 'Kontak', 'Recency', 'Frequency', 'Monetary', 'RFM Score']
-    const rows = donaturList.map(d => [
+    const csvRows = rows.map((d: any) => [
       d.id_donatur, d.nama_lengkap, d.tipe, d.kontak,
       d.recency, d.frequency, d.monetary, d.rfm_score,
     ])
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n')
+    const csv = [headers, ...csvRows].map(r => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `donatur_${segmen}_page${page}.csv`
+    a.download = `donatur_${segmen}${all ? '_semua' : `_page${page}`}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -333,8 +341,11 @@ export default function SegmentDetailPage({
                   Daftar Donatur ({totalDonatur.toLocaleString()})
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button onClick={exportCSV} variant="outline" size="sm" className="text-xs font-bold">
-                    <Download className="mr-1 h-3 w-3" /> Export CSV
+                  <Button onClick={() => exportCSV(false)} variant="outline" size="sm" className="text-xs font-bold">
+                    <Download className="mr-1 h-3 w-3" /> Halaman Ini
+                  </Button>
+                  <Button onClick={() => exportCSV(true)} size="sm" className="bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-700">
+                    <Download className="mr-1 h-3 w-3" /> Semua ({totalDonatur})
                   </Button>
                 </div>
               </CardHeader>
