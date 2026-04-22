@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,6 +20,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
 } from 'recharts'
 import { SegmentCard } from '@/components/segmentasi/SegmentCard'
+import { useSegmentasi } from '@/contexts/SegmentasiContext'
 
 // Warna untuk pie chart sesuai segment order
 const SEGMENT_COLORS: Record<string, string> = {
@@ -32,49 +33,6 @@ const SEGMENT_COLORS: Record<string, string> = {
   at_risk: '#ea580c',
   hibernating: '#64748b',
   lost: '#dc2626',
-}
-
-interface SegmentData {
-  key: string
-  label: string
-  description: string
-  color: string
-  bgColor: string
-  borderColor: string
-  iconName: string
-  count: number
-  percentage: number
-  avg_recency: number
-  avg_frequency: number
-  avg_monetary: number
-  total_monetary: number
-  recommendation: {
-    title: string
-    description: string
-    channels: string[]
-  }
-}
-
-interface AnalysisResult {
-  success: boolean
-  timestamp: string
-  elapsed_ms: number
-  stats: {
-    total_donatur: number
-    avg_recency: number
-    avg_frequency: number
-    avg_monetary: number
-  }
-  clustering: {
-    optimal_k: number
-    silhouette: number
-    davies_bouldin: number
-    calinski_harabasz: number
-    rating: { stars: number; label: string }
-    converged: boolean
-  }
-  segments: SegmentData[]
-  total_donatur: number
 }
 
 function formatRupiah(value: number): string {
@@ -100,26 +58,9 @@ function StarRating({ stars }: { stars: number }) {
 }
 
 export default function SegmentasiPage() {
-  const [data, setData] = useState<AnalysisResult | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const { data, loading, error, runAnalysis } = useSegmentasi()
 
-  const runAnalysis = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/segmentasi/run', { method: 'POST' })
-      if (!res.ok) throw new Error('Gagal menjalankan analisis')
-      const result = await res.json()
-      setData(result)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Auto-run on mount
+  // Auto-run on mount (uses cache if available)
   useEffect(() => {
     runAnalysis()
   }, [])
@@ -171,7 +112,7 @@ export default function SegmentasiPage() {
             </div>
 
             <Button
-              onClick={runAnalysis}
+              onClick={() => runAnalysis(true)}
               disabled={loading}
               className="bg-emerald-600 font-bold shadow-lg shadow-emerald-100 transition-all hover:bg-emerald-700"
             >
