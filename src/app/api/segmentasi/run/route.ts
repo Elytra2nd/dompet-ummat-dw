@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { calculateRFM, minMaxNormalize } from '@/lib/ml/rfm'
 import { runKMeans } from '@/lib/ml/kmeans'
-import { silhouetteScore, silhouetteToRating } from '@/lib/ml/evaluation'
+import { silhouetteScore, silhouetteToRating, daviesBouldinIndex, calinskiHarabaszIndex } from '@/lib/ml/evaluation'
 import { SEGMENT_CONFIGS, getSegmentConfig } from '@/lib/constants-segmentasi'
 import type { RFMInput } from '@/lib/ml/rfm'
 
@@ -19,6 +19,7 @@ import type { RFMInput } from '@/lib/ml/rfm'
  */
 export async function POST() {
   let conn
+  const startTime = Date.now()
   try {
     conn = await db.getConnection()
 
@@ -90,6 +91,8 @@ export async function POST() {
     // Step 6: Run final clustering dengan K terbaik
     const finalCluster = runKMeans(normalizedData, bestK, 300, 10, 42)
     const finalSilhouette = silhouetteScore(normalizedData, finalCluster.labels)
+    const finalDBI = daviesBouldinIndex(normalizedData, finalCluster.labels, finalCluster.centroids)
+    const finalCHI = calinskiHarabaszIndex(normalizedData, finalCluster.labels, finalCluster.centroids)
     const rating = silhouetteToRating(finalSilhouette)
 
     // Step 7: Assign segment labels dan merge
@@ -132,13 +135,18 @@ export async function POST() {
       }
     }).filter(s => s.count > 0)
 
+    const elapsedMs = Date.now() - startTime
+
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
+      elapsed_ms: elapsedMs,
       stats,
       clustering: {
         optimal_k: bestK,
         silhouette: finalSilhouette,
+        davies_bouldin: finalDBI,
+        calinski_harabasz: finalCHI,
         rating,
         iterations: finalCluster.iterations,
         converged: finalCluster.converged,

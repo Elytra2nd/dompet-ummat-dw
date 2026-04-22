@@ -12,6 +12,8 @@ import {
   Loader2,
   Star,
   ArrowRight,
+  Timer,
+  FlaskConical,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -56,6 +58,7 @@ interface SegmentData {
 interface AnalysisResult {
   success: boolean
   timestamp: string
+  elapsed_ms: number
   stats: {
     total_donatur: number
     avg_recency: number
@@ -65,6 +68,8 @@ interface AnalysisResult {
   clustering: {
     optimal_k: number
     silhouette: number
+    davies_bouldin: number
+    calinski_harabasz: number
     rating: { stars: number; label: string }
     converged: boolean
   }
@@ -261,6 +266,43 @@ export default function SegmentasiPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Evaluation Metrics */}
+            <Card className="border-2 border-slate-100 bg-white shadow-sm">
+              <CardHeader className="border-b bg-slate-50/50 py-4">
+                <CardTitle className="flex items-center gap-2 text-sm font-black text-slate-700">
+                  <FlaskConical className="h-4 w-4 text-emerald-500" />
+                  Evaluasi Kualitas Clustering
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="rounded-xl border border-slate-100 p-4">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">Silhouette Score</p>
+                    <p className="mt-1 text-2xl font-black text-emerald-600">{data.clustering.silhouette.toFixed(4)}</p>
+                    <p className="mt-1 text-[10px] text-slate-400">Semakin tinggi → pemisahan cluster semakin jelas</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-100 p-4">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">Davies-Bouldin Index</p>
+                    <p className="mt-1 text-2xl font-black text-blue-600">{data.clustering.davies_bouldin.toFixed(4)}</p>
+                    <p className="mt-1 text-[10px] text-slate-400">Semakin rendah → cluster semakin padat dan terpisah</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-100 p-4">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">Calinski-Harabasz Index</p>
+                    <p className="mt-1 text-2xl font-black text-indigo-600">{data.clustering.calinski_harabasz.toFixed(2)}</p>
+                    <p className="mt-1 text-[10px] text-slate-400">Semakin tinggi → rasio dispersi antar/intra cluster baik</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-100 p-4">
+                    <div className="flex items-center gap-1.5">
+                      <Timer className="h-3 w-3 text-slate-400" />
+                      <p className="text-[10px] font-bold uppercase text-slate-400">Waktu Analisis</p>
+                    </div>
+                    <p className="mt-1 text-2xl font-black text-slate-700">{(data.elapsed_ms / 1000).toFixed(1)}s</p>
+                    <p className="mt-1 text-[10px] text-slate-400">On-demand training (K={data.clustering.optimal_k})</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Donut Chart + Segment Cards */}
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">

@@ -12,6 +12,8 @@ import {
   Download,
   Lightbulb,
   MessageSquare,
+  Search,
+  ArrowUpDown,
 } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 import Link from 'next/link'
@@ -85,6 +87,9 @@ export default function SegmentDetailPage({
   const [totalPages, setTotalPages] = useState(1)
   const [totalDonatur, setTotalDonatur] = useState(0)
   const [overallStats, setOverallStats] = useState({ avg_recency: 0, avg_frequency: 0, avg_monetary: 0 })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | ''>('')
+  const [sortAsc, setSortAsc] = useState(true)
 
   // Fetch segment data via run API
   useEffect(() => {
@@ -151,6 +156,24 @@ export default function SegmentDetailPage({
   ] : []
 
   const IconComponent = (LucideIcons as any)[config.iconName] || LucideIcons.Users
+
+  // Filter + Sort donatur
+  const filteredDonatur = donaturList
+    .filter(d => searchQuery === '' || d.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      if (!sortKey) return 0
+      const diff = a[sortKey] - b[sortKey]
+      return sortAsc ? diff : -diff
+    })
+
+  const handleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortAsc(!sortAsc)
+    } else {
+      setSortKey(key)
+      setSortAsc(key === 'recency') // recency: ascending default, others: desc
+    }
+  }
 
   // Export CSV
   const exportCSV = () => {
@@ -309,11 +332,26 @@ export default function SegmentDetailPage({
                 <CardTitle className="text-sm font-black text-slate-700">
                   Daftar Donatur ({totalDonatur.toLocaleString()})
                 </CardTitle>
-                <Button onClick={exportCSV} variant="outline" size="sm" className="text-xs font-bold">
-                  <Download className="mr-1 h-3 w-3" /> Export CSV
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={exportCSV} variant="outline" size="sm" className="text-xs font-bold">
+                    <Download className="mr-1 h-3 w-3" /> Export CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
+                {/* Search Box */}
+                <div className="border-b px-4 py-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Cari nama donatur..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-all"
+                    />
+                  </div>
+                </div>
                 {loadingDonatur ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
@@ -326,14 +364,22 @@ export default function SegmentDetailPage({
                           <tr className="border-b bg-slate-50 text-left">
                             <th className="px-4 py-3 font-bold uppercase text-slate-500">Nama</th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500">Tipe</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Terakhir (hari)</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Frekuensi</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Total Donasi</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Skor</th>
+                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('recency')}>
+                              <span className="inline-flex items-center gap-1">Terakhir (hari) <ArrowUpDown className="h-3 w-3" /></span>
+                            </th>
+                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('frequency')}>
+                              <span className="inline-flex items-center gap-1">Frekuensi <ArrowUpDown className="h-3 w-3" /></span>
+                            </th>
+                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('monetary')}>
+                              <span className="inline-flex items-center gap-1">Total Donasi <ArrowUpDown className="h-3 w-3" /></span>
+                            </th>
+                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('rfm_score')}>
+                              <span className="inline-flex items-center gap-1">Skor <ArrowUpDown className="h-3 w-3" /></span>
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
-                          {donaturList.map((d, i) => (
+                          {filteredDonatur.map((d, i) => (
                             <tr key={d.sk_donatur} className={`border-b transition-colors hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-25'}`}>
                               <td className="px-4 py-3 font-semibold text-slate-800">{d.nama_lengkap}</td>
                               <td className="px-4 py-3 text-slate-500">{d.tipe}</td>
