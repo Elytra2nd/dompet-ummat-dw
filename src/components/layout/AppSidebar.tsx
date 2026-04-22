@@ -85,7 +85,7 @@ const sidebarConfig = {
       items: [
         { title: "Segmentasi Donatur", url: "/segmentasi" },
         { title: "Perbandingan Segmen", url: "/segmentasi/perbandingan" },
-        { title: "Sebaran Spasial", url: "/map/mustahik" },
+        { title: "Sebaran Spasial", url: "/mustahik/spasial" },
         { title: "Log Audit SCD", url: "/reports/scd" },
       ],
     },
