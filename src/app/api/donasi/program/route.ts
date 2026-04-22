@@ -22,8 +22,8 @@ export async function GET() {
     conn = await db.getConnection()
 
     // Ambil data dengan type assertion agar TypeScript tidak komplain di .map
-    const [programRows] = await conn.query(`
-      SELECT 
+    const programRows = await conn.query(`
+      SELECT
         COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
         COUNT(fd.sk_fakta_donasi) AS jumlahTransaksi,
         COALESCE(SUM(fd.nominal_valid), 0) AS totalDonasi
