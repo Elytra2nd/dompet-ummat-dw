@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { 
   Activity, MapPin, User, Truck, Clock, Search, 
-  AlertCircle, Filter, RefreshCw, Plus, Edit3, Trash2, X, Save
+  AlertCircle, Filter, RefreshCw, Plus, Edit3, Trash2, X, Save, Eye,
+  ChevronLeft, ChevronRight,
+  Loader2
 } from 'lucide-react'
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface AmbulanLog {
   sk_fakta_layanan_ambulan: number;
@@ -42,7 +45,9 @@ export default function MonitoringAmbulanPage() {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   
-  // STATE CRUD
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
@@ -61,11 +66,11 @@ export default function MonitoringAmbulanPage() {
   const fetchAmbulan = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`/api/operasional/ambulan`, { cache: 'no-store' })
+      const res = await fetch(`/api/ambulan/monitoring`, { cache: 'no-store' })
       const d = await res.json()
       setData(Array.isArray(d) ? d : [])
     } catch (error) {
-      toast.error("Gagal sinkronisasi data")
+      toast.error("Gagal sinkronisasi data warehouse")
     } finally {
       setLoading(false)
     }
@@ -78,32 +83,35 @@ export default function MonitoringAmbulanPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     const method = isEditing ? 'PUT' : 'POST'
     try {
-      const res = await fetch('/api/operasional/ambulan', {
+      const res = await fetch('/api/ambulan/monitoring', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
       if (res.ok) {
-        toast.success(isEditing ? "Data diperbarui" : "Layanan baru dicatat")
+        toast.success(isEditing ? "Versi data diperbarui" : "Layanan baru berhasil dicatat")
         setIsFormOpen(false)
         fetchAmbulan()
       }
     } catch (error) {
-      toast.error("Gagal menyimpan ke warehouse")
+      toast.error("Gagal memproses data fakta")
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleDelete = async (sk: number) => {
     try {
-      const res = await fetch(`/api/operasional/ambulan?sk=${sk}`, { method: 'DELETE' })
+      const res = await fetch(`/api/ambulan/monitoring?sk=${sk}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success("Log layanan dihapus")
+        toast.success("Catatan layanan berhasil dihapus")
         fetchAmbulan()
       }
     } catch (error) {
-      toast.error("Gagal menghapus data")
+      toast.error("Gagal menghapus data dari warehouse")
     }
   }
 
@@ -119,69 +127,76 @@ export default function MonitoringAmbulanPage() {
     })
     setIsEditing(true)
     setIsFormOpen(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
       const matchSearch = 
         item.dim_pasien_ambulan?.nama_pasien?.toLowerCase().includes(search.toLowerCase()) ||
-        item.id_transaksi.toLowerCase().includes(search.toLowerCase());
+        item.id_transaksi?.toLowerCase().includes(search.toLowerCase());
       const matchKategori = filterKategori === 'Semua' || item.kategori_layanan === filterKategori;
       return matchSearch && matchKategori;
     });
   }, [data, search, filterKategori]);
 
-  if (!mounted) return <div className="p-8 font-black text-slate-400">LOADING...</div>
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const currentItems = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  if (!mounted) return null
 
   return (
-    <div className="p-4 md:p-8 space-y-6 font-sans bg-slate-50 min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="p-4 md:p-8 space-y-6 bg-slate-50/50 min-h-screen font-sans text-slate-900">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tighter flex items-center gap-3">
-            <Activity className="text-rose-600 h-8 w-8" /> Monitoring <span className="text-rose-600">Ambulan</span>
+          <h1 className="text-2xl font-bold flex items-center gap-2 tracking-tight uppercase">
+            <Activity className="text-rose-500 h-6 w-6" /> Monitoring <span className="text-rose-600">Layanan</span>
           </h1>
-          <p className="text-slate-500 font-medium italic text-sm">Transactional Fact Table Management</p>
+          <p className="text-slate-500 text-sm">Rekapitulasi Transaksi Bantuan Pasien & Masyarakat</p>
         </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={fetchAmbulan} className="font-bold border-2 bg-white">
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm border-slate-200 font-bold uppercase text-[10px]">
+            <RefreshCw className={`mr-2 h-3 w-3 ${loading ? 'animate-spin' : ''}`} /> Sync Data
           </Button>
-          <Button onClick={() => { setIsEditing(false); setIsFormOpen(true); }} className="bg-rose-600 hover:bg-rose-700 font-bold">
-            <Plus className="mr-2 h-4 w-4" /> Catat Layanan
-          </Button>
+          
+          {/* PERUBAHAN: Tombol diarahkan ke halaman input layanan khusus */}
+          <Link href="/ambulan/layanan" className="w-full md:w-auto">
+            <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white w-full font-bold uppercase text-[10px] tracking-widest">
+              <Plus className="mr-2 h-4 w-4" /> Catat Layanan Baru
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* FORM INPUT SECTION */}
-      {isFormOpen && (
-        <Card className="border-2 border-rose-100 shadow-xl animate-in fade-in slide-in-from-top-4">
-          <CardHeader className="bg-rose-50/50 py-3 border-b flex flex-row items-center justify-between">
-            <CardTitle className="text-xs font-black uppercase text-rose-700 tracking-widest flex items-center gap-2">
-              <Truck className="h-4 w-4" /> {isEditing ? 'Koreksi Data Layanan' : 'Input Layanan Baru'}
+      {/* FORM EDIT SECTION (Tetap muncul saat Edit diklik) */}
+      {isFormOpen && isEditing && (
+        <Card className="border-none shadow-lg animate-in fade-in zoom-in-95 duration-200 bg-white rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Edit3 className="h-4 w-4 text-indigo-500" /> Koreksi Data Transaksi
             </CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)}><X className="h-4 w-4"/></Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full h-8 w-8"><X className="h-4 w-4"/></Button>
           </CardHeader>
           <CardContent className="pt-6">
-            <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase text-slate-400">SK Pasien (Dimensi)</Label>
-                <Input required type="number" placeholder="Contoh: 1" value={formData.sk_pasien} onChange={(e) => setFormData({...formData, sk_pasien: e.target.value})} />
+            <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-600 uppercase">SK Pasien</Label>
+                <Input required type="number" value={formData.sk_pasien} onChange={(e) => setFormData({...formData, sk_pasien: e.target.value})} />
               </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase text-slate-400">Tujuan (SK Lokasi)</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-600 uppercase">SK Lokasi</Label>
                 <Input required type="number" value={formData.sk_lokasi} onChange={(e) => setFormData({...formData, sk_lokasi: e.target.value})} />
               </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase text-slate-400">Armada</Label>
-                <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-bold" value={formData.armada} onChange={(e) => setFormData({...formData, armada: e.target.value})}>
-                  <option value="Ambulan_1__KB_1234_XX_">Ambulan 1</option>
-                  <option value="Ambulan_2__KB_5678_YY_">Ambulan 2</option>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-600 uppercase">Armada</Label>
+                <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium" value={formData.armada} onChange={(e) => setFormData({...formData, armada: e.target.value})}>
+                  <option value="Ambulan_1__KB_1234_XX_">Unit 1 (KB 1234 XX)</option>
+                  <option value="Ambulan_2__KB_5678_YY_">Unit 2 (KB 5678 YY)</option>
                 </select>
               </div>
-              <div className="md:col-span-3 flex justify-end gap-2 border-t pt-4">
-                <Button type="submit" className="bg-slate-900 font-black uppercase text-[10px] px-8">
-                  <Save className="mr-2 h-4 w-4" /> {isEditing ? 'Update Warehouse' : 'Simpan Transaksi'}
+              <div className="md:col-span-3 flex justify-end">
+                <Button type="submit" disabled={loading} className="bg-slate-900 text-white px-8 font-bold uppercase text-[10px]">
+                  {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Save className="mr-2 h-4 w-4" />} Update Record
                 </Button>
               </div>
             </form>
@@ -189,90 +204,107 @@ export default function MonitoringAmbulanPage() {
         </Card>
       )}
 
-      {/* FILTER SECTION */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="md:col-span-3 border-2 shadow-sm">
-           <div className="relative p-2 flex items-center">
-              <Search className="absolute left-4 h-4 w-4 text-slate-400" />
-              <Input placeholder="Cari pasien atau ID..." className="pl-10 border-none shadow-none font-bold" value={search} onChange={(e) => setSearch(e.target.value)} />
-           </div>
-        </Card>
-        <Card className="border-2 shadow-sm flex items-center px-4 bg-white">
-          <Filter className="h-4 w-4 text-slate-400 mr-3" />
-          <select className="w-full bg-transparent text-sm font-black text-slate-600 outline-none" value={filterKategori} onChange={(e) => setFilterKategori(e.target.value)}>
-            <option value="Semua">Semua Layanan</option>
-            <option value="Antar_Pasien">Antar Pasien</option>
-            <option value="Jemput_Pasien">Jemput Pasien</option>
-            <option value="Layanan_Jenazah">Layanan Jenazah</option>
-          </select>
-        </Card>
-      </div>
-
-      {/* TABLE SECTION */}
-      <Card className="border-none shadow-xl overflow-hidden bg-white">
+      <Card className="border-none shadow-sm overflow-hidden bg-white rounded-xl">
+        <div className="p-4 border-b bg-slate-50/50 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <input 
+              placeholder="Cari nama pasien atau ID Transaksi..." 
+              className="pl-10 w-full h-10 bg-white border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none transition-all" 
+              value={search} 
+              onChange={(e) => {setSearch(e.target.value); setCurrentPage(1);}} 
+            />
+          </div>
+          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-md px-3 h-10 shadow-sm">
+            <Filter className="h-4 w-4 text-slate-400" />
+            <select className="text-xs bg-transparent outline-none min-w-[150px] font-bold uppercase text-slate-600" value={filterKategori} onChange={(e) => {setFilterKategori(e.target.value); setCurrentPage(1);}}>
+              <option value="Semua">Semua Kategori</option>
+              <option value="Antar_Pasien">Antar Pasien</option>
+              <option value="Jemput_Pasien">Jemput Pasien</option>
+              <option value="Layanan_Jenazah">Layanan Jenazah</option>
+            </select>
+          </div>
+        </div>
+        
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-900">
-              <TableRow className="hover:bg-slate-900">
-                <TableHead className="text-white font-black text-[10px] uppercase">Layanan</TableHead>
-                <TableHead className="text-white font-black text-[10px] uppercase">Pasien</TableHead>
-                <TableHead className="text-white font-black text-[10px] uppercase">Armada & Tujuan</TableHead>
-                <TableHead className="text-white font-black text-[10px] uppercase text-right pr-6">Aksi</TableHead>
+            <TableHeader className="bg-slate-50 border-b">
+              <TableRow>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4">Layanan & ID</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Identitas Pasien</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Unit & Lokasi</TableHead>
+                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-6">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-20 font-bold text-slate-400">MENYIAPKAN DATA...</TableCell></TableRow>
-              ) : filteredData.map((item) => (
-                <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-rose-50/30 group">
-                  <TableCell>
-                    <Badge variant="outline" className="font-black text-[9px] uppercase border-rose-200 text-rose-600 bg-rose-50 mb-1">
-                      {item.kategori_layanan?.replace(/_/g, ' ')}
-                    </Badge>
-                    <p className="font-mono text-[10px] font-bold text-slate-400">{item.id_transaksi}</p>
-                  </TableCell>
-                  <TableCell>
-                    <p className="font-black text-slate-800 uppercase text-sm leading-none">{item.dim_pasien_ambulan?.nama_pasien || 'UMUM'}</p>
-                    <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{item.dim_pasien_ambulan?.status_ekonomi || '-'}</p>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-black text-slate-600 uppercase flex items-center gap-1">
-                        <Truck className="h-3 w-3"/> {item.armada?.split('(')[0]}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
-                        <MapPin className="h-3 w-3 text-rose-500"/> {item.dim_lokasi?.kabupaten_kota || 'Pontianak'}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right pr-4">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(item)}>
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl border-2">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="font-black uppercase tracking-tighter">Hapus Log Transaksi?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-xs font-medium">Tindakan ini akan menghapus permanen catatan layanan <strong>{item.id_transaksi}</strong> dari tabel fakta warehouse.</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600 font-bold uppercase text-[10px]">Hapus Permanen</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {loading && data.length === 0 ? (
+                <TableRow><TableCell colSpan={4} className="text-center py-16 text-slate-400 font-medium animate-pulse uppercase text-xs tracking-widest">Sinkronisasi Data...</TableCell></TableRow>
+              ) : currentItems.length > 0 ? (
+                currentItems.map((item) => (
+                  <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0 group">
+                    <TableCell>
+                      <Badge variant="secondary" className="mb-1 font-bold text-[9px] bg-rose-50 text-rose-700 hover:bg-rose-50 border-none px-2 py-0.5 rounded-none uppercase">
+                        {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
+                      </Badge>
+                      <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter uppercase">{item.id_transaksi}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-bold text-sm text-slate-900 uppercase group-hover:text-rose-600 transition-colors">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{item.dim_pasien_ambulan?.status_ekonomi || 'Non-Subsidi'}</p>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center text-[11px] text-slate-700 font-semibold gap-1.5 uppercase">
+                           <Truck size={13} className="text-slate-400"/> {item.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Standar'}
+                        </div>
+                        <div className="flex items-center text-[10px] text-slate-400 font-bold gap-1.5 uppercase">
+                           <MapPin size={12} className="text-rose-400"/> {item.dim_lokasi?.kabupaten_kota || 'PONTIANAK'}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-4">
+                      <div className="flex justify-end gap-1 items-center">
+                        <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
+                        </Link>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16} /></Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-xl border-2">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="font-black uppercase text-lg flex items-center gap-2">
+                                <AlertCircle className="text-rose-600" /> Hapus Record?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-slate-500 text-sm font-medium leading-relaxed">
+                                Data ID <strong>{item.id_transaksi}</strong> akan dihapus permanen dari tabel fakta layanan warehouse.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-lg font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white font-bold uppercase text-[10px]">Ya, Hapus</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 font-medium italic uppercase text-xs">Belum ada data fakta ditemukan.</TableCell></TableRow>
+              )}
             </TableBody>
           </Table>
+
+          {/* PAGINATION */}
+          <div className="p-4 border-t flex items-center justify-between bg-slate-50/30">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Halaman {currentPage} dari {totalPages || 1}</span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200 shadow-sm rounded-lg" onClick={() => setCurrentPage(p => Math.max(p-1, 1))} disabled={currentPage === 1}><ChevronLeft size={16}/></Button>
+              <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200 shadow-sm rounded-lg" onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}><ChevronRight size={16}/></Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

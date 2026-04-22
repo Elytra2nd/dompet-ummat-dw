@@ -8,6 +8,7 @@ export const db = mariadb.createPool({
   port: Number(process.env.DB_PORT) || 4000,
   ssl: {
     rejectUnauthorized: true,
+    // TiDB Cloud uses ISRG Root X1 CA, which is trusted by Node.js built-in store
   },
   connectionLimit: 10,
   acquireTimeout: 30000,

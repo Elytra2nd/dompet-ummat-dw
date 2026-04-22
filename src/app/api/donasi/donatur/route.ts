@@ -21,7 +21,7 @@ export async function GET(req: Request) {
           ],
         }),
       },
-      take: 100, // Menambah jumlah fetch untuk data warehouse
+      // take: 100, // BARIS INI DIHAPUS agar mengambil semua data
       orderBy: { nama_lengkap: 'asc' },
     })
 
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     })
 
     const lastIdNumber = lastRecord?.id_donatur 
-      ? parseInt(lastRecord.id_donatur.split('.').pop() || '0') // Menyesuaikan format DU-xxxx.xxx
+      ? parseInt(lastRecord.id_donatur.split('.').pop() || '0')
       : 0
 
     const year = new Date().getFullYear().toString().substring(2);
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   }
 }
 
-// --- UPDATE (PUT) - Implementasi SCD Type 2 Teroptimasi ---
+// --- UPDATE (PUT) - Implementasi SCD Type 2 ---
 export async function PUT(req: Request) {
   try {
     const body = await req.json()
@@ -79,7 +79,6 @@ export async function PUT(req: Request) {
     if (!sk_donatur) return NextResponse.json({ error: "SK diperlukan untuk update histori" }, { status: 400 })
 
     const transaction = await prisma.$transaction(async (tx) => {
-      // 1. Validasi keberadaan record lama
       const oldRecord = await tx.dim_donatur.findUnique({
         where: { sk_donatur: Number(sk_donatur) }
       })
@@ -89,8 +88,6 @@ export async function PUT(req: Request) {
       const now = new Date()
       const nextSecond = new Date(now.getTime() + 1000)
 
-      // 2. BUAT RECORD BARU DULU (Versioning)
-      // Menggunakan Business Key yang sama (id_donatur) tapi SK baru otomatis
       const newVersion = await tx.dim_donatur.create({
         data: {
           id_donatur: oldRecord.id_donatur,
@@ -105,7 +102,6 @@ export async function PUT(req: Request) {
         }
       })
 
-      // 3. MATIKAN RECORD LAMA (Expiring)
       await tx.dim_donatur.update({
         where: { sk_donatur: Number(sk_donatur) },
         data: {
@@ -116,7 +112,7 @@ export async function PUT(req: Request) {
 
       return newVersion
     }, {
-      timeout: 15000 // Memberikan waktu ekstra untuk TiDB Cloud
+      timeout: 15000 
     })
 
     return NextResponse.json({ success: true, data: transaction })

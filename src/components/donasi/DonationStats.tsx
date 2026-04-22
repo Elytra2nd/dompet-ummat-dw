@@ -288,8 +288,8 @@ export default function DonationStats({
 
               <div
                 className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${isPositive
-                  ? 'bg-emerald-500/20 text-emerald-300'
-                  : 'bg-rose-500/20 text-rose-300'
+                    ? 'bg-emerald-500/20 text-emerald-300'
+                    : 'bg-rose-500/20 text-rose-300'
                   }`}
               >
                 {isPositive ? (
@@ -685,7 +685,8 @@ export default function DonationStats({
                       border: 'none',
                       boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                     }}
-                    formatter={(value) => [formatRupiah(Number(value)), 'Total Donasi']} />
+                    formatter={(value: any) => [formatRupiah(Number(value)), 'Total Donasi']}
+                  />
 
                   <Area
                     type="monotone"
