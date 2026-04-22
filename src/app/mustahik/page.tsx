@@ -31,7 +31,6 @@ import {
   Search,
   Loader2,
   MapPin,
-  Heart,
   ArrowLeft,
   X,
   Edit3,
@@ -40,8 +39,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  ShieldCheck,
-  ClipboardList
+  ClipboardList,
+  Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -55,6 +54,8 @@ interface Mustahik {
   alamat: string
   kabupaten_kota: string
   skoring: number
+  latitude?: number
+  longitude?: number
 }
 
 export default function ManajemenMustahikPage() {
@@ -76,6 +77,8 @@ export default function ManajemenMustahikPage() {
     kabupaten_kota: '',
     kategori_pm: 'Asnaf_Miskin',
     skoring: 0,
+    latitude: 0,
+    longitude: 0,
   })
 
   const kategoriOptions = [
@@ -83,7 +86,7 @@ export default function ManajemenMustahikPage() {
     { label: 'Asnaf Fakir', value: 'Asnaf_Fakir' },
     { label: 'Asnaf Fisabilillah', value: 'Asnaf_Fisabilillah' },
     { label: 'Asnaf Mualaf', value: 'Asnaf_Mualaf' },
-    { label: 'Asnaf Gharimin', size: 'Asnaf_Gharimin' },
+    { label: 'Asnaf Gharimin', value: 'Asnaf_Gharimin' },
   ]
 
   useEffect(() => { fetchMustahik() }, [])
@@ -115,7 +118,7 @@ export default function ManajemenMustahikPage() {
       const result = await res.json()
 
       if (res.ok) {
-        toast.success(isEditing ? 'Data mustahik diperbarui (SCD Type 2 Record Created)' : 'Mustahik baru terdaftar')
+        toast.success(isEditing ? 'Data mustahik & koordinat diperbarui (SCD Type 2)' : 'Mustahik baru terdaftar')
         resetForm()
         await fetchMustahik()
         setCurrentPage(1)
@@ -148,6 +151,8 @@ export default function ManajemenMustahikPage() {
       kabupaten_kota: m.kabupaten_kota || '',
       kategori_pm: m.kategori_pm || 'Asnaf_Miskin',
       skoring: m.skoring || 0,
+      latitude: m.latitude || 0,
+      longitude: m.longitude || 0,
     })
     setIsEditing(true)
     setIsAdding(true)
@@ -157,10 +162,13 @@ export default function ManajemenMustahikPage() {
   const resetForm = () => {
     setIsAdding(false)
     setIsEditing(false)
-    setFormData({ sk_mustahik: 0, nama: '', nik: '', alamat: '', kabupaten_kota: '', kategori_pm: 'Asnaf_Miskin', skoring: 0 })
+    setFormData({ 
+      sk_mustahik: 0, nama: '', nik: '', alamat: '', 
+      kabupaten_kota: '', kategori_pm: 'Asnaf_Miskin', 
+      skoring: 0, latitude: 0, longitude: 0 
+    })
   }
 
-  // --- LOGIKA FILTERING ---
   const filteredMustahik = mustahik.filter((m) => {
     const nama = (m.nama || '').toLowerCase()
     const id = (m.id_mustahik || '').toLowerCase()
@@ -176,7 +184,6 @@ export default function ManajemenMustahikPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
-      {/* HEADER SECTION */}
       <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
@@ -196,13 +203,12 @@ export default function ManajemenMustahikPage() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
-        {/* FORM INPUT SECTION */}
         {isAdding && (
           <Card className="animate-in fade-in slide-in-from-top-4 border-2 border-emerald-100 shadow-xl overflow-hidden bg-white rounded-none">
             <CardHeader className="bg-emerald-50/50 py-4 border-b">
               <CardTitle className="flex items-center justify-between text-sm font-black text-emerald-700 uppercase tracking-widest">
                 <span className="flex items-center gap-2">
-                  <ClipboardList className="h-4 w-4" /> {isEditing ? 'Update Dimensi Mustahik' : 'Registrasi Mustahik Baru'}
+                  <ClipboardList className="h-4 w-4" /> {isEditing ? 'Update Dimensi & Spasial' : 'Registrasi Mustahik Baru'}
                 </span>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400" onClick={resetForm}><X className="h-4 w-4" /></Button>
               </CardTitle>
@@ -241,9 +247,38 @@ export default function ManajemenMustahikPage() {
                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Alamat Lengkap</Label>
                   <Input value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} />
                 </div>
+
+                {/* --- INPUT DATA SPASIAL --- */}
+                <div className="md:col-span-2 space-y-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-lg">
+                   <Label className="text-[10px] font-black uppercase text-rose-500 tracking-wider flex items-center gap-1">
+                    <Globe className="h-3 w-3" /> Latitude (Koordinat Y)
+                  </Label>
+                  <Input 
+                    type="number" 
+                    step="any"
+                    placeholder="Contoh: -0.0263"
+                    className="font-mono text-xs"
+                    value={formData.latitude} 
+                    onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value)})} 
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-lg">
+                   <Label className="text-[10px] font-black uppercase text-rose-500 tracking-wider flex items-center gap-1">
+                    <Globe className="h-3 w-3" /> Longitude (Koordinat X)
+                  </Label>
+                  <Input 
+                    type="number" 
+                    step="any"
+                    placeholder="Contoh: 109.3425"
+                    className="font-mono text-xs"
+                    value={formData.longitude} 
+                    onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value)})} 
+                  />
+                </div>
+
                 <div className="md:col-span-4 flex justify-end">
                   <Button type="submit" disabled={loading} className="w-full md:w-auto px-12 bg-emerald-600 font-black uppercase tracking-tighter hover:bg-emerald-700 shadow-lg">
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Sync Version (SCD)' : 'Push to Warehouse')}
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Sync Version (SCD + Spasial)' : 'Push to Warehouse')}
                   </Button>
                 </div>
               </form>
@@ -251,7 +286,6 @@ export default function ManajemenMustahikPage() {
           </Card>
         )}
 
-        {/* TABLE SECTION */}
         <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-none">
           <CardHeader className="border-b py-4 bg-slate-50/50">
             <div className="relative max-w-sm">
@@ -272,7 +306,7 @@ export default function ManajemenMustahikPage() {
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
                   <TableHead className="font-black text-[10px] uppercase text-slate-500">ID & Kategori</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500">Profil Mustahik</TableHead>
+                  <TableHead className="font-black text-[10px] uppercase text-slate-500">Profil & Lokasi</TableHead>
                   <TableHead className="font-black text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -289,55 +323,43 @@ export default function ManajemenMustahikPage() {
                     </TableCell>
                     <TableCell>
                       <p className="font-black text-slate-900 uppercase leading-none mb-1 tracking-tight">{m.nama}</p>
-                      <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
+                      <div className="text-[10px] font-bold text-slate-400 flex flex-wrap items-center gap-2">
                         <Badge variant="outline" className="text-[8px] h-4 font-black bg-blue-50 text-blue-600 border-blue-200 uppercase">Score: {m.skoring}</Badge>
-                        <MapPin className="h-3 w-3 text-rose-500"/> {m.kabupaten_kota}
+                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-rose-500"/> {m.kabupaten_kota}</span>
+                        {m.latitude && m.longitude && (
+                          <Badge variant="secondary" className="text-[7px] h-3 bg-emerald-50 text-emerald-600 border-none px-1">SPATIAL READY</Badge>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right pr-4">
                       <div className="flex items-center justify-end gap-1">
-                        {/* DETAIL */}
                         <Link href={`/mustahik/${m.id_mustahik}`}>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-slate-400 hover:text-emerald-600"
-                            title="Rekam Jejak SCD"
-                          >
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Detail & Histori">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-
-                        {/* EDIT */}
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(m)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(m)} title="Edit Data & Spasial">
                           <Edit3 className="h-4 w-4" />
                         </Button>
-
-                        {/* HAPUS */}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-none border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(225,29,72,1)]">
+                          <AlertDialogContent className="rounded-none border-4 border-slate-900">
                             <AlertDialogHeader>
                               <div className="flex items-center gap-3 text-rose-600 mb-2">
-                                <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
-                                <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Nonaktifkan Mustahik?</AlertDialogTitle>
+                                <AlertTriangle className="h-6 w-6" />
+                                <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Nonaktifkan?</AlertDialogTitle>
                               </div>
                               <AlertDialogDescription className="font-bold text-slate-600 text-sm">
-                                Anda akan menonaktifkan record <strong>{m.nama}</strong>. Data histori tetap tersimpan di warehouse (SCD Type 2) namun tidak muncul di daftar aktif.
+                                Record <strong>{m.nama}</strong> akan dinonaktifkan. Histori (SCD Type 2) tetap aman di warehouse.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">
-                              <AlertDialogCancel className="rounded-none border-2 border-slate-900 font-black uppercase text-xs">Batal</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={() => handleDelete(m.sk_mustahik, m.nama)}
-                                className="bg-rose-600 hover:bg-rose-700 rounded-none font-black uppercase text-xs px-6"
-                              >
-                                Konfirmasi Hapus
-                              </AlertDialogAction>
+                              <AlertDialogCancel className="rounded-none border-2 border-slate-900">Batal</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(m.sk_mustahik, m.nama)} className="bg-rose-600 hover:bg-rose-700 rounded-none font-black">Hapus</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -348,31 +370,18 @@ export default function ManajemenMustahikPage() {
               </TableBody>
             </Table>
 
-            {/* --- PAGINASI --- */}
             <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
                 Records {Math.min((currentPage - 1) * itemsPerPage + 1, filteredMustahik.length)} - {Math.min(currentPage * itemsPerPage, filteredMustahik.length)} of {filteredMustahik.length}
               </p>
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="h-8 w-8 p-0 rounded-none border-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-none border-2">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-xs font-black text-slate-900 mx-2 uppercase tracking-tighter">
+                <span className="text-xs font-black text-slate-900 mx-2 tracking-tighter">
                   {currentPage} / {totalPages || 1}
                 </span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="h-8 w-8 p-0 rounded-none border-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="h-8 w-8 p-0 rounded-none border-2">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
