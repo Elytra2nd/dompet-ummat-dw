@@ -1,7 +1,14 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, MapPinned } from 'lucide-react'
-import SpatialMustahikMap from '@/components/mustahik/SpatialMustahikMap'
+import dynamic from 'next/dynamic'
+
+const SpatialMustahikMap = dynamic(
+  () => import('@/components/mustahik/SpatialMustahikMap'),
+  { ssr: false, loading: () => <div className="flex items-center justify-center py-20 text-slate-400">Memuat peta...</div> }
+)
 
 export default function MustahikSpasialPage() {
   return (

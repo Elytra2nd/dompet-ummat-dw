@@ -19,7 +19,7 @@ export async function GET() {
       ORDER BY totalDonasi DESC
     `)
 
-    const data = (programRows || []).map((row) => ({
+    const data = (programRows || []).map((row: any) => ({
       program: row.program,
       jumlahTransaksi: Number(row.jumlahTransaksi) || 0,
       totalDonasi: Number(row.totalDonasi) || 0,
@@ -32,7 +32,7 @@ export async function GET() {
     return NextResponse.json(
       {
         error: 'Gagal mengambil distribusi program donasi',
-        detail: error.message,
+        detail: (error as any).message,
       },
       { status: 500 }
     )
