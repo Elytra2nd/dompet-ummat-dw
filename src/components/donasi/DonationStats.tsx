@@ -1,65 +1,137 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Area,
   AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts'
 import {
-  Users,
-  ArrowUpRight,
   ArrowDownRight,
-  HeartHandshake,
-  Zap,
-  UserCheck,
-  HandCoins,
-  PieChart,
+  ArrowUpRight,
   Calendar,
-  Loader2,
+  Filter,
+  HandCoins,
+  HeartHandshake,
+  PieChart,
+  UserCheck,
+  Users,
+  X,
+  Zap,
 } from 'lucide-react'
 import { formatRupiah } from '@/lib/utils-ambulan'
+
+type FilterType = 'none' | 'year' | 'month' | 'day'
+type Grain = 'year' | 'month' | 'day'
 
 interface DonationStatsProps {
   totalDonasi: number
   jumlahDonatur: number
   jumlahMustahik: number
-  dana_tersalur: number
+  danaTersalur: number
   pertumbuhan: number
-  targetBulanan?: number
-  sebaranWilayah?: number
 }
 
 interface TrendItem {
-  month: string
+  label: string
   year: string
+  month: string | null
+  monthValue: string | null
+  day: string | null
+  date: string | null
   total: number
 }
 
-export default function DonationDashboard({
+interface YearResponse {
+  years: string[]
+  minYear: string | null
+  maxYear: string | null
+}
+
+interface FilterState {
+  filterType: FilterType
+  grain: Grain
+  startYear: string
+  endYear: string
+  startMonth: string
+  endMonth: string
+  startDate: string
+  endDate: string
+}
+
+function buildDefaultFilter(minYear?: string | null, maxYear?: string | null): FilterState {
+  return {
+    filterType: 'none',
+    grain: 'year',
+    startYear: minYear ?? '',
+    endYear: maxYear ?? '',
+    startMonth: '',
+    endMonth: '',
+    startDate: '',
+    endDate: '',
+  }
+}
+
+function normalizeFilter(filter: FilterState): FilterState {
+  if (filter.filterType === 'none') {
+    return {
+      ...filter,
+      grain: 'year',
+    }
+  }
+
+  if (filter.filterType === 'year') {
+    return {
+      ...filter,
+      grain: 'year',
+    }
+  }
+
+  if (filter.filterType === 'month') {
+    return {
+      ...filter,
+      grain: 'month',
+    }
+  }
+
+  return {
+    ...filter,
+    grain: 'day',
+  }
+}
+
+function getFilterLabel(filter: FilterState) {
+  if (filter.filterType === 'none') return 'Semua Tahun'
+  if (filter.filterType === 'year') return `${filter.startYear} - ${filter.endYear}`
+  if (filter.filterType === 'month') return `${filter.startMonth} s.d. ${filter.endMonth}`
+  return `${filter.startDate} s.d. ${filter.endDate}`
+}
+
+export default function DonationStats({
   totalDonasi = 0,
   jumlahDonatur = 0,
   jumlahMustahik = 0,
   pertumbuhan = 0,
-  dana_tersalur = 0,
+  danaTersalur = 0,
 }: DonationStatsProps) {
-  const [availableYears, setAvailableYears] = useState<string[]>([])
   const [isMounted, setIsMounted] = useState(false)
-  const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString())
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+
+  const [availableYears, setAvailableYears] = useState<string[]>([])
+  const [minYear, setMinYear] = useState<string | null>(null)
+  const [maxYear, setMaxYear] = useState<string | null>(null)
+
+  const [draftFilter, setDraftFilter] = useState<FilterState>(buildDefaultFilter())
+  const [appliedFilter, setAppliedFilter] = useState<FilterState>(buildDefaultFilter())
+
   const [chartData, setChartData] = useState<TrendItem[]>([])
   const [loadingChart, setLoadingChart] = useState(false)
+  const [chartError, setChartError] = useState<string | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -68,54 +140,134 @@ export default function DonationDashboard({
   useEffect(() => {
     const fetchYears = async () => {
       try {
-        const res = await fetch('/api/donasi/tahun', { cache: 'no-store' })
-        if (!res.ok) throw new Error('Gagal mengambil daftar tahun')
-        const years = await res.json()
+        const res = await fetch('/api/donasi/tahun')
+        if (!res.ok) throw new Error('Gagal memuat daftar tahun')
+
+        const data = await res.json()
+
+        const years = Array.isArray(data) ? data : data.years ?? []
+        const min = Array.isArray(data) ? data[0] ?? null : data.minYear ?? null
+        const max = Array.isArray(data) ? data[data.length - 1] ?? null : data.maxYear ?? null
+
         setAvailableYears(years)
-        if (years.length > 0 && !years.includes(filterYear)) {
-          setFilterYear(years[years.length - 1])
-        }
+        setMinYear(min)
+        setMaxYear(max)
+
+        const initialFilter = buildDefaultFilter(min, max)
+        setDraftFilter(initialFilter)
+        setAppliedFilter(initialFilter)
       } catch (error) {
-        console.error(error)
+        console.error('Gagal memuat tahun:', error)
       }
     }
+
     fetchYears()
   }, [])
 
   useEffect(() => {
+    if (!appliedFilter.filterType) return
+
     const fetchTrend = async () => {
-      if (!isMounted) return
+      setLoadingChart(true)
+      setChartError(null)
+
       try {
-        setLoadingChart(true)
-        const res = await fetch(`/api/donasi/tren?year=${filterYear}`, {
-          cache: 'no-store',
-        })
-        if (!res.ok) throw new Error('Gagal mengambil data tren')
-        const data = await res.json()
+        const params = new URLSearchParams()
+        params.set('filterType', appliedFilter.filterType)
+        params.set('grain', appliedFilter.grain)
+
+        if (appliedFilter.filterType === 'year') {
+          params.set('startYear', appliedFilter.startYear)
+          params.set('endYear', appliedFilter.endYear)
+        }
+
+        if (appliedFilter.filterType === 'month') {
+          params.set('startMonth', appliedFilter.startMonth)
+          params.set('endMonth', appliedFilter.endMonth)
+        }
+
+        if (appliedFilter.filterType === 'day') {
+          params.set('startDate', appliedFilter.startDate)
+          params.set('endDate', appliedFilter.endDate)
+        }
+
+        const res = await fetch(`/api/donasi/tren?${params.toString()}`)
+        if (!res.ok) throw new Error('Gagal memuat data tren')
+
+        const data: TrendItem[] = await res.json()
         setChartData(data)
-      } catch (error) {
+      } catch (error: any) {
         console.error(error)
+        setChartError(error?.message ?? 'Terjadi kesalahan saat memuat grafik')
         setChartData([])
       } finally {
         setLoadingChart(false)
       }
     }
+
     fetchTrend()
-  }, [filterYear, isMounted])
+  }, [appliedFilter])
 
   const isPositive = pertumbuhan >= 0
-  const persentasePenyaluran = totalDonasi > 0 ? (dana_tersalur / totalDonasi) * 100 : 0
 
-  const validYears = availableYears.filter((year) => {
-    const y = Number(year)
-    const currentYear = new Date().getFullYear()
-    return Number.isInteger(y) && y >= 2011 && y <= currentYear
-  })
+  const persentasePenyaluran =
+    totalDonasi > 0 ? (danaTersalur / totalDonasi) * 100 : 0
+
+  const activeFilterLabel = useMemo(() => {
+    return getFilterLabel(appliedFilter)
+  }, [appliedFilter])
+
+  const handleFilterTypeChange = (value: FilterType) => {
+    setDraftFilter((prev) =>
+      normalizeFilter({
+        ...prev,
+        filterType: value,
+      })
+    )
+  }
+
+  const handleApplyFilter = () => {
+    const normalized = normalizeFilter(draftFilter)
+
+    if (normalized.filterType === 'year') {
+      if (!normalized.startYear || !normalized.endYear) {
+        alert('Pilih tahun awal dan tahun akhir terlebih dahulu')
+        return
+      }
+    }
+
+    if (normalized.filterType === 'month') {
+      if (!normalized.startMonth || !normalized.endMonth) {
+        alert('Pilih bulan awal dan bulan akhir terlebih dahulu')
+        return
+      }
+    }
+
+    if (normalized.filterType === 'day') {
+      if (!normalized.startDate || !normalized.endDate) {
+        alert('Pilih tanggal awal dan tanggal akhir terlebih dahulu')
+        return
+      }
+    }
+
+    setAppliedFilter(normalized)
+    setIsFilterOpen(false)
+  }
+
+  const handleResetFilter = () => {
+    const resetFilter = buildDefaultFilter(minYear, maxYear)
+    setDraftFilter(resetFilter)
+    setAppliedFilter(resetFilter)
+    setIsFilterOpen(false)
+  }
+
+  if (!isMounted) {
+    return <div className="p-10 text-center font-sans">Memuat Dashboard...</div>
+  }
 
   return (
     <div className="space-y-6 font-sans">
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        {/* CARD 1: TOTAL DONASI */}
         <Card className="col-span-2 lg:col-span-1 relative overflow-hidden border-none bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <HeartHandshake size={100} />
@@ -134,21 +286,23 @@ export default function DonationDashboard({
                 {formatRupiah(totalDonasi)}
               </h3>
 
-              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${isPositive
-                ? 'bg-emerald-500/20 text-emerald-300'
-                : 'bg-rose-500/20 text-rose-300'
-                }`}>
-                {isPositive
-                  ? <ArrowUpRight className="h-3 w-3" />
-                  : <ArrowDownRight className="h-3 w-3" />
-                }
+              <div
+                className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${isPositive
+                    ? 'bg-emerald-500/20 text-emerald-300'
+                    : 'bg-rose-500/20 text-rose-300'
+                  }`}
+              >
+                {isPositive ? (
+                  <ArrowUpRight className="h-3 w-3" />
+                ) : (
+                  <ArrowDownRight className="h-3 w-3" />
+                )}
                 {Math.abs(pertumbuhan)}%
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* CARD 2: DANA TERSALUR */}
         <Card className="relative overflow-hidden border-none bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <HandCoins size={100} />
@@ -166,7 +320,7 @@ export default function DonationDashboard({
 
             <div className="mt-3 overflow-hidden">
               <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
-                {formatRupiah(dana_tersalur)}
+                {formatRupiah(danaTersalur)}
               </h3>
 
               <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
@@ -176,7 +330,6 @@ export default function DonationDashboard({
           </CardContent>
         </Card>
 
-        {/* CARD 3: RASIO */}
         <Card className="relative overflow-hidden border-none bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <PieChart size={100} />
@@ -213,7 +366,6 @@ export default function DonationDashboard({
           </CardContent>
         </Card>
 
-        {/* CARD 4: MUZAKKI */}
         <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <Users size={100} />
@@ -243,7 +395,6 @@ export default function DonationDashboard({
           </CardContent>
         </Card>
 
-        {/* CARD 5: MUSTAHIK */}
         <Card className="relative overflow-hidden border-none bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
             <UserCheck size={100} />
@@ -272,107 +423,279 @@ export default function DonationDashboard({
           </CardContent>
         </Card>
       </div>
-      <Card className="border-none shadow-xl bg-white overflow-hidden">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 pb-2">
+
+
+      <Card className="border-none shadow-md">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-7">
           <div>
-            <CardTitle className="text-xl font-black text-slate-900">
-              Tren Penghimpunan
+            <CardTitle className="text-xl font-black text-slate-800">
+              Grafik Penghimpunan Dana
             </CardTitle>
-            <CardDescription className="text-xs font-medium">
-              Visualisasi perolehan donasi bulanan di Kalimantan Barat
+            <CardDescription>
+              Visualisasi pertumbuhan donasi Ziswaf dari waktu ke waktu
             </CardDescription>
+            <div className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+              {activeFilterLabel}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
-            <Calendar className="ml-2 h-4 w-4 text-slate-500" />
-            <Select value={filterYear} onValueChange={setFilterYear}>
-              <SelectTrigger className="border-none bg-transparent shadow-none font-bold text-slate-700 focus:ring-0">
-                <SelectValue placeholder="Tahun" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-none shadow-2xl">
-                {validYears.map((year) => (
-                  <SelectItem key={year} value={year} className="font-bold">
-                    Tahun {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="relative flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              <Filter className="h-4 w-4" />
+              Filter
+            </button>
+
+            {appliedFilter.filterType !== 'none' && (
+              <button
+                type="button"
+                onClick={handleResetFilter}
+                className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700 transition hover:bg-rose-100"
+              >
+                <X className="h-4 w-4" />
+                Reset
+              </button>
+            )}
+
+            {isFilterOpen && (
+              <div className="absolute right-0 top-12 z-20 w-[320px] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
+                <div className="mb-4 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-slate-500" />
+                  <p className="text-sm font-black text-slate-800">Filter Waktu</p>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="filterType"
+                      checked={draftFilter.filterType === 'none'}
+                      onChange={() => handleFilterTypeChange('none')}
+                    />
+                    Tanpa Range
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="filterType"
+                      checked={draftFilter.filterType === 'year'}
+                      onChange={() => handleFilterTypeChange('year')}
+                    />
+                    Range Tahun
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="filterType"
+                      checked={draftFilter.filterType === 'month'}
+                      onChange={() => handleFilterTypeChange('month')}
+                    />
+                    Range Bulan
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="filterType"
+                      checked={draftFilter.filterType === 'day'}
+                      onChange={() => handleFilterTypeChange('day')}
+                    />
+                    Range Hari
+                  </label>
+                </div>
+
+                {draftFilter.filterType === 'year' && (
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
+                        Tahun Awal
+                      </label>
+                      <select
+                        value={draftFilter.startYear}
+                        onChange={(e) =>
+                          setDraftFilter((prev) => ({ ...prev, startYear: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      >
+                        <option value="">Pilih</option>
+                        {availableYears.map((year) => (
+                          <option key={`start-${year}`} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
+                        Tahun Akhir
+                      </label>
+                      <select
+                        value={draftFilter.endYear}
+                        onChange={(e) =>
+                          setDraftFilter((prev) => ({ ...prev, endYear: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      >
+                        <option value="">Pilih</option>
+                        {availableYears.map((year) => (
+                          <option key={`end-${year}`} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {draftFilter.filterType === 'month' && (
+                  <div className="mt-4 grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
+                        Bulan Awal
+                      </label>
+                      <input
+                        type="month"
+                        value={draftFilter.startMonth}
+                        onChange={(e) =>
+                          setDraftFilter((prev) => ({ ...prev, startMonth: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
+                        Bulan Akhir
+                      </label>
+                      <input
+                        type="month"
+                        value={draftFilter.endMonth}
+                        onChange={(e) =>
+                          setDraftFilter((prev) => ({ ...prev, endMonth: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {draftFilter.filterType === 'day' && (
+                  <div className="mt-4 grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
+                        Tanggal Awal
+                      </label>
+                      <input
+                        type="date"
+                        value={draftFilter.startDate}
+                        onChange={(e) =>
+                          setDraftFilter((prev) => ({ ...prev, startDate: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
+                        Tanggal Akhir
+                      </label>
+                      <input
+                        type="date"
+                        value={draftFilter.endDate}
+                        onChange={(e) =>
+                          setDraftFilter((prev) => ({ ...prev, endDate: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-5 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleResetFilter}
+                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApplyFilter}
+                    className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+                  >
+                    Terapkan
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="w-full h-64">
-            {!isMounted || loadingChart ? (
-              <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-400">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-                <p className="text-xs font-black uppercase tracking-widest">
-                  Sinkronisasi Data...
-                </p>
+
+        <CardContent>
+          <div className="h-[350px] w-full">
+            {loadingChart ? (
+              <div className="flex h-full items-center justify-center text-sm font-medium text-slate-500">
+                Memuat grafik...
+              </div>
+            ) : chartError ? (
+              <div className="flex h-full items-center justify-center text-sm font-medium text-rose-600">
+                {chartError}
               </div>
             ) : chartData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400 italic">
-                Data donasi {filterYear} belum tersedia
+              <div className="flex h-full items-center justify-center text-sm font-medium text-slate-500">
+                Tidak ada data untuk filter yang dipilih
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={chartData}
-                  margin={{ top: 10, right: 20, left: 10, bottom: 0 }}
-                >
+                <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#059669" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#059669" stopOpacity={0} />
                     </linearGradient>
                   </defs>
 
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#f1f5f9"
-                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
 
                   <XAxis
-                    dataKey="month"
+                    dataKey="label"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
-                    interval={0}
+                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                    dy={10}
                   />
 
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(value: number) =>
-                      value >= 1000000
-                        ? `${value / 1000000}jt`
-                        : value.toLocaleString()
-                    }
-                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                    tickFormatter={(value) => `${value / 1000000}jt`}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
                   />
 
                   <Tooltip
                     contentStyle={{
-                      borderRadius: "16px",
-                      border: "none",
-                      boxShadow:
-                        "0 20px 25px -5px rgba(0,0,0,0.1)",
-                      padding: "12px",
+                      borderRadius: '12px',
+                      border: 'none',
+                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                     }}
-                    itemStyle={{ fontWeight: "900", color: "#065f46" }}
-                    formatter={(value: any) => [
-                      formatRupiah(value),
-                      "Total Donasi",
-                    ]}
+                    formatter={(value: number) => [formatRupiah(value), 'Total Donasi']}
                   />
 
                   <Area
                     type="monotone"
                     dataKey="total"
-                    stroke="#10b981"
+                    stroke="#059669"
                     strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#colorTotal)"
-                    animationDuration={2000}
+                    animationDuration={1500}
                   />
                 </AreaChart>
               </ResponsiveContainer>

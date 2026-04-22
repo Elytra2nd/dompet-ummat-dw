@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import DonationStats from '@/components/donasi/DonationStats'
+import ProgramStats from '@/components/donasi/ProgramStats'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -22,7 +23,7 @@ export default function DashboardPage() {
     jumlahDonatur: 0,
     jumlahMustahik: 0,
     pertumbuhan: 0,
-    dana_tersalur: 0,
+    danaTersalur: 0,
     layananAmbulan: 0,
   })
   const [loading, setLoading] = useState(true)
@@ -40,7 +41,7 @@ export default function DashboardPage() {
             jumlahMustahik: data.jumlahMustahik || 0,
             pertumbuhan: data.pertumbuhan || 0,
             layananAmbulan: data.layananAmbulan || 0,
-            dana_tersalur: data.dana_tersalur || 0
+            danaTersalur: data.danaTersalur || 0
           })
         }
       } catch (error) {
@@ -113,10 +114,12 @@ export default function DashboardPage() {
               jumlahDonatur={stats.jumlahDonatur}
               jumlahMustahik={stats.jumlahMustahik}
               pertumbuhan={stats.pertumbuhan}
-              dana_tersalur={stats.dana_tersalur}
+              danaTersalur={stats.danaTersalur}
             />
           )}
         </section>
+
+        <ProgramStats />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           
@@ -144,7 +147,7 @@ export default function DashboardPage() {
                 </Card>
               </Link>
 
-              <Link href="/ambulan/layanan">
+              <Link href="/mustahik/spasial">
                 <Card className="hover:border-red-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
                     <div className="flex items-start justify-between">

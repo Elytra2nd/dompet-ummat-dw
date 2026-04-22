@@ -33,7 +33,7 @@ export async function GET() {
       totalDonasi: donasiRows[0].total || 0,
       jumlahDonatur: Number(donaturRows[0].total) || 0,
       jumlahMustahik: Number(mustahikRows[0].total) || 0,
-      dana_tersalur: penyaluranRows[0].total || 0,
+      danaTersalur: penyaluranRows[0].total || 0,
       layananAmbulan: ambulanRows[0].total || 0,
       pertumbuhan: 12.5,
     });

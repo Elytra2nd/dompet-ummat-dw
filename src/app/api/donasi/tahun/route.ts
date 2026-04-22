@@ -1,27 +1,35 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+interface RawYearRow {
+  tahun: string
+}
+
 export async function GET() {
   try {
-    const currentYear = new Date().getFullYear()
-
-    const rows = await prisma.$queryRaw<{ tahun: unknown }[]>`
-      SELECT DISTINCT SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) AS tahun
+    const rows = await prisma.$queryRawUnsafe<RawYearRow[]>(`
+      SELECT DISTINCT
+        SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) AS tahun
       FROM fact_donasi
       WHERE sk_tgl_bersih IS NOT NULL
-      HAVING CAST(tahun AS SIGNED) BETWEEN 2011 AND ${currentYear}
-      ORDER BY tahun DESC
-    `
+      ORDER BY tahun ASC
+    `)
 
-    const data = rows.map((row) => String(row.tahun))
+    const years = rows
+      .map((row) => String(row.tahun))
+      .filter((year) => /^\d{4}$/.test(year))
 
-    return NextResponse.json(data)
+    return NextResponse.json({
+      years,
+      minYear: years[0] ?? null,
+      maxYear: years[years.length - 1] ?? null,
+    })
   } catch (error: any) {
     console.error('TAHUN_DONASI_ERROR:', error)
 
     return NextResponse.json(
       {
-        error: 'Gagal memuat daftar tahun',
+        error: 'Gagal memuat daftar tahun donasi',
         details: error?.message ?? String(error),
       },
       { status: 500 }

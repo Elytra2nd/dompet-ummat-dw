@@ -13,7 +13,7 @@ export default function DonasiMasukPage() {
     totalDonasi: 0,
     jumlahDonatur: 0,
     jumlahMustahik: 0, // Tambahkan ini
-    dana_tersalur: 0,
+    danaTersalur: 0,
     targetBulanan: 100000000,
     pertumbuhan: 0,
   })
@@ -83,8 +83,7 @@ export default function DonasiMasukPage() {
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
           jumlahMustahik={stats.jumlahMustahik}
-          dana_tersalur={stats.dana_tersalur}
-          targetBulanan={stats.targetBulanan}
+          danaTersalur={stats.danaTersalur}
           pertumbuhan={stats.pertumbuhan}
         />
 
