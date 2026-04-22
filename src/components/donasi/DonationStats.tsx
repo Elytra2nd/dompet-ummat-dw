@@ -33,7 +33,7 @@ interface DonationStatsProps {
   totalDonasi: number
   jumlahDonatur: number
   jumlahMustahik: number
-  dana_tersalur: number
+  danaTersalur: number
   pertumbuhan: number
 }
 
@@ -117,7 +117,7 @@ export default function DonationStats({
   jumlahDonatur = 0,
   jumlahMustahik = 0,
   pertumbuhan = 0,
-  dana_tersalur = 0,
+  danaTersalur = 0,
 }: DonationStatsProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -211,7 +211,7 @@ export default function DonationStats({
   const isPositive = pertumbuhan >= 0
 
   const persentasePenyaluran =
-    totalDonasi > 0 ? (dana_tersalur / totalDonasi) * 100 : 0
+    totalDonasi > 0 ? (danaTersalur / totalDonasi) * 100 : 0
 
   const activeFilterLabel = useMemo(() => {
     return getFilterLabel(appliedFilter)
@@ -320,7 +320,7 @@ export default function DonationStats({
 
             <div className="mt-3 overflow-hidden">
               <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
-                {formatRupiah(dana_tersalur)}
+                {formatRupiah(danaTersalur)}
               </h3>
 
               <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
