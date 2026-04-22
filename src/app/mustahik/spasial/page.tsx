@@ -1,7 +1,23 @@
+'use client'
+
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, MapPinned } from 'lucide-react'
-import SpatialMustahikMap from '@/components/mustahik/SpatialMustahikMap'
+
+// 1. Definisikan komponen peta secara dinamis dengan ssr: false
+const SpatialMustahikMap = dynamic(
+  () => import('@/components/mustahik/SpatialMustahikMap'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-[600px] w-full rounded-xl border-2 border-dashed border-slate-200 bg-white flex flex-col items-center justify-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <p className="text-sm font-medium text-slate-500">Menyiapkan data peta...</p>
+      </div>
+    )
+  }
+)
 
 export default function MustahikSpasialPage() {
   return (
@@ -34,7 +50,10 @@ export default function MustahikSpasialPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-8">
-        <SpatialMustahikMap />
+        {/* 2. Gunakan komponen dinamis yang sudah didefinisikan di atas */}
+        <div className="overflow-hidden rounded-xl bg-white shadow-md border border-slate-200">
+           <SpatialMustahikMap />
+        </div>
       </div>
     </div>
   )
