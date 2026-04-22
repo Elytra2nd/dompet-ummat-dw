@@ -7,6 +7,9 @@ export async function GET() {
       where: {
         is_active: true,
         dim_lokasi: {
+          // Pastikan sk_lokasi bukan nilai default -1
+          sk_lokasi: { not: -1 },
+          // Pastikan latitude dan longitude tidak null
           latitude: { not: null },
           longitude: { not: null },
         },
@@ -16,25 +19,32 @@ export async function GET() {
       },
     });
 
-    // Fungsi Jittering untuk memberikan sedikit pergeseran acak
-    // Nilai 0.0001 - 0.0005 cukup untuk memisahkan marker tanpa mengubah lokasi secara signifikan
-    const applyJitter = () => (Math.random() - 0.5) * 0.0003;
+    // Fungsi Jittering (0.0005 sekitar 50 meter agar pergeseran terlihat jelas jika zoom dekat)
+    const applyJitter = () => (Math.random() - 0.5) * 0.0005;
 
-    const geoData = data.map((m) => {
-      const baseLat = Number(m.dim_lokasi?.latitude);
-      const baseLng = Number(m.dim_lokasi?.longitude);
+    const geoData = data
+      .map((m) => {
+        // Paksa konversi ke Number untuk menangani objek Decimal Prisma
+        const latRaw = m.dim_lokasi?.latitude ? Number(m.dim_lokasi.latitude) : null;
+        const lngRaw = m.dim_lokasi?.longitude ? Number(m.dim_lokasi.longitude) : null;
 
-      return {
-        id: m.sk_mustahik,
-        nama: m.nama,
-        // Tambahkan jitter agar marker yang koordinatnya sama persis bisa terlihat terpisah
-        lat: baseLat + applyJitter(),
-        lng: baseLng + applyJitter(),
-        kategori: m.kategori_pm,
-        wilayah: `${m.dim_lokasi?.kecamatan || ""}, ${m.dim_lokasi?.kabupaten_kota || ""}`,
-        alamat: m.alamat,
-      };
-    });
+        // Jika hasil konversi bukan angka valid atau 0 (Null Island), kita abaikan di tahap filter
+        if (latRaw === null || lngRaw === null || latRaw === 0 || lngRaw === 0) {
+          return null;
+        }
+
+        return {
+          id: m.sk_mustahik,
+          nama: m.nama,
+          lat: latRaw + applyJitter(),
+          lng: lngRaw + applyJitter(),
+          kategori: m.kategori_pm,
+          wilayah: `${m.dim_lokasi?.kecamatan || ""}, ${m.dim_lokasi?.kabupaten_kota || ""}`,
+          alamat: m.alamat,
+        };
+      })
+      // Filter untuk menghapus data null (koordinat tidak valid) agar tidak muncul di peta
+      .filter((item) => item !== null);
 
     return NextResponse.json(geoData);
   } catch (error) {
