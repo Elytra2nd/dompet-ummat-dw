@@ -104,9 +104,7 @@ export default function ProgramStats() {
                     border: 'none',
                     boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                   }}
-                  formatter={(value: number) => [formatRupiah(value), 'Total Donasi']}
-                />
-
+                    formatter={(value) => [formatRupiah(Number(value)), 'Total Donasi']} />
                 <Bar
                   dataKey="totalDonasi"
                   fill="#10b981"
