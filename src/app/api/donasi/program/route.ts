@@ -14,9 +14,9 @@ interface FormattedProgramData {
 }
 
 function normalizeRows(result: any): RawProgramRow[] {
-  if (Array.isArray(result?.[0])) return result[0] as RawProgramRow[]
-  if (Array.isArray(result)) return result as RawProgramRow[]
-  if (Array.isArray(result?.rows)) return result.rows as RawProgramRow[]
+  if (Array.isArray(result?.[0])) return result[0]
+  if (Array.isArray(result)) return result
+  if (Array.isArray(result?.rows)) return result.rows
   return []
 }
 
@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
 
     const filterType = searchParams.get('filterType') || 'none'
-    const grain = searchParams.get('grain') || 'year'
 
     const startYear = searchParams.get('startYear')
     const endYear = searchParams.get('endYear')
@@ -39,12 +38,13 @@ export async function GET(request: NextRequest) {
     const whereClauses: string[] = []
     const queryParams: any[] = []
 
+    // FILTER TAHUN
     if (filterType === 'year') {
       if (!startYear || !endYear) {
         return NextResponse.json(
           {
             error: 'Parameter tahun tidak lengkap',
-            detail: 'startYear dan endYear wajib diisi untuk filterType=year',
+            detail: 'startYear dan endYear wajib diisi',
           },
           { status: 400 }
         )
@@ -54,12 +54,13 @@ export async function GET(request: NextRequest) {
       queryParams.push(startYear, endYear)
     }
 
+    // FILTER BULAN
     if (filterType === 'month') {
       if (!startMonth || !endMonth) {
         return NextResponse.json(
           {
             error: 'Parameter bulan tidak lengkap',
-            detail: 'startMonth dan endMonth wajib diisi untuk filterType=month',
+            detail: 'startMonth dan endMonth wajib diisi',
           },
           { status: 400 }
         )
@@ -69,12 +70,13 @@ export async function GET(request: NextRequest) {
       queryParams.push(startMonth, endMonth)
     }
 
+    // FILTER HARI
     if (filterType === 'day') {
       if (!startDate || !endDate) {
         return NextResponse.json(
           {
             error: 'Parameter tanggal tidak lengkap',
-            detail: 'startDate dan endDate wajib diisi untuk filterType=day',
+            detail: 'startDate dan endDate wajib diisi',
           },
           { status: 400 }
         )
@@ -109,15 +111,13 @@ export async function GET(request: NextRequest) {
     }))
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('API /api/donasi/program error:', error)
-
-    const message = error instanceof Error ? error.message : 'Unknown error occurred'
 
     return NextResponse.json(
       {
         error: 'Gagal mengambil distribusi program donasi',
-        detail: message,
+        detail: error?.message || 'Unknown error',
       },
       { status: 500 }
     )
