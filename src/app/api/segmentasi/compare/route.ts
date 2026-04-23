@@ -176,10 +176,15 @@ export async function POST() {
     ]
 
     // Score: Silhouette tertinggi = terbaik, DBI terendah = terbaik, CHI tertinggi = terbaik
-    const ranked = algorithms.map(a => ({
-      ...a,
-      score: a.silhouette * 40 + (1 / (a.dbi + 0.01)) * 30 + (a.chi / 1000) * 30,
-    })).sort((a, b) => b.score - a.score)
+    // DBSCAN dengan < 2 cluster mendapat score -1 (tidak valid)
+    const ranked = algorithms.map(a => {
+      // Jika semua metrik = 0, algoritma gagal membentuk cluster valid
+      const isInvalid = a.silhouette === 0 && a.dbi === 0 && a.chi === 0
+      const score = isInvalid
+        ? -1
+        : a.silhouette * 40 + (1 / (a.dbi + 0.01)) * 30 + (a.chi / 1000) * 30
+      return { ...a, score }
+    }).sort((a, b) => b.score - a.score)
 
     const winner = ranked[0].name
     const elapsedMs = Date.now() - startTime
