@@ -33,7 +33,18 @@ export async function GET(request: NextRequest) {
   let conn: any
 
   try {
-    const parentKey = request.nextUrl.searchParams.get('parent') as ParentKey | null
+    const searchParams = request.nextUrl.searchParams
+
+    const parentKey = searchParams.get('parent') as ParentKey | null
+    const filterType = searchParams.get('filterType') || 'none'
+    const grain = searchParams.get('grain') || 'year'
+
+    const startYear = searchParams.get('startYear')
+    const endYear = searchParams.get('endYear')
+    const startMonth = searchParams.get('startMonth')
+    const endMonth = searchParams.get('endMonth')
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
 
     if (!parentKey || !(parentKey in PARENT_MAP)) {
       return NextResponse.json(
@@ -47,10 +58,57 @@ export async function GET(request: NextRequest) {
 
     const parent = PARENT_MAP[parentKey]
 
+    const whereClauses: string[] = ['dp.program_induk = ?']
+    const queryParams: any[] = [parent]
+
+    if (filterType === 'year') {
+      if (!startYear || !endYear) {
+        return NextResponse.json(
+          {
+            error: 'Parameter tahun tidak lengkap',
+            detail: 'startYear dan endYear wajib diisi untuk filterType=year',
+          },
+          { status: 400 }
+        )
+      }
+
+      whereClauses.push('YEAR(sk_tgl_bersih) BETWEEN ? AND ?')
+      queryParams.push(startYear, endYear)
+    }
+
+    if (filterType === 'month') {
+      if (!startMonth || !endMonth) {
+        return NextResponse.json(
+          {
+            error: 'Parameter bulan tidak lengkap',
+            detail: 'startMonth dan endMonth wajib diisi untuk filterType=month',
+          },
+          { status: 400 }
+        )
+      }
+
+      whereClauses.push("DATE_FORMAT(sk_tgl_bersih, '%Y-%m') BETWEEN ? AND ?")
+      queryParams.push(startMonth, endMonth)
+    }
+
+    if (filterType === 'day') {
+      if (!startDate || !endDate) {
+        return NextResponse.json(
+          {
+            error: 'Parameter tanggal tidak lengkap',
+            detail: 'startDate dan endDate wajib diisi untuk filterType=day',
+          },
+          { status: 400 }
+        )
+      }
+
+      whereClauses.push('DATE(sk_tgl_bersih) BETWEEN ? AND ?')
+      queryParams.push(startDate, endDate)
+    }
+
     conn = await db.getConnection()
 
-    const result = await conn.query(
-      `
+    const sql = `
       SELECT
         COALESCE(dp.sub_program, 'Tidak Diketahui') AS sub_program,
         COUNT(*) AS jumlahTransaksi,
@@ -58,13 +116,12 @@ export async function GET(request: NextRequest) {
       FROM fact_donasi fd
       LEFT JOIN dim_program_donasi dp
         ON fd.sk_program_donasi = dp.sk_program_donasi
-      WHERE dp.program_induk = ?
+      WHERE ${whereClauses.join(' AND ')}
       GROUP BY dp.sub_program
       ORDER BY totalDonasi DESC
-      `,
-      [parent]
-    )
+    `
 
+    const result = await conn.query(sql, queryParams)
     const rows = normalizeRows(result)
 
     const data: FormattedSubProgramData[] = rows.map((row) => ({
@@ -77,11 +134,13 @@ export async function GET(request: NextRequest) {
       success: true,
       parentKey,
       parent,
+      filterType,
+      grain,
       total: data.length,
       data,
     })
   } catch (error: unknown) {
-    console.error('API /api/donasi/sub-program error:', error)
+    console.error('API /api/donasi/subprogram error:', error)
 
     const detail =
       error instanceof Error ? error.message : 'Unknown error occurred'
