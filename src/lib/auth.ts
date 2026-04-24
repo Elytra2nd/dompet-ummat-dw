@@ -44,6 +44,9 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   callbacks: {
+    async redirect({ baseUrl }) {
+      return baseUrl + "/"
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role
