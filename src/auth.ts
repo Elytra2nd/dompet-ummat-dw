@@ -1,11 +1,9 @@
 import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/prisma"
 import Credentials from "next-auth/providers/credentials"
+import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   providers: [
     Credentials({
       name: "credentials",
@@ -27,22 +25,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const isMatch = await bcrypt.compare(
-          credentials.password as string, 
+          credentials.password as string,
           user.password
         )
-        
+
         if (!isMatch) return null
 
         return {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role, 
+          role: user.role,
         }
       }
     })
   ],
-  // Tambahkan ini agar inisialisasi handlers tidak undefined saat build
   secret: process.env.AUTH_SECRET,
   session: { strategy: "jwt" },
   callbacks: {
@@ -60,6 +57,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }
   },
   pages: {
-    signIn: "/login", 
+    signIn: "/login",
   }
 })
