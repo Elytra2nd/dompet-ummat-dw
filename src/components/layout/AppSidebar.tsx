@@ -11,12 +11,10 @@ import {
   PanelLeftClose,
   ClipboardCheck,
   FileBarChart,
-  Activity,
-  History,
-  LayoutGrid
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react' // Import fungsi signOut
 
 import {
   Sidebar,
@@ -104,6 +102,11 @@ export function AppSidebar() {
   const pathname = usePathname()
   const { toggleSidebar } = useSidebar()
 
+  // Handler Logout
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/login' }) // Redirect ke login setelah keluar
+  }
+
   return (
     <Sidebar collapsible="icon" className="border-r-2 bg-white transition-all duration-300 ease-in-out">
       {/* HEADER */}
@@ -188,15 +191,18 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER */}
+      {/* FOOTER - LOGOUT AREA */}
       <SidebarFooter className="p-4 border-t bg-slate-50/50">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3">
-              <LogOut className="h-5 w-5" />
-              <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
-                <span className="text-xs font-black text-slate-900 leading-none">Muhammad Ilham</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">Authorized Admin</span>
+            <SidebarMenuButton 
+              onClick={handleLogout} // Trigger fungsi logout
+              className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3 group"
+            >
+              <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
+              <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden ml-2">
+                <span className="text-xs font-black text-slate-900 leading-none">Logout</span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">End Session</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
