@@ -12,8 +12,6 @@ import {
   Loader2,
   Star,
   ArrowRight,
-  Timer,
-  FlaskConical,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
