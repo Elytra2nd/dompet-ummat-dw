@@ -1,11 +1,10 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface RawSubProgramRow {
   sub_program?: string | null
-  program?: string | null
-  jumlahTransaksi?: string | number | null
-  totalDonasi?: string | number | null
+  jumlahTransaksi: number | bigint
+  totalDonasi: number | bigint | string
 }
 
 interface FormattedSubProgramData {
@@ -22,18 +21,19 @@ const PARENT_MAP = {
 
 type ParentKey = keyof typeof PARENT_MAP
 
-function normalizeRows(result: any): RawSubProgramRow[] {
-  if (Array.isArray(result?.[0])) return result[0] as RawSubProgramRow[]
-  if (Array.isArray(result)) return result as RawSubProgramRow[]
-  if (Array.isArray(result?.rows)) return result.rows as RawSubProgramRow[]
-  return []
-}
-
 export async function GET(request: NextRequest) {
-  let conn: any
-
   try {
-    const parentKey = request.nextUrl.searchParams.get('parent') as ParentKey | null
+    const searchParams = request.nextUrl.searchParams
+
+    const parentKey = searchParams.get('parent') as ParentKey | null
+    const filterType = searchParams.get('filterType') || 'none'
+    
+    const startYear = searchParams.get('startYear')
+    const endYear = searchParams.get('endYear')
+    const startMonth = searchParams.get('startMonth')
+    const endMonth = searchParams.get('endMonth')
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
 
     if (!parentKey || !(parentKey in PARENT_MAP)) {
       return NextResponse.json(
@@ -47,10 +47,8 @@ export async function GET(request: NextRequest) {
 
     const parent = PARENT_MAP[parentKey]
 
-    conn = await db.getConnection()
-
-    const result = await conn.query(
-      `
+    // --- 1. MEMBANGUN QUERY STRING ---
+    let query = `
       SELECT
         COALESCE(dp.sub_program, 'Tidak Diketahui') AS sub_program,
         COUNT(*) AS jumlahTransaksi,
@@ -59,46 +57,57 @@ export async function GET(request: NextRequest) {
       LEFT JOIN dim_program_donasi dp
         ON fd.sk_program_donasi = dp.sk_program_donasi
       WHERE dp.program_induk = ?
-      GROUP BY dp.sub_program
-      ORDER BY totalDonasi DESC
-      `,
-      [parent]
-    )
+    `
+    const params: any[] = [parent]
 
-    const rows = normalizeRows(result)
+    // --- 2. MENAMBAHKAN FILTER SECARA DINAMIS ---
+    if (filterType === 'year' && startYear && endYear) {
+      query += ` AND SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 4) BETWEEN ? AND ?`
+      params.push(startYear, endYear)
+    } 
+    else if (filterType === 'month' && startMonth && endMonth) {
+      const sMonth = startMonth.replace('-', '')
+      const eMonth = endMonth.replace('-', '')
+      query += ` AND SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 6) BETWEEN ? AND ?`
+      params.push(sMonth, eMonth)
+    } 
+    else if (filterType === 'day' && startDate && endDate) {
+      const sDate = startDate.replaceAll('-', '')
+      const eDate = endDate.replaceAll('-', '')
+      query += ` AND CAST(fd.sk_tgl_bersih AS CHAR) BETWEEN ? AND ?`
+      params.push(sDate, eDate)
+    }
 
+    query += ` GROUP BY dp.sub_program ORDER BY totalDonasi DESC`
+
+    // --- 3. EKSEKUSI QUERY ---
+    // Menggunakan $queryRawUnsafe agar tidak perlu import { Prisma }
+    const rows = await prisma.$queryRawUnsafe<RawSubProgramRow[]>(query, ...params)
+
+    // --- 4. MAPPING DATA ---
     const data: FormattedSubProgramData[] = rows.map((row) => ({
-      sub_program: row.sub_program ?? row.program ?? 'Tidak Diketahui',
-      jumlahTransaksi: Number(row.jumlahTransaksi) || 0,
-      totalDonasi: Number(row.totalDonasi) || 0,
+      sub_program: row.sub_program ?? 'Tidak Diketahui',
+      jumlahTransaksi: Number(row.jumlahTransaksi),
+      totalDonasi: Number(row.totalDonasi),
     }))
 
     return NextResponse.json({
       success: true,
       parentKey,
       parent,
+      filterType,
       total: data.length,
       data,
     })
   } catch (error: unknown) {
-    console.error('API /api/donasi/sub-program error:', error)
-
-    const detail =
-      error instanceof Error ? error.message : 'Unknown error occurred'
-
+    console.error('API /api/donasi/subprogram error:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Gagal mengambil distribusi sub program donasi',
-        detail,
+        detail: error instanceof Error ? error.message : 'Unknown error occurred',
       },
       { status: 500 }
     )
-  } finally {
-    if (conn) {
-      try {
-        conn.release()
-      } catch {}
-    }
   }
 }

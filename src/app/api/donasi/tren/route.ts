@@ -23,7 +23,7 @@ interface RawTrendRow {
   tahun: string
   bulan?: string | null
   hari?: string | null
-  total: unknown
+  total: number | string | bigint
 }
 
 function normalizeMonthKey(value: string) {
@@ -39,49 +39,41 @@ export async function GET(req: Request) {
 
   const filterType = (searchParams.get('filterType') || 'none') as FilterType
   const grain = (searchParams.get('grain') || 'year') as Grain
-
   const startYear = searchParams.get('startYear')
   const endYear = searchParams.get('endYear')
-
   const startMonth = searchParams.get('startMonth')
   const endMonth = searchParams.get('endMonth')
-
   const startDate = searchParams.get('startDate')
   const endDate = searchParams.get('endDate')
 
   const currentYear = String(new Date().getFullYear())
 
   try {
-    let query = ''
-    let params: (string | number)[] = []
+    let rows: RawTrendRow[] = []
+
+    // --- LOGIC FILTER KE QUERY ---
 
     if (filterType === 'none' || filterType === 'year') {
       const yearStart = filterType === 'none' ? '2011' : startYear
       const yearEnd = filterType === 'none' ? currentYear : endYear
 
       if (!yearStart || !yearEnd) {
-        return NextResponse.json(
-          { error: 'Range tahun tidak lengkap' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Range tahun tidak lengkap' }, { status: 400 })
       }
 
       if (grain === 'year') {
-        query = `
+        // Menggunakan Tagged Template $queryRaw untuk keamanan
+        rows = await prisma.$queryRaw<RawTrendRow[]>`
           SELECT
             SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) AS tahun,
             SUM(nominal_valid) AS total
           FROM fact_donasi
-          WHERE SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) BETWEEN ? AND ?
+          WHERE SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) BETWEEN ${yearStart} AND ${yearEnd}
           GROUP BY SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4)
           ORDER BY tahun ASC
         `
-        params = [yearStart, yearEnd]
       } else {
-        return NextResponse.json(
-          { error: 'Filter year/none hanya mendukung grain year' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Filter year/none hanya mendukung grain year' }, { status: 400 })
       }
     }
 
@@ -90,25 +82,19 @@ export async function GET(req: Request) {
       const endMonthKey = endMonth ? normalizeMonthKey(endMonth) : null
 
       if (!startMonthKey || !endMonthKey) {
-        return NextResponse.json(
-          { error: 'Range bulan tidak lengkap' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Range bulan tidak lengkap' }, { status: 400 })
       }
 
-      query = `
+      rows = await prisma.$queryRaw<RawTrendRow[]>`
         SELECT
           SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) AS tahun,
           SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 5, 2) AS bulan,
           SUM(nominal_valid) AS total
         FROM fact_donasi
-        WHERE SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 6) BETWEEN ? AND ?
-        GROUP BY
-          SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4),
-          SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 5, 2)
+        WHERE SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 6) BETWEEN ${startMonthKey} AND ${endMonthKey}
+        GROUP BY 1, 2
         ORDER BY tahun ASC, bulan ASC
       `
-      params = [startMonthKey, endMonthKey]
     }
 
     if (filterType === 'day') {
@@ -116,30 +102,23 @@ export async function GET(req: Request) {
       const endDateKey = endDate ? normalizeDateKey(endDate) : null
 
       if (!startDateKey || !endDateKey) {
-        return NextResponse.json(
-          { error: 'Range hari tidak lengkap' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Range hari tidak lengkap' }, { status: 400 })
       }
 
-      query = `
+      rows = await prisma.$queryRaw<RawTrendRow[]>`
         SELECT
           SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) AS tahun,
           SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 5, 2) AS bulan,
           SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 7, 2) AS hari,
           SUM(nominal_valid) AS total
         FROM fact_donasi
-        WHERE SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 8) BETWEEN ? AND ?
-        GROUP BY
-          SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4),
-          SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 5, 2),
-          SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 7, 2)
+        WHERE SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 8) BETWEEN ${startDateKey} AND ${endDateKey}
+        GROUP BY 1, 2, 3
         ORDER BY tahun ASC, bulan ASC, hari ASC
       `
-      params = [startDateKey, endDateKey]
     }
 
-    const rows = await prisma.$queryRawUnsafe<RawTrendRow[]>(query, ...params)
+    // --- DATA MAPPING ---
 
     const data = rows.map((row) => {
       const tahun = String(row.tahun)
@@ -163,6 +142,7 @@ export async function GET(req: Request) {
         monthValue: bulan,
         day: hari,
         date: bulan && hari ? `${tahun}-${bulan}-${hari}` : null,
+        // Konversi BigInt dari SQL ke Number agar bisa di-serialize ke JSON
         total: Number(row.total ?? 0),
       }
     })
