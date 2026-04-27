@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import DonationStats from '@/components/donasi/DonationStats'
 import ProgramStats from '@/components/donasi/ProgramStats'
+import DemografiStats from '@/components/mustahik/DemografiStats'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -120,6 +121,8 @@ export default function DashboardPage() {
         </section>
 
         <ProgramStats />
+
+        <DemografiStats />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           

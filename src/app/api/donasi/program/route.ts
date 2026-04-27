@@ -1,10 +1,10 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface RawProgramRow {
   program?: string | null
-  jumlahTransaksi?: string | number | null
-  totalDonasi?: string | number | null
+  jumlahTransaksi: number | bigint
+  totalDonasi: number | bigint | string
 }
 
 interface FormattedProgramData {
@@ -13,21 +13,11 @@ interface FormattedProgramData {
   totalDonasi: number
 }
 
-function normalizeRows(result: any): RawProgramRow[] {
-  if (Array.isArray(result?.[0])) return result[0]
-  if (Array.isArray(result)) return result
-  if (Array.isArray(result?.rows)) return result.rows
-  return []
-}
-
 export async function GET(request: NextRequest) {
-  let conn: any
-
   try {
     const searchParams = request.nextUrl.searchParams
 
     const filterType = searchParams.get('filterType') || 'none'
-
     const startYear = searchParams.get('startYear')
     const endYear = searchParams.get('endYear')
     const startMonth = searchParams.get('startMonth')
@@ -38,56 +28,39 @@ export async function GET(request: NextRequest) {
     const whereClauses: string[] = []
     const queryParams: any[] = []
 
-    // FILTER TAHUN
+    // --- LOGIK FILTER (Menyesuaikan sk_tgl_bersih YYYYMMDD) ---
+    
     if (filterType === 'year') {
       if (!startYear || !endYear) {
-        return NextResponse.json(
-          {
-            error: 'Parameter tahun tidak lengkap',
-            detail: 'startYear dan endYear wajib diisi',
-          },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Parameter tahun tidak lengkap' }, { status: 400 })
       }
-
-      whereClauses.push('YEAR(sk_tgl_bersih) BETWEEN ? AND ?')
+      whereClauses.push('SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 4) BETWEEN ? AND ?')
       queryParams.push(startYear, endYear)
     }
 
-    // FILTER BULAN
     if (filterType === 'month') {
       if (!startMonth || !endMonth) {
-        return NextResponse.json(
-          {
-            error: 'Parameter bulan tidak lengkap',
-            detail: 'startMonth dan endMonth wajib diisi',
-          },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Parameter bulan tidak lengkap' }, { status: 400 })
       }
-
-      whereClauses.push("DATE_FORMAT(sk_tgl_bersih, '%Y-%m') BETWEEN ? AND ?")
-      queryParams.push(startMonth, endMonth)
+      const sMonth = startMonth.replace('-', '')
+      const eMonth = endMonth.replace('-', '')
+      whereClauses.push('SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 6) BETWEEN ? AND ?')
+      queryParams.push(sMonth, eMonth)
     }
 
-    // FILTER HARI
     if (filterType === 'day') {
       if (!startDate || !endDate) {
-        return NextResponse.json(
-          {
-            error: 'Parameter tanggal tidak lengkap',
-            detail: 'startDate dan endDate wajib diisi',
-          },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Parameter tanggal tidak lengkap' }, { status: 400 })
       }
-
-      whereClauses.push('DATE(sk_tgl_bersih) BETWEEN ? AND ?')
-      queryParams.push(startDate, endDate)
+      const sDate = startDate.replaceAll('-', '')
+      const eDate = endDate.replaceAll('-', '')
+      whereClauses.push('CAST(fd.sk_tgl_bersih AS CHAR) BETWEEN ? AND ?')
+      queryParams.push(sDate, eDate)
     }
 
-    conn = await db.getConnection()
-
+    // --- CONSTRUCT QUERY ---
+    const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
+    
     const sql = `
       SELECT
         COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
@@ -96,14 +69,15 @@ export async function GET(request: NextRequest) {
       FROM fact_donasi fd
       LEFT JOIN dim_program_donasi dp
         ON fd.sk_program_donasi = dp.sk_program_donasi
-      ${whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''}
+      ${whereSql}
       GROUP BY dp.program_induk
       ORDER BY totalDonasi DESC
     `
 
-    const result = await conn.query(sql, queryParams)
-    const rows = normalizeRows(result)
+    // --- EXECUTE ---
+    const rows = await prisma.$queryRawUnsafe<RawProgramRow[]>(sql, ...queryParams)
 
+    // --- MAPPING ---
     const data: FormattedProgramData[] = rows.map((row) => ({
       program: row.program ?? 'Tidak Diketahui',
       jumlahTransaksi: Number(row.jumlahTransaksi) || 0,
@@ -113,7 +87,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data)
   } catch (error: any) {
     console.error('API /api/donasi/program error:', error)
-
     return NextResponse.json(
       {
         error: 'Gagal mengambil distribusi program donasi',
@@ -121,7 +94,5 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     )
-  } finally {
-    if (conn) conn.release()
   }
 }
