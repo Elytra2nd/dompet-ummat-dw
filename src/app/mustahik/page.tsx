@@ -44,6 +44,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import ImportButton from '@/components/import/ImportButton'
 
 interface Mustahik {
   sk_mustahik: number
@@ -194,9 +195,12 @@ export default function ManajemenMustahikPage() {
               <Users className="h-8 w-8 text-emerald-600" /> Database <span className="text-emerald-600">Mustahik</span>
             </h1>
             {!isAdding && (
-              <Button onClick={() => setIsAdding(true)} className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs">
-                <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
-              </Button>
+              <div className="flex items-center gap-2">
+                <ImportButton modul="mustahik" onImportSuccess={fetchMustahik} />
+                <Button onClick={() => setIsAdding(true)} className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs">
+                  <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
+                </Button>
+              </div>
             )}
           </div>
         </div>

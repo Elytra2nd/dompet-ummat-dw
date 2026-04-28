@@ -2,6 +2,7 @@ import AddPenyaluranForm from '@/components/penyaluran/AddPenyaluranForm'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, HandCoins } from 'lucide-react'
 import Link from 'next/link'
+import ImportButton from '@/components/import/ImportButton'
 
 export default function PenyaluranBaruPage() {
   return (
@@ -32,6 +33,7 @@ export default function PenyaluranBaruPage() {
                 Kalimatan Barat
               </p>
             </div>
+            <ImportButton modul="penyaluran" />
           </div>
         </div>
       </div>

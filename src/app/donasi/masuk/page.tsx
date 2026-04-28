@@ -6,6 +6,7 @@ import DonationStats from '@/components/donasi/DonationStats'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, HeartHandshake, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import ImportButton from '@/components/import/ImportButton'
 
 export default function DonasiMasukPage() {
   // 1. Perbarui Initial State agar sinkron dengan interface DonationStatsProps
@@ -67,12 +68,15 @@ export default function DonasiMasukPage() {
                 Pencatatan dana Ziswaf masuk untuk pemberdayaan ummat
               </p>
             </div>
-            {loading && (
-              <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Sinkronisasi Data...
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              <ImportButton modul="donasi" onImportSuccess={fetchStats} />
+              {loading && (
+                <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sinkronisasi...
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
