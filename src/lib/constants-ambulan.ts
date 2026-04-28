@@ -32,3 +32,30 @@ export const STATUS_EKONOMI = [
   { label: 'Menengah', value: 'Menengah' },
   { label: 'Mampu', value: 'Mampu' },
 ]
+
+export const AMBULAN_LAYANAN_IMPORT_HEADERS = [
+  { key: 'id_transaksi',        label: 'ID Transaksi *',         required: true,  isNumber: false },
+  { key: 'tanggal_layanan',     label: 'Tanggal (DD/MM/YYYY) *', required: true,  isNumber: false },
+  { key: 'nama_pasien',         label: 'Nama Pasien *',          required: true,  isNumber: false },
+  { key: 'no_hp',               label: 'No HP Pasien',           required: false, isNumber: false },
+  { key: 'gender',              label: 'Gender (L/P) *',         required: true,  isNumber: false },
+  { key: 'status_ekonomi',      label: 'Status Ekonomi *',       required: true,  isNumber: false },
+  { key: 'jam',                 label: 'Shift Waktu *',          required: true,  isNumber: false },
+  { key: 'armada',              label: 'Armada *',               required: true,  isNumber: false },
+  { key: 'kategori_layanan',    label: 'Kategori Layanan *',     required: true,  isNumber: false },
+  { key: 'alamat_jemput',       label: 'Alamat Penjemputan *',   required: true,  isNumber: false },
+  { key: 'desa',                label: 'Desa/Kelurahan',         required: false, isNumber: false },
+  { key: 'kecamatan',           label: 'Kecamatan',              required: false, isNumber: false },
+  { key: 'kabupaten_kota',      label: 'Kabupaten/Kota *',       required: true,  isNumber: false },
+  { key: 'latitude',            label: 'Latitude',               required: false, isNumber: true  },
+  { key: 'longitude',           label: 'Longitude',              required: false, isNumber: true  },
+] as const
+
+export const AMBULAN_AKTIVITAS_IMPORT_HEADERS = [
+  { key: 'id_transaksi',        label: 'ID Transaksi *',         required: true,  isNumber: false },
+  { key: 'tanggal_aktivitas',   label: 'Tanggal (DD/MM/YYYY) *', required: true,  isNumber: false },
+  { key: 'jam',                 label: 'Shift Waktu *',          required: true,  isNumber: false },
+  { key: 'armada',              label: 'Armada *',               required: true,  isNumber: false },
+  { key: 'kategori_aktivitas',  label: 'Kategori Aktivitas *',   required: true,  isNumber: false },
+  { key: 'biaya_operasional',   label: 'Biaya (Rp) *',           required: true,  isNumber: true  },
+] as const

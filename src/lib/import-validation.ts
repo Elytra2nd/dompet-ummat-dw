@@ -18,7 +18,7 @@ export interface RowError {
 }
 
 /** Modul yang mendukung fitur import Excel */
-export type ImportModul = 'donasi' | 'penyaluran' | 'mustahik'
+export type ImportModul = 'donasi' | 'penyaluran' | 'mustahik' | 'ambulan_layanan' | 'ambulan_aktivitas'
 
 export interface ImportValidationResult {
   status: 'validation_failed' | 'success'
@@ -69,6 +69,33 @@ export interface MustahikRowParsed {
   jumlah_jiwa: number
   latitude?: number
   longitude?: number
+}
+
+export interface AmbulanLayananRowParsed {
+  id_transaksi: string
+  tanggal_layanan: string
+  nama_pasien: string
+  no_hp?: string
+  gender: string
+  status_ekonomi: string
+  jam: string
+  armada: string
+  kategori_layanan: string
+  alamat_jemput: string
+  desa?: string
+  kecamatan?: string
+  kabupaten_kota: string
+  latitude?: number
+  longitude?: number
+}
+
+export interface AmbulanAktivitasRowParsed {
+  id_transaksi: string
+  tanggal_aktivitas: string
+  jam: string
+  armada: string
+  kategori_aktivitas: string
+  biaya_operasional: number
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -361,3 +388,150 @@ export function validateMustahikRow(
     },
   }
 }
+
+// ─── VALIDATOR: AMBULAN LAYANAN ──────────────────────────────────────────────
+
+const ENUM_AMBULAN_SHIFT = ['Pagi (06:00-12:00)', 'Siang (12:00-15:00)', 'Sore (15:00-18:00)', 'Malam (18:00-06:00)']
+const ENUM_AMBULAN_ARMADA = ['Ambulan 1 (KB 1234 XX)', 'Ambulan 2 (KB 5678 YY)', 'Lainnya']
+const ENUM_AMBULAN_KAT_LAYANAN = ['Antar Pasien', 'Jemput Pasien', 'Layanan Jenazah', 'Gawat Darurat', 'Lainnya']
+const ENUM_AMBULAN_STATUS_EKO = ['Dhuafa', 'Menengah', 'Mampu']
+
+export function validateAmbulanLayananRow(
+  raw: Record<string, unknown>,
+  rowNumber: number,
+): { errors: RowError[]; parsed: AmbulanLayananRowParsed | null } {
+  const errors: RowError[] = []
+  const id = raw['id_transaksi'] as string | undefined
+
+  if (!raw['id_transaksi'] || String(raw['id_transaksi']).trim() === '') {
+    errors.push(err(rowNumber, id, 'id_transaksi', raw['id_transaksi'], 'required', 'ID Transaksi wajib diisi'))
+  }
+
+  const tgl = parseDate(String(raw['tanggal_layanan'] ?? ''))
+  if (!tgl) {
+    errors.push(err(rowNumber, id, 'tanggal_layanan', raw['tanggal_layanan'], 'date_format', 'Format tanggal harus DD/MM/YYYY'))
+  }
+
+  if (!raw['nama_pasien'] || String(raw['nama_pasien']).trim() === '') {
+    errors.push(err(rowNumber, id, 'nama_pasien', raw['nama_pasien'], 'required', 'Nama pasien wajib diisi'))
+  }
+
+  if (!ENUM_GENDER.includes(String(raw['gender'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'gender', raw['gender'], 'enum', 'Gender harus L atau P'))
+  }
+
+  if (!ENUM_AMBULAN_STATUS_EKO.includes(String(raw['status_ekonomi'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'status_ekonomi', raw['status_ekonomi'], 'enum', `Status Ekonomi tidak valid. Pilih: ${ENUM_AMBULAN_STATUS_EKO.join(', ')}`))
+  }
+
+  if (!ENUM_AMBULAN_SHIFT.includes(String(raw['jam'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'jam', raw['jam'], 'enum', `Shift tidak valid. Pilih: ${ENUM_AMBULAN_SHIFT.join(', ')}`))
+  }
+
+  if (!ENUM_AMBULAN_ARMADA.includes(String(raw['armada'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'armada', raw['armada'], 'enum', `Armada tidak valid. Pilih: ${ENUM_AMBULAN_ARMADA.join(', ')}`))
+  }
+
+  if (!ENUM_AMBULAN_KAT_LAYANAN.includes(String(raw['kategori_layanan'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'kategori_layanan', raw['kategori_layanan'], 'enum', `Kategori layanan tidak valid. Pilih: ${ENUM_AMBULAN_KAT_LAYANAN.join(', ')}`))
+  }
+
+  if (!raw['alamat_jemput'] || String(raw['alamat_jemput']).trim() === '') {
+    errors.push(err(rowNumber, id, 'alamat_jemput', raw['alamat_jemput'], 'required', 'Alamat penjemputan wajib diisi'))
+  }
+  
+  if (!raw['kabupaten_kota'] || String(raw['kabupaten_kota']).trim() === '') {
+    errors.push(err(rowNumber, id, 'kabupaten_kota', raw['kabupaten_kota'], 'required', 'Kabupaten/Kota wajib diisi'))
+  }
+
+  const lat = raw['latitude']
+  const lng = raw['longitude']
+  if (lat !== undefined && lat !== null && lat !== '') {
+    if (typeof lat !== 'number' || lat < -90 || lat > 90) {
+      errors.push(err(rowNumber, id, 'latitude', lat, 'coord_range', 'Latitude harus angka antara -90 dan 90', 'warning'))
+    }
+  }
+  if (lng !== undefined && lng !== null && lng !== '') {
+    if (typeof lng !== 'number' || lng < -180 || lng > 180) {
+      errors.push(err(rowNumber, id, 'longitude', lng, 'coord_range', 'Longitude harus angka antara -180 dan 180', 'warning'))
+    }
+  }
+
+  if (errors.filter(e => e.severity === 'error').length > 0) return { errors, parsed: null }
+
+  return {
+    errors,
+    parsed: {
+      id_transaksi: String(raw['id_transaksi']).trim(),
+      tanggal_layanan: String(raw['tanggal_layanan']),
+      nama_pasien: String(raw['nama_pasien']).trim(),
+      no_hp: raw['no_hp'] ? String(raw['no_hp']).trim() : undefined,
+      gender: String(raw['gender']),
+      status_ekonomi: String(raw['status_ekonomi']),
+      jam: String(raw['jam']),
+      armada: String(raw['armada']),
+      kategori_layanan: String(raw['kategori_layanan']),
+      alamat_jemput: String(raw['alamat_jemput']).trim(),
+      desa: raw['desa'] ? String(raw['desa']).trim() : undefined,
+      kecamatan: raw['kecamatan'] ? String(raw['kecamatan']).trim() : undefined,
+      kabupaten_kota: String(raw['kabupaten_kota']).trim(),
+      latitude: (lat !== undefined && lat !== null && lat !== '') ? lat as number : undefined,
+      longitude: (lng !== undefined && lng !== null && lng !== '') ? lng as number : undefined,
+    }
+  }
+}
+
+// ─── VALIDATOR: AMBULAN AKTIVITAS ─────────────────────────────────────────────
+
+const ENUM_AMBULAN_KAT_AKTIVITAS = ['Isi Bensin', 'Servis Rutin', 'Ganti Suku Cadang', 'Pajak/Administrasi', 'Lainnya']
+
+export function validateAmbulanAktivitasRow(
+  raw: Record<string, unknown>,
+  rowNumber: number,
+): { errors: RowError[]; parsed: AmbulanAktivitasRowParsed | null } {
+  const errors: RowError[] = []
+  const id = raw['id_transaksi'] as string | undefined
+
+  if (!raw['id_transaksi'] || String(raw['id_transaksi']).trim() === '') {
+    errors.push(err(rowNumber, id, 'id_transaksi', raw['id_transaksi'], 'required', 'ID Transaksi wajib diisi'))
+  }
+
+  const tgl = parseDate(String(raw['tanggal_aktivitas'] ?? ''))
+  if (!tgl) {
+    errors.push(err(rowNumber, id, 'tanggal_aktivitas', raw['tanggal_aktivitas'], 'date_format', 'Format tanggal harus DD/MM/YYYY'))
+  }
+
+  if (!ENUM_AMBULAN_SHIFT.includes(String(raw['jam'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'jam', raw['jam'], 'enum', `Shift tidak valid. Pilih: ${ENUM_AMBULAN_SHIFT.join(', ')}`))
+  }
+
+  if (!ENUM_AMBULAN_ARMADA.includes(String(raw['armada'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'armada', raw['armada'], 'enum', `Armada tidak valid. Pilih: ${ENUM_AMBULAN_ARMADA.join(', ')}`))
+  }
+
+  if (!ENUM_AMBULAN_KAT_AKTIVITAS.includes(String(raw['kategori_aktivitas'] ?? ''))) {
+    errors.push(err(rowNumber, id, 'kategori_aktivitas', raw['kategori_aktivitas'], 'enum', `Kategori aktivitas tidak valid. Pilih: ${ENUM_AMBULAN_KAT_AKTIVITAS.join(', ')}`))
+  }
+
+  const biaya = raw['biaya_operasional']
+  if (typeof biaya !== 'number' || isNaN(biaya)) {
+    errors.push(err(rowNumber, id, 'biaya_operasional', biaya, 'type_number', 'Biaya operasional harus berupa angka. Hapus titik pemisah ribuan.'))
+  } else if (biaya < 0) {
+    errors.push(err(rowNumber, id, 'biaya_operasional', biaya, 'min_value', 'Biaya operasional tidak boleh negatif'))
+  }
+
+  if (errors.length > 0) return { errors, parsed: null }
+
+  return {
+    errors: [],
+    parsed: {
+      id_transaksi: String(raw['id_transaksi']).trim(),
+      tanggal_aktivitas: String(raw['tanggal_aktivitas']),
+      jam: String(raw['jam']),
+      armada: String(raw['armada']),
+      kategori_aktivitas: String(raw['kategori_aktivitas']),
+      biaya_operasional: biaya as number,
+    }
+  }
+}
+

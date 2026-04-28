@@ -18,6 +18,15 @@ import {
   IMPORT_ENUM_GENDER,
   IMPORT_ENUM_KATEGORI_PM,
 } from '@/lib/constants-mustahik'
+import {
+  AMBULAN_LAYANAN_IMPORT_HEADERS,
+  AMBULAN_AKTIVITAS_IMPORT_HEADERS,
+  SHIFT_JAM,
+  LIST_ARMADA,
+  KATEGORI_LAYANAN,
+  KATEGORI_AKTIVITAS,
+  STATUS_EKONOMI,
+} from '@/lib/constants-ambulan'
 
 export const dynamic = 'force-dynamic'
 
@@ -280,6 +289,125 @@ function buildMustahikWorkbook(): ExcelJS.Workbook {
   return wb
 }
 
+// ─── Builder: Ambulan Layanan ──────────────────────────────────────────────────
+function buildAmbulanLayananWorkbook(): ExcelJS.Workbook {
+  const wb = new ExcelJS.Workbook()
+  wb.creator = 'Dompet Ummat Kalbar'
+
+  const ref = wb.addWorksheet('Referensi')
+  ref.state = 'veryHidden'
+  IMPORT_ENUM_GENDER.forEach((v, i) => ref.getCell(`A${i + 1}`).value = v)
+  STATUS_EKONOMI.forEach((v, i) => ref.getCell(`B${i + 1}`).value = v.label)
+  SHIFT_JAM.forEach((v, i) => ref.getCell(`C${i + 1}`).value = v.label)
+  LIST_ARMADA.forEach((v, i) => ref.getCell(`D${i + 1}`).value = v.label)
+  KATEGORI_LAYANAN.forEach((v, i) => ref.getCell(`E${i + 1}`).value = v.label)
+
+  const data = wb.addWorksheet('Data')
+  data.views = [{ state: 'frozen', ySplit: 1 }]
+
+  const headers = AMBULAN_LAYANAN_IMPORT_HEADERS
+  headers.forEach((h, i) => {
+    const cell = data.getCell(1, i + 1)
+    cell.value = h.label
+    applyHeaderStyle(cell, h.required)
+    data.getColumn(i + 1).width = 22
+  })
+  data.getRow(1).height = 40
+
+  const examples: Record<string, unknown> = {
+    id_transaksi: 'SRV-AMB-1001',
+    tanggal_layanan: '15/01/2024',
+    nama_pasien: 'Budi Santoso',
+    no_hp: '081234567890',
+    gender: 'L',
+    status_ekonomi: 'Dhuafa',
+    jam: 'Pagi (06:00-12:00)',
+    armada: 'Ambulan 1 (KB 1234 XX)',
+    kategori_layanan: 'Antar Pasien',
+    alamat_jemput: 'RSUD Melawi',
+    desa: 'Nanga Pinoh',
+    kecamatan: 'Nanga Pinoh',
+    kabupaten_kota: 'Melawi',
+    latitude: -0.3456,
+    longitude: 111.7501,
+  }
+  headers.forEach((h, i) => {
+    const cell = data.getCell(2, i + 1)
+    cell.value = examples[h.key] as ExcelJS.CellValue
+    if (h.key === 'latitude' || h.key === 'longitude') cell.numFmt = '0.00000000'
+    applyExampleStyle(cell)
+  })
+
+  const genderIdx = headers.findIndex(h => h.key === 'gender') + 1
+  const ekoIdx = headers.findIndex(h => h.key === 'status_ekonomi') + 1
+  const jamIdx = headers.findIndex(h => h.key === 'jam') + 1
+  const armadaIdx = headers.findIndex(h => h.key === 'armada') + 1
+  const katIdx = headers.findIndex(h => h.key === 'kategori_layanan') + 1
+
+  for (let row = 3; row <= 5000; row++) {
+    data.getCell(row, genderIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$A$1:$A${IMPORT_ENUM_GENDER.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Isi L atau P' }
+    data.getCell(row, ekoIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$B$1:$B${STATUS_EKONOMI.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+    data.getCell(row, jamIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$C$1:$C${SHIFT_JAM.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+    data.getCell(row, armadaIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$D$1:$D${LIST_ARMADA.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+    data.getCell(row, katIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$E$1:$E${KATEGORI_LAYANAN.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+  }
+
+  return wb
+}
+
+// ─── Builder: Ambulan Aktivitas ────────────────────────────────────────────────
+function buildAmbulanAktivitasWorkbook(): ExcelJS.Workbook {
+  const wb = new ExcelJS.Workbook()
+  wb.creator = 'Dompet Ummat Kalbar'
+
+  const ref = wb.addWorksheet('Referensi')
+  ref.state = 'veryHidden'
+  SHIFT_JAM.forEach((v, i) => ref.getCell(`A${i + 1}`).value = v.label)
+  LIST_ARMADA.forEach((v, i) => ref.getCell(`B${i + 1}`).value = v.label)
+  KATEGORI_AKTIVITAS.forEach((v, i) => ref.getCell(`C${i + 1}`).value = v.label)
+
+  const data = wb.addWorksheet('Data')
+  data.views = [{ state: 'frozen', ySplit: 1 }]
+
+  const headers = AMBULAN_AKTIVITAS_IMPORT_HEADERS
+  headers.forEach((h, i) => {
+    const cell = data.getCell(1, i + 1)
+    cell.value = h.label
+    applyHeaderStyle(cell, h.required)
+    data.getColumn(i + 1).width = 22
+  })
+  data.getRow(1).height = 40
+
+  const examples: Record<string, unknown> = {
+    id_transaksi: 'EXP-AMB-1001',
+    tanggal_aktivitas: '16/01/2024',
+    jam: 'Siang (12:00-15:00)',
+    armada: 'Ambulan 1 (KB 1234 XX)',
+    kategori_aktivitas: 'Isi Bensin',
+    biaya_operasional: 250000,
+  }
+  headers.forEach((h, i) => {
+    const cell = data.getCell(2, i + 1)
+    cell.value = examples[h.key] as ExcelJS.CellValue
+    if (h.isNumber) cell.numFmt = '#,##0'
+    applyExampleStyle(cell)
+  })
+
+  const jamIdx = headers.findIndex(h => h.key === 'jam') + 1
+  const armadaIdx = headers.findIndex(h => h.key === 'armada') + 1
+  const katIdx = headers.findIndex(h => h.key === 'kategori_aktivitas') + 1
+  const biayaIdx = headers.findIndex(h => h.key === 'biaya_operasional') + 1
+
+  for (let row = 3; row <= 5000; row++) {
+    data.getCell(row, jamIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$A$1:$A${SHIFT_JAM.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+    data.getCell(row, armadaIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$B$1:$B${LIST_ARMADA.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+    data.getCell(row, katIdx).dataValidation = { type: 'list', allowBlank: false, formulae: [`Referensi!$C$1:$C${KATEGORI_AKTIVITAS.length}`], showErrorMessage: true, errorTitle: 'Nilai Tidak Valid', error: 'Pilih dari dropdown' }
+    data.getCell(row, biayaIdx).numFmt = '#,##0'
+  }
+
+  return wb
+}
+
 // ─── HANDLER ──────────────────────────────────────────────────────────────────
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -296,6 +424,14 @@ export async function GET(req: Request) {
     case 'mustahik':
       workbook = buildMustahikWorkbook()
       filename = 'template_mustahik.xlsx'
+      break
+    case 'ambulan_layanan':
+      workbook = buildAmbulanLayananWorkbook()
+      filename = 'template_ambulan_layanan.xlsx'
+      break
+    case 'ambulan_aktivitas':
+      workbook = buildAmbulanAktivitasWorkbook()
+      filename = 'template_ambulan_aktivitas.xlsx'
       break
     default:
       workbook = buildDonasiWorkbook()

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { KATEGORI_AKTIVITAS, KATEGORI_LAYANAN } from '@/lib/constants-ambulan'
+import ImportButton from '@/components/import/ImportButton'
 
 // Helper to get nice readable label from Prisma Enum value
 const getEnumLabel = (val: string, type: 'aktivitas' | 'layanan') => {
@@ -161,6 +162,7 @@ export default function AmbulanExecutivePage() {
                       Catat Layanan Baru
                     </Button>
                   </Link>
+                  <ImportButton modul="ambulan_layanan" onImportSuccess={() => window.location.reload()} />
                 </div>
               </div>
             </div>
@@ -196,6 +198,7 @@ export default function AmbulanExecutivePage() {
                       Catat Biaya Internal
                     </Button>
                   </Link>
+                  <ImportButton modul="ambulan_aktivitas" onImportSuccess={() => window.location.reload()} />
                 </div>
               </div>
             </div>

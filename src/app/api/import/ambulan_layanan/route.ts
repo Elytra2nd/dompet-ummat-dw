@@ -1,0 +1,205 @@
+import ExcelJS from 'exceljs'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import {
+  validateAmbulanLayananRow,
+  parseDate,
+  chunk,
+  type RowError,
+  type AmbulanLayananRowParsed,
+} from '@/lib/import-validation'
+import { AMBULAN_LAYANAN_IMPORT_HEADERS } from '@/lib/constants-ambulan'
+
+export const dynamic = 'force-dynamic'
+
+export async function POST(req: Request) {
+  try {
+    const formData = await req.formData()
+    const file = formData.get('file') as File | null
+
+    if (!file) return NextResponse.json({ error: 'File tidak ditemukan' }, { status: 400 })
+
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(await file.arrayBuffer())
+
+    const sheet = workbook.getWorksheet('Data')
+    if (!sheet) {
+      return NextResponse.json({ error: 'Sheet "Data" tidak ditemukan. Pastikan menggunakan template resmi.' }, { status: 400 })
+    }
+
+    const requiredKeys = AMBULAN_LAYANAN_IMPORT_HEADERS.filter(h => h.required).map(h => h.label)
+    const headerRow = sheet.getRow(1)
+    const headerValues = headerRow.values as (string | undefined)[]
+    for (const label of requiredKeys) {
+      if (!headerValues.some(v => v?.includes(label.replace(' *', '')))) {
+        return NextResponse.json({
+          error: `Kolom wajib tidak ditemukan: "${label}". Pastikan menggunakan template resmi.`
+        }, { status: 400 })
+      }
+    }
+
+    const HEADER_KEYS = AMBULAN_LAYANAN_IMPORT_HEADERS.map(h => h.key)
+    const errors: RowError[] = []
+    const candidates: { rowNumber: number; data: AmbulanLayananRowParsed }[] = []
+
+    sheet.eachRow((row, rowNumber) => {
+      if (rowNumber <= 2) return
+      const values = row.values as ExcelJS.CellValue[]
+
+      const rawValues = HEADER_KEYS.map((_, i) => values[i + 1])
+      if (rawValues.every(v => v === null || v === undefined || v === '')) return
+
+      const rawObj: Record<string, unknown> = {}
+      HEADER_KEYS.forEach((key, i) => {
+        const val = values[i + 1]
+        if (val instanceof Date) {
+          const dd = String(val.getDate()).padStart(2, '0')
+          const mm = String(val.getMonth() + 1).padStart(2, '0')
+          rawObj[key] = `${dd}/${mm}/${val.getFullYear()}`
+        } else if (val !== null && typeof val === 'object' && 'text' in val) {
+          rawObj[key] = (val as ExcelJS.RichText).text
+        } else {
+          rawObj[key] = val
+        }
+      })
+
+      const { errors: rowErrors, parsed } = validateAmbulanLayananRow(rawObj, rowNumber)
+      if (rowErrors.length > 0) {
+        errors.push(...rowErrors)
+      } else if (parsed) {
+        candidates.push({ rowNumber, data: parsed })
+      }
+    })
+
+    const idCounts = new Map<string, number>()
+    candidates.forEach(c => {
+      const id = c.data.id_transaksi
+      idCounts.set(id, (idCounts.get(id) ?? 0) + 1)
+    })
+    const dupInFile = candidates.filter(c => (idCounts.get(c.data.id_transaksi) ?? 0) > 1)
+    dupInFile.forEach(c => {
+      errors.push({
+        rowNumber: c.rowNumber,
+        idField: c.data.id_transaksi,
+        field: 'id_transaksi',
+        value: c.data.id_transaksi,
+        rule: 'duplicate_in_file',
+        message: `ID transaksi "${c.data.id_transaksi}" muncul lebih dari sekali dalam file`,
+        severity: 'error',
+      })
+    })
+
+    const validCandidates = candidates.filter(
+      c => (idCounts.get(c.data.id_transaksi) ?? 0) === 1
+    )
+
+    const totalRows = candidates.length + errors.filter(e => e.rule !== 'duplicate_in_file').length
+    if (errors.length > 0) {
+      return NextResponse.json({
+        status: 'validation_failed',
+        totalRows,
+        validRows: validCandidates.length,
+        errorRows: errors.length,
+        errors,
+      })
+    }
+
+    const allIds = validCandidates.map(c => c.data.id_transaksi)
+    const existingIds = await prisma.fact_layanan_ambulan.findMany({
+      where: { id_transaksi: { in: allIds } },
+      select: { id_transaksi: true },
+    })
+    const existingSet = new Set(existingIds.map(e => e.id_transaksi))
+    const rowsToImport = validCandidates.filter(c => !existingSet.has(c.data.id_transaksi))
+
+    let imported = 0
+
+    await prisma.$transaction(async (tx) => {
+      for (const batch of chunk(rowsToImport, 100)) {
+        for (const c of batch) {
+          const tglObj = parseDate(c.data.tanggal_layanan)!
+          const sk_tanggal = parseInt(
+            tglObj.getFullYear().toString() +
+            (tglObj.getMonth() + 1).toString().padStart(2, '0') +
+            tglObj.getDate().toString().padStart(2, '0')
+          )
+
+          const newLocation = await tx.dim_lokasi.create({
+            data: {
+              latitude: c.data.latitude ?? 0,
+              longitude: c.data.longitude ?? 0,
+              desa_kelurahan: c.data.desa || 'To Be Determined',
+              kecamatan: c.data.kecamatan || 'To Be Determined',
+              kabupaten_kota: c.data.kabupaten_kota || 'To Be Determined',
+              provinsi: 'Kalimantan Barat',
+            },
+          })
+
+          const pasienId = `IMP-PAS-${Date.now()}-${Math.floor(Math.random()*1000)}`
+          const enumGenderMap: any = { 'L': 'L', 'P': 'P' }
+
+          const pasien = await tx.dim_pasien_ambulan.create({
+            data: {
+              id_pasien: pasienId,
+              nama_pasien: c.data.nama_pasien,
+              gender: enumGenderMap[c.data.gender] || 'To_Be_Determined',
+              no_hp: c.data.no_hp || null,
+              status_ekonomi: c.data.status_ekonomi as any, // Matches Dhuafa, Menengah, Mampu
+              alamat_jemput: c.data.alamat_jemput,
+              desa: c.data.desa || null,
+              kelurahan_kecamatan: c.data.kecamatan || null,
+              kabupaten_kota: c.data.kabupaten_kota,
+            },
+          })
+
+          const shiftMap: any = {
+            'Pagi (06:00-12:00)': 'Pagi__06_00_12_00_',
+            'Siang (12:00-15:00)': 'Siang__12_00_15_00_',
+            'Sore (15:00-18:00)': 'Sore__15_00_18_00_',
+            'Malam (18:00-06:00)': 'Malam__18_00_06_00_'
+          }
+
+          const armadaMap: any = {
+            'Ambulan 1 (KB 1234 XX)': 'Ambulan_1__KB_1234_XX_',
+            'Ambulan 2 (KB 5678 YY)': 'Ambulan_2__KB_5678_YY_',
+            'Lainnya': 'Lainnya'
+          }
+
+          const katLayananMap: any = {
+            'Antar Pasien': 'Antar_Pasien',
+            'Jemput Pasien': 'Jemput_Pasien',
+            'Layanan Jenazah': 'Layanan_Jenazah',
+            'Gawat Darurat': 'Gawat_Darurat',
+            'Lainnya': 'Lainnya'
+          }
+
+          await tx.fact_layanan_ambulan.create({
+            data: {
+              id_transaksi: c.data.id_transaksi,
+              sk_pasien: pasien.sk_pasien,
+              sk_tanggal_layanan: sk_tanggal,
+              jam: shiftMap[c.data.jam] || 'To_Be_Determined',
+              armada: armadaMap[c.data.armada] || 'Lainnya',
+              kategori_layanan: katLayananMap[c.data.kategori_layanan] || 'Lainnya',
+              sk_lokasi: newLocation.sk_lokasi,
+              jumlah_layanan: 1,
+            },
+          })
+        }
+        imported += batch.length
+      }
+    }, { timeout: 120000 })
+
+    return NextResponse.json({
+      status: 'success',
+      imported,
+      skipped: existingSet.size,
+    })
+  } catch (error: any) {
+    console.error('IMPORT_AMBULAN_LAYANAN_ERROR:', error)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan server saat memproses import', details: error.message },
+      { status: 500 },
+    )
+  }
+}

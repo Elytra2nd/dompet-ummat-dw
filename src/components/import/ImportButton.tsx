@@ -85,6 +85,8 @@ export default function ImportButton({ modul, onImportSuccess }: ImportButtonPro
     donasi: 'Donasi',
     penyaluran: 'Penyaluran',
     mustahik: 'Mustahik',
+    ambulan_layanan: 'Layanan Ambulan',
+    ambulan_aktivitas: 'Aktivitas Ambulan',
   }
 
   return (
@@ -146,3 +148,4 @@ export default function ImportButton({ modul, onImportSuccess }: ImportButtonPro
     </>
   )
 }
+
