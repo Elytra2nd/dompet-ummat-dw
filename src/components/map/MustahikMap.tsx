@@ -91,10 +91,10 @@ export default function MustahikMap({ points }: MapProps) {
 
     // Handler untuk klik bar pada chart
     const handleBarClick = (data: any) => {
-        if (!data || !data.activePayload || !data.activePayload[0]) return;
-        const clickedWilayah = data.activePayload[0].payload.wilayah;
+        // Recharts <Bar onClick> memberikan data bar yang di-klik secara langsung
+        const clickedWilayah = data?.wilayah || data?.payload?.wilayah || (data?.activePayload && data?.activePayload[0]?.payload?.wilayah);
         
-        if (clickedWilayah === "Lainnya") return; // Hindari drill down jika nilainya 'Lainnya'
+        if (!clickedWilayah || clickedWilayah === "Lainnya") return; // Hindari drill down jika nilainya 'Lainnya'
 
         if (drillLevel === 'provinsi') {
             setSelectedKab(clickedWilayah);
@@ -243,7 +243,6 @@ export default function MustahikMap({ points }: MapProps) {
                                     data={chartData}
                                     layout="vertical"
                                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                    onClick={handleBarClick}
                                     style={{ cursor: drillLevel !== 'kecamatan' ? 'pointer' : 'default' }}
                                 >
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
@@ -267,7 +266,12 @@ export default function MustahikMap({ points }: MapProps) {
                                             fontWeight: 'bold'
                                         }}
                                     />
-                                    <Bar dataKey="jumlahMustahik" radius={[0, 4, 4, 0]} barSize={20}>
+                                    <Bar 
+                                        dataKey="jumlahMustahik" 
+                                        radius={[0, 4, 4, 0]} 
+                                        barSize={20}
+                                        onClick={handleBarClick}
+                                    >
                                         {chartData.map((_, index) => (
                                             <Cell
                                                 key={`cell-${index}`}
