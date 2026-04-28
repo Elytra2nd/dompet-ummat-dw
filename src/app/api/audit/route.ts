@@ -40,6 +40,15 @@ export async function GET() {
           CASE WHEN is_active = 1 THEN 'Active (Current)' ELSE 'Archived (History)' END AS status_record
         FROM dim_petugas
         WHERE sk_petugas > 0
+
+        UNION ALL
+
+        SELECT 
+          id_pasien AS id_bisnis, nama_pasien AS nama, 'Pasien' AS entitas, 
+          valid_from, valid_to, is_active,
+          CASE WHEN is_active = 1 THEN 'Active (Current)' ELSE 'Archived (History)' END AS status_record
+        FROM dim_pasien_ambulan
+        WHERE sk_pasien > 0
       ) AS unified_audit
       ORDER BY valid_from DESC
       LIMIT 1000

@@ -169,6 +169,7 @@ export default function AuditLogPage() {
             <option value="Donatur">Donatur</option>
             <option value="Mustahik">Mustahik</option>
             <option value="Petugas">Petugas</option>
+            <option value="Pasien">Pasien</option>
           </select>
         </Card>
       </div>

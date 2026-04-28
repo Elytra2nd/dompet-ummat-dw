@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useMemo, useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -29,6 +29,34 @@ const BAR_COLORS = ['#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#059
 
 interface MapProps {
     points: any[];
+}
+
+// Komponen helper untuk menganimasi kamera peta (flyToBounds) ke titik-titik yang tersaring
+function MapUpdater({ points, defaultCenter }: { points: any[], defaultCenter: [number, number] }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!points || points.length === 0) {
+            map.flyTo(defaultCenter, 7, { duration: 1.5 });
+            return;
+        }
+
+        // Kumpulkan semua titik koordinat yang valid (bukan NaN)
+        const validPoints = points.filter(p => !isNaN(p.lat) && !isNaN(p.lng));
+        if (validPoints.length === 0) return;
+
+        const lats = validPoints.map(p => p.lat);
+        const lngs = validPoints.map(p => p.lng);
+
+        const bounds = L.latLngBounds(
+            [Math.min(...lats), Math.min(...lngs)],
+            [Math.max(...lats), Math.max(...lngs)]
+        );
+
+        map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5, maxZoom: 14 });
+    }, [points, map, defaultCenter]);
+
+    return null;
 }
 
 export default function MustahikMap({ points }: MapProps) {
@@ -181,6 +209,7 @@ export default function MustahikMap({ points }: MapProps) {
                         style={{ height: '100%', width: '100%' }}
                         scrollWheelZoom={true}
                     >
+                        <MapUpdater points={filteredPoints} defaultCenter={defaultCenter} />
                         <TileLayer
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             attribution='&copy; Dompet Ummat Kalbar'
