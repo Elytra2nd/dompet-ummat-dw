@@ -41,8 +41,6 @@ import {
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import ImportButton from '@/components/import/ImportButton'
-import AddMustahikDialog from '@/components/mustahik/AddMustahikDialog'
-import MustahikSuccessDialog from '@/components/mustahik/MustahikSuccessDialog'
 
 interface Mustahik {
   sk_mustahik: number
@@ -65,12 +63,6 @@ export default function ManajemenMustahikPage() {
   // --- STATE PAGINASI ---
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-
-  // --- DIALOG STATES ---
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editData, setEditData] = useState<any>(null)
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
-  const [successData, setSuccessData] = useState<any>(null)
 
   useEffect(() => { fetchMustahik() }, [])
 
@@ -95,31 +87,6 @@ export default function ManajemenMustahikPage() {
         fetchMustahik()
       }
     } catch (e) { toast.error('Gagal menonaktifkan record') }
-  }
-
-  const startEdit = (m: Mustahik) => {
-    setEditData({
-      sk_mustahik: m.sk_mustahik,
-      nama: m.nama || '',
-      nik: m.nik || '',
-      kk: '', 
-      gender: 'L', 
-      no_hp: '', 
-      alamat: m.alamat || '',
-      kabupaten_kota: m.kabupaten_kota || '',
-      desa: '', 
-      kelurahan_kecamatan: '', 
-      provinsi: '', 
-      jumlah_jiwa: 1, 
-      dana_tersalur: 0, 
-      kategori_pm: m.kategori_pm || 'Asnaf_Miskin',
-      skoring: m.skoring || 0,
-      latitude: m.latitude || 0,
-      longitude: m.longitude || 0,
-      program_induk: '', 
-      sub_program: '', 
-    })
-    setDialogOpen(true)
   }
 
   const filteredMustahik = mustahik.filter((m) => {
@@ -148,8 +115,10 @@ export default function ManajemenMustahikPage() {
             </h1>
             <div className="flex items-center gap-2">
               <ImportButton modul="mustahik" onImportSuccess={fetchMustahik} />
-              <Button onClick={() => { setEditData(null); setDialogOpen(true); }} className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs">
-                <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
+              <Button asChild className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs">
+                <Link href="/mustahik/baru">
+                  <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
+                </Link>
               </Button>
             </div>
           </div>
@@ -209,9 +178,13 @@ export default function ManajemenMustahikPage() {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(m)} title="Edit Data & Spasial">
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
+                        
+                        <Link href={`/mustahik/baru?id=${m.id_mustahik}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Edit Data & Spasial">
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        </Link>
+
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
@@ -260,27 +233,6 @@ export default function ManajemenMustahikPage() {
           </CardContent>
         </Card>
       </div>
-
-      <AddMustahikDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        initialData={editData}
-        onSuccess={(data) => {
-          setSuccessData(data)
-          setSuccessDialogOpen(true)
-          fetchMustahik()
-        }}
-      />
-      <MustahikSuccessDialog
-        open={successDialogOpen}
-        data={successData}
-        onAddAnother={() => {
-          setSuccessDialogOpen(false)
-          setEditData(null)
-          setTimeout(() => setDialogOpen(true), 300)
-        }}
-        onClose={() => setSuccessDialogOpen(false)}
-      />
     </div>
   )
 }

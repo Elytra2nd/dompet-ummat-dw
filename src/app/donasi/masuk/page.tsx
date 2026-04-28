@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AddDonasiForm from '@/components/donasi/AddDonasiForm'
 import DonationStats from '@/components/donasi/DonationStats'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, HeartHandshake, Loader2 } from 'lucide-react'
@@ -70,6 +69,11 @@ export default function DonasiMasukPage() {
             </div>
             <div className="flex items-center gap-3">
               <ImportButton modul="donasi" onImportSuccess={fetchStats} />
+              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 font-bold shadow-md">
+                <Link href="/donasi/masuk/baru">
+                  Input Transaksi
+                </Link>
+              </Button>
               {loading && (
                 <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -82,7 +86,6 @@ export default function DonasiMasukPage() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-8 px-8">
-        {/* 2. Kirim Props secara lengkap ke komponen DonationStats */}
         <DonationStats
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
@@ -90,9 +93,6 @@ export default function DonasiMasukPage() {
           danaTersalur={stats.danaTersalur}
           pertumbuhan={stats.pertumbuhan}
         />
-
-        {/* FORM UTAMA */}
-        <AddDonasiForm />
       </div>
     </div>
   )
