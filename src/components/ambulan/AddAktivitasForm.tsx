@@ -25,9 +25,9 @@ import {
 export default function AddAktivitasForm() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    jam: SHIFT_JAM[0],
-    armada: LIST_ARMADA[0],
-    kategori_aktivitas: KATEGORI_AKTIVITAS[0],
+    jam: SHIFT_JAM[0].value,
+    armada: LIST_ARMADA[0].value,
+    kategori_aktivitas: KATEGORI_AKTIVITAS[0].value,
     biaya_operasional: '',
     keterangan: '', // Opsional
   })
@@ -87,8 +87,8 @@ export default function AddAktivitasForm() {
                 }
               >
                 {LIST_ARMADA.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
+                  <option key={a.value} value={a.value}>
+                    {a.label}
                   </option>
                 ))}
               </select>
@@ -105,8 +105,8 @@ export default function AddAktivitasForm() {
                 }
               >
                 {SHIFT_JAM.map((j) => (
-                  <option key={j} value={j}>
-                    {j}
+                  <option key={j.value} value={j.value}>
+                    {j.label}
                   </option>
                 ))}
               </select>
@@ -125,8 +125,8 @@ export default function AddAktivitasForm() {
               }
             >
               {KATEGORI_AKTIVITAS.map((k) => (
-                <option key={k} value={k}>
-                  {k}
+                <option key={k.value} value={k.value}>
+                  {k.label}
                 </option>
               ))}
             </select>

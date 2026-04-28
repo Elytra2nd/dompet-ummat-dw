@@ -69,11 +69,11 @@ export default function AddLayananForm() {
     nama_pasien: '',
     gender: 'L',
     no_hp: '',
-    status_ekonomi: 'Dhuafa',
+    status_ekonomi: STATUS_EKONOMI[0].value,
     alamat_jemput: '',
-    jam: SHIFT_JAM[0],
-    armada: LIST_ARMADA[0],
-    kategori_layanan: KATEGORI_LAYANAN[0],
+    jam: SHIFT_JAM[0].value,
+    armada: LIST_ARMADA[0].value,
+    kategori_layanan: KATEGORI_LAYANAN[0].value,
     desa: '',
     kelurahan_kecamatan: '',
     kabupaten_kota: '',
@@ -149,7 +149,7 @@ export default function AddLayananForm() {
       return toast.error('Tentukan lokasi tujuan di peta')
     setLoading(true)
     try {
-      const res = await fetch('/app/ambulan/api/layanan', {
+      const res = await fetch('/api/ambulan/layanan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -191,8 +191,8 @@ export default function AddLayananForm() {
                 }
               >
                 {LIST_ARMADA.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
+                  <option key={a.value} value={a.value}>
+                    {a.label}
                   </option>
                 ))}
               </select>
@@ -209,8 +209,8 @@ export default function AddLayananForm() {
                 }
               >
                 {SHIFT_JAM.map((j) => (
-                  <option key={j} value={j}>
-                    {j}
+                  <option key={j.value} value={j.value}>
+                    {j.label}
                   </option>
                 ))}
               </select>
@@ -246,8 +246,8 @@ export default function AddLayananForm() {
                   }
                 >
                   {KATEGORI_LAYANAN.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
+                    <option key={k.value} value={k.value}>
+                      {k.label}
                     </option>
                   ))}
                 </select>
@@ -278,8 +278,8 @@ export default function AddLayananForm() {
                   }
                 >
                   {STATUS_EKONOMI.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                    <option key={s.value} value={s.value}>
+                      {s.label}
                     </option>
                   ))}
                 </select>

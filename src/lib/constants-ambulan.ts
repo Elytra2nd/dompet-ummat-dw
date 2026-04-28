@@ -1,30 +1,34 @@
 export const SHIFT_JAM = [
-  'Pagi (06:00-12:00)',
-  'Siang (12:00-15:00)',
-  'Sore (15:00-18:00)',
-  'Malam (18:00-06:00)',
+  { label: 'Pagi (06:00-12:00)', value: 'Pagi__06_00_12_00_' },
+  { label: 'Siang (12:00-15:00)', value: 'Siang__12_00_15_00_' },
+  { label: 'Sore (15:00-18:00)', value: 'Sore__15_00_18_00_' },
+  { label: 'Malam (18:00-06:00)', value: 'Malam__18_00_06_00_' },
 ]
 
 export const LIST_ARMADA = [
-  'Ambulan 1 (KB 1234 XX)',
-  'Ambulan 2 (KB 5678 YY)',
-  'Lainnya',
+  { label: 'Ambulan 1 (KB 1234 XX)', value: 'Ambulan_1__KB_1234_XX_' },
+  { label: 'Ambulan 2 (KB 5678 YY)', value: 'Ambulan_2__KB_5678_YY_' },
+  { label: 'Lainnya', value: 'Lainnya' },
 ]
 
 export const KATEGORI_LAYANAN = [
-  'Antar Pasien',
-  'Jemput Pasien',
-  'Layanan Jenazah',
-  'Gawat Darurat',
-  'Lainnya',
+  { label: 'Antar Pasien', value: 'Antar_Pasien' },
+  { label: 'Jemput Pasien', value: 'Jemput_Pasien' },
+  { label: 'Layanan Jenazah', value: 'Layanan_Jenazah' },
+  { label: 'Gawat Darurat', value: 'Gawat_Darurat' },
+  { label: 'Lainnya', value: 'Lainnya' },
 ]
 
 export const KATEGORI_AKTIVITAS = [
-  'Isi Bensin',
-  'Servis Rutin',
-  'Ganti Suku Cadang',
-  'Pajak/Administrasi',
-  'Lainnya',
+  { label: 'Isi Bensin', value: 'Isi_Bensin' },
+  { label: 'Servis Rutin', value: 'Servis_Rutin' },
+  { label: 'Ganti Suku Cadang', value: 'Ganti_Suku_Cadang' },
+  { label: 'Pajak/Administrasi', value: 'Pajak_Administrasi' },
+  { label: 'Lainnya', value: 'Lainnya' },
 ]
 
-export const STATUS_EKONOMI = ['Dhuafa', 'Menengah', 'Mampu']
+export const STATUS_EKONOMI = [
+  { label: 'Dhuafa', value: 'Dhuafa' },
+  { label: 'Menengah', value: 'Menengah' },
+  { label: 'Mampu', value: 'Mampu' },
+]
