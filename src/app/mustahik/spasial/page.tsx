@@ -16,6 +16,9 @@ interface SpatialPoint {
   kategori: string;
   wilayah: string;
   alamat: string;
+  kabupaten: string;
+  kecamatan: string;
+  desa: string;
 }
 
 // Import dinamis untuk komponen peta
