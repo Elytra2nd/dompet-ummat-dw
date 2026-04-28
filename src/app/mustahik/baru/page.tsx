@@ -128,7 +128,9 @@ const defaultForm: MustahikFormData = {
   longitude: 0,
 }
 
-export default function AddMustahikPage() {
+import { Suspense } from 'react'
+
+export function AddMustahikFormContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const editId = searchParams.get('id')
@@ -644,5 +646,13 @@ export default function AddMustahikPage() {
         }}
       />
     </div>
+  )
+}
+
+export default function AddMustahikPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-600" /></div>}>
+      <AddMustahikFormContent />
+    </Suspense>
   )
 }

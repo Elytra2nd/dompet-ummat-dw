@@ -10,6 +10,8 @@ import { Heart, Loader2, Save, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+import { Suspense } from 'react'
+
 const kategoriOptions = [
   { label: 'Individu', value: 'Individu' },
   { label: 'Lembaga / Korporasi', value: 'Lembaga_Korporasi' },
@@ -19,7 +21,7 @@ const kategoriOptions = [
   { label: 'Data Corrupted', value: 'Data_Corrupted' },
 ]
 
-export default function AddDonaturPage() {
+function AddDonaturFormContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const editId = searchParams.get('id')
@@ -150,5 +152,13 @@ export default function AddDonaturPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function AddDonaturPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-indigo-600" /></div>}>
+      <AddDonaturFormContent />
+    </Suspense>
   )
 }
