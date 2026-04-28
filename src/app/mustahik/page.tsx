@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -32,19 +31,18 @@ import {
   Loader2,
   MapPin,
   ArrowLeft,
-  X,
   Edit3,
   Trash2,
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Eye,
-  ClipboardList,
-  Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import ImportButton from '@/components/import/ImportButton'
+import AddMustahikDialog from '@/components/mustahik/AddMustahikDialog'
+import MustahikSuccessDialog from '@/components/mustahik/MustahikSuccessDialog'
 
 interface Mustahik {
   sk_mustahik: number
@@ -62,33 +60,17 @@ interface Mustahik {
 export default function ManajemenMustahikPage() {
   const [mustahik, setMustahik] = useState<Mustahik[]>([])
   const [loading, setLoading] = useState(true)
-  const [isAdding, setIsAdding] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
   const [search, setSearch] = useState('')
 
   // --- STATE PAGINASI ---
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  const [formData, setFormData] = useState({
-    sk_mustahik: 0,
-    nama: '',
-    nik: '',
-    alamat: '',
-    kabupaten_kota: '',
-    kategori_pm: 'Asnaf_Miskin',
-    skoring: 0,
-    latitude: 0,
-    longitude: 0,
-  })
-
-  const kategoriOptions = [
-    { label: 'Asnaf Miskin', value: 'Asnaf_Miskin' },
-    { label: 'Asnaf Fakir', value: 'Asnaf_Fakir' },
-    { label: 'Asnaf Fisabilillah', value: 'Asnaf_Fisabilillah' },
-    { label: 'Asnaf Mualaf', value: 'Asnaf_Mualaf' },
-    { label: 'Asnaf Gharimin', value: 'Asnaf_Gharimin' },
-  ]
+  // --- DIALOG STATES ---
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editData, setEditData] = useState<any>(null)
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+  const [successData, setSuccessData] = useState<any>(null)
 
   useEffect(() => { fetchMustahik() }, [])
 
@@ -105,34 +87,6 @@ export default function ManajemenMustahikPage() {
     }
   }
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    const method = isEditing ? 'PUT' : 'POST'
-    try {
-      const res = await fetch('/api/mustahik/index', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      
-      const result = await res.json()
-
-      if (res.ok) {
-        toast.success(isEditing ? 'Data mustahik & koordinat diperbarui (SCD Type 2)' : 'Mustahik baru terdaftar')
-        resetForm()
-        await fetchMustahik()
-        setCurrentPage(1)
-      } else {
-        toast.error(result.error || 'Gagal menyimpan data')
-      }
-    } catch (e) { 
-      toast.error('Terjadi kesalahan koneksi database') 
-    } finally { 
-      setLoading(false) 
-    }
-  }
-
   const handleDelete = async (sk: number, nama: string) => {
     try {
       const res = await fetch(`/api/mustahik/index?sk=${sk}`, { method: 'DELETE' })
@@ -144,30 +98,28 @@ export default function ManajemenMustahikPage() {
   }
 
   const startEdit = (m: Mustahik) => {
-    setFormData({
+    setEditData({
       sk_mustahik: m.sk_mustahik,
       nama: m.nama || '',
       nik: m.nik || '',
+      kk: '', 
+      gender: 'L', 
+      no_hp: '', 
       alamat: m.alamat || '',
       kabupaten_kota: m.kabupaten_kota || '',
+      desa: '', 
+      kelurahan_kecamatan: '', 
+      provinsi: '', 
+      jumlah_jiwa: 1, 
+      dana_tersalur: 0, 
       kategori_pm: m.kategori_pm || 'Asnaf_Miskin',
       skoring: m.skoring || 0,
       latitude: m.latitude || 0,
       longitude: m.longitude || 0,
+      program_induk: '', 
+      sub_program: '', 
     })
-    setIsEditing(true)
-    setIsAdding(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const resetForm = () => {
-    setIsAdding(false)
-    setIsEditing(false)
-    setFormData({ 
-      sk_mustahik: 0, nama: '', nik: '', alamat: '', 
-      kabupaten_kota: '', kategori_pm: 'Asnaf_Miskin', 
-      skoring: 0, latitude: 0, longitude: 0 
-    })
+    setDialogOpen(true)
   }
 
   const filteredMustahik = mustahik.filter((m) => {
@@ -194,102 +146,17 @@ export default function ManajemenMustahikPage() {
             <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tighter">
               <Users className="h-8 w-8 text-emerald-600" /> Database <span className="text-emerald-600">Mustahik</span>
             </h1>
-            {!isAdding && (
-              <div className="flex items-center gap-2">
-                <ImportButton modul="mustahik" onImportSuccess={fetchMustahik} />
-                <Button onClick={() => setIsAdding(true)} className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs">
-                  <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <ImportButton modul="mustahik" onImportSuccess={fetchMustahik} />
+              <Button onClick={() => { setEditData(null); setDialogOpen(true); }} className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs">
+                <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
-        {isAdding && (
-          <Card className="animate-in fade-in slide-in-from-top-4 border-2 border-emerald-100 shadow-xl overflow-hidden bg-white rounded-none">
-            <CardHeader className="bg-emerald-50/50 py-4 border-b">
-              <CardTitle className="flex items-center justify-between text-sm font-black text-emerald-700 uppercase tracking-widest">
-                <span className="flex items-center gap-2">
-                  <ClipboardList className="h-4 w-4" /> {isEditing ? 'Update Dimensi & Spasial' : 'Registrasi Mustahik Baru'}
-                </span>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400" onClick={resetForm}><X className="h-4 w-4" /></Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSave} className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Nama Lengkap</Label>
-                  <Input required className="font-bold uppercase" value={formData.nama} onChange={(e) => setFormData({...formData, nama: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">NIK (KTP)</Label>
-                  <Input required value={formData.nik} onChange={(e) => setFormData({...formData, nik: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Skoring Kelayakan</Label>
-                  <Input type="number" required value={formData.skoring} onChange={(e) => setFormData({...formData, skoring: parseInt(e.target.value)})} />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Kategori PM</Label>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500"
-                    value={formData.kategori_pm}
-                    onChange={(e) => setFormData({...formData, kategori_pm: e.target.value})}
-                  >
-                    {kategoriOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Kabupaten / Kota</Label>
-                  <Input value={formData.kabupaten_kota} onChange={(e) => setFormData({...formData, kabupaten_kota: e.target.value})} />
-                </div>
-                <div className="md:col-span-4 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Alamat Lengkap</Label>
-                  <Input value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} />
-                </div>
-
-                {/* --- INPUT DATA SPASIAL --- */}
-                <div className="md:col-span-2 space-y-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-lg">
-                   <Label className="text-[10px] font-black uppercase text-rose-500 tracking-wider flex items-center gap-1">
-                    <Globe className="h-3 w-3" /> Latitude (Koordinat Y)
-                  </Label>
-                  <Input 
-                    type="number" 
-                    step="any"
-                    placeholder="Contoh: -0.0263"
-                    className="font-mono text-xs"
-                    value={formData.latitude} 
-                    onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value)})} 
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-lg">
-                   <Label className="text-[10px] font-black uppercase text-rose-500 tracking-wider flex items-center gap-1">
-                    <Globe className="h-3 w-3" /> Longitude (Koordinat X)
-                  </Label>
-                  <Input 
-                    type="number" 
-                    step="any"
-                    placeholder="Contoh: 109.3425"
-                    className="font-mono text-xs"
-                    value={formData.longitude} 
-                    onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value)})} 
-                  />
-                </div>
-
-                <div className="md:col-span-4 flex justify-end">
-                  <Button type="submit" disabled={loading} className="w-full md:w-auto px-12 bg-emerald-600 font-black uppercase tracking-tighter hover:bg-emerald-700 shadow-lg">
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Sync Version (SCD + Spasial)' : 'Push to Warehouse')}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
         <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-none">
           <CardHeader className="border-b py-4 bg-slate-50/50">
             <div className="relative max-w-sm">
@@ -393,6 +260,27 @@ export default function ManajemenMustahikPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AddMustahikDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initialData={editData}
+        onSuccess={(data) => {
+          setSuccessData(data)
+          setSuccessDialogOpen(true)
+          fetchMustahik()
+        }}
+      />
+      <MustahikSuccessDialog
+        open={successDialogOpen}
+        data={successData}
+        onAddAnother={() => {
+          setSuccessDialogOpen(false)
+          setEditData(null)
+          setTimeout(() => setDialogOpen(true), 300)
+        }}
+        onClose={() => setSuccessDialogOpen(false)}
+      />
     </div>
   )
 }
