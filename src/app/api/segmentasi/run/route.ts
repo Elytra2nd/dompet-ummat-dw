@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { fetchRFMData } from '@/lib/segmentasi-query'
 import { calculateRFM, minMaxNormalize } from '@/lib/ml/rfm'
 import { runKMeans } from '@/lib/ml/kmeans'
 import { silhouetteScore, silhouetteToRating, daviesBouldinIndex, calinskiHarabaszIndex } from '@/lib/ml/evaluation'
 import { SEGMENT_CONFIGS, getSegmentConfig } from '@/lib/constants-segmentasi'
-import type { RFMInput } from '@/lib/ml/rfm'
+
+// ---- Server-side Run Cache (TTL 10 menit) ----
+// Hindari recompute K-Means pada setiap request context mount
+let runCache: { result: unknown; timestamp: number } | null = null
+const RUN_CACHE_TTL = 10 * 60 * 1000
 
 /**
  * POST /api/segmentasi/run
@@ -18,51 +23,27 @@ import type { RFMInput } from '@/lib/ml/rfm'
  * 6. Return hasil dalam format user-friendly
  */
 export async function POST() {
+  // Return dari cache jika masih valid
+  if (runCache && (Date.now() - runCache.timestamp) < RUN_CACHE_TTL) {
+    return NextResponse.json({ ...(runCache.result as object), from_cache: true })
+  }
+
   let conn
   const startTime = Date.now()
   try {
     conn = await db.getConnection()
 
-    // Step 1: Query data RFM dari Data Warehouse
-    const rows = await conn.query(`
-      SELECT
-        d.sk_donatur,
-        d.id_donatur,
-        d.nama_lengkap,
-        MAX(dd.tanggal) AS last_donation_date,
-        COUNT(f.sk_fakta_donasi) AS total_transactions,
-        COALESCE(SUM(f.nominal_valid), 0) AS total_amount
-      FROM fact_donasi f
-      JOIN dim_donatur d ON f.sk_donatur = d.sk_donatur
-      JOIN dim_date dd ON f.sk_tgl_bersih = dd.sk_date
-      WHERE d.sk_donatur > 0
-        AND d.is_active = 1
-        AND f.nominal_valid > 0
-      GROUP BY d.sk_donatur, d.id_donatur, d.nama_lengkap
-      HAVING total_transactions >= 1
-      ORDER BY total_amount DESC
-    `)
+    // Step 1: Query data RFM dari Data Warehouse (shared query)
+    const { rfmInput } = await fetchRFMData(conn)
 
-    if (!rows || rows.length === 0) {
+    if (rfmInput.length === 0) {
       return NextResponse.json(
         { error: 'Tidak ada data donatur yang memenuhi syarat' },
         { status: 404 }
       )
     }
 
-    // Step 2: Transform ke RFMInput
-    const rfmInput: RFMInput[] = rows.map((row: any) => ({
-      sk_donatur: Number(row.sk_donatur),
-      id_donatur: String(row.id_donatur),
-      nama_lengkap: String(row.nama_lengkap || 'Tanpa Nama'),
-      last_donation_date: row.last_donation_date
-        ? new Date(row.last_donation_date).toISOString()
-        : new Date().toISOString(),
-      total_transactions: Number(row.total_transactions),
-      total_amount: Number(row.total_amount),
-    }))
-
-    // Step 3: Hitung RFM
+    // Step 2: Hitung RFM (sebelumnya Step 3)
     const { results: rfmResults, stats } = calculateRFM(rfmInput)
 
     // Step 4: Normalisasi untuk clustering
@@ -114,11 +95,6 @@ export async function POST() {
       return {
         key,
         label: config.label,
-        description: config.description,
-        color: config.color,
-        bgColor: config.bgColor,
-        borderColor: config.borderColor,
-        iconName: config.iconName,
         count: members.length,
         percentage: Math.round((members.length / enrichedResults.length) * 10000) / 100,
         avg_recency: members.length > 0
@@ -131,13 +107,12 @@ export async function POST() {
           ? Math.round(totalMonetary / members.length)
           : 0,
         total_monetary: totalMonetary,
-        recommendation: config.recommendation,
       }
     }).filter(s => s.count > 0)
 
     const elapsedMs = Date.now() - startTime
 
-    return NextResponse.json({
+    const result = {
       success: true,
       timestamp: new Date().toISOString(),
       elapsed_ms: elapsedMs,
@@ -153,11 +128,17 @@ export async function POST() {
       },
       segments: segmentSummary,
       total_donatur: enrichedResults.length,
-    })
-  } catch (error: any) {
-    console.error('SEGMENTASI_RUN_ERROR:', error)
+    }
+
+    // Simpan ke cache server
+    runCache = { result, timestamp: Date.now() }
+
+    return NextResponse.json(result)
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('SEGMENTASI_RUN_ERROR:', msg)
     return NextResponse.json(
-      { error: 'Gagal menjalankan analisis segmentasi', details: error.message },
+      { error: 'Gagal menjalankan analisis segmentasi', details: msg },
       { status: 500 }
     )
   } finally {

@@ -1,14 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { fetchRFMData } from '@/lib/segmentasi-query'
 import { calculateRFM } from '@/lib/ml/rfm'
 import { getSegmentConfig } from '@/lib/constants-segmentasi'
-import type { RFMInput } from '@/lib/ml/rfm'
+
+// ---- Types ----
+interface EnrichedDonatur {
+  sk_donatur: number
+  id_donatur: string
+  nama_lengkap: string
+  tipe: string
+  kontak: string
+  recency: number
+  frequency: number
+  monetary: number
+  r_score: number
+  f_score: number
+  m_score: number
+  rfm_score: number
+  segment_key: string
+  segment_label: string
+}
+
+// ---- Server-side RFM Cache (TTL 5 menit) ----
+let rfmCache: { data: EnrichedDonatur[]; timestamp: number } | null = null
+const CACHE_TTL = 5 * 60 * 1000 // 5 menit
+
+type SortKey = 'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap'
 
 /**
- * GET /api/segmentasi/donatur?segment=champions&page=1&limit=20
- * =============================================================
- * Ambil daftar donatur untuk segmen tertentu.
- * Jika segment tidak diberikan, return semua donatur dengan segment-nya.
+ * GET /api/segmentasi/donatur
+ * ===========================
+ * Query params:
+ *   - segment   : filter segmen (e.g. "champions")
+ *   - page      : halaman (default 1)
+ *   - limit     : per halaman (default 20, max 10000)
+ *   - search    : cari nama donatur (server-side, semua data)
+ *   - sort      : kolom sorting (recency|frequency|monetary|rfm_score|nama_lengkap)
+ *   - order     : asc | desc (default: desc untuk numerik, asc untuk nama)
  */
 export async function GET(request: NextRequest) {
   let conn
@@ -17,74 +46,79 @@ export async function GET(request: NextRequest) {
     const segmentFilter = searchParams.get('segment') || ''
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const limit = Math.min(10000, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const search = (searchParams.get('search') || '').trim().toLowerCase()
+    const sortKey = (searchParams.get('sort') || '') as SortKey
+    const sortOrder = searchParams.get('order') === 'asc' ? 'asc' : 'desc'
 
-    conn = await db.getConnection()
+    // Gunakan cache jika masih valid
+    let enriched: EnrichedDonatur[]
+    const now = Date.now()
 
-    // Query data RFM
-    const rows = await conn.query(`
-      SELECT
-        d.sk_donatur,
-        d.id_donatur,
-        d.nama_lengkap,
-        d.tipe,
-        d.kontak_utama,
-        MAX(dd.tanggal) AS last_donation_date,
-        COUNT(f.sk_fakta_donasi) AS total_transactions,
-        COALESCE(SUM(f.nominal_valid), 0) AS total_amount
-      FROM fact_donasi f
-      JOIN dim_donatur d ON f.sk_donatur = d.sk_donatur
-      JOIN dim_date dd ON f.sk_tgl_bersih = dd.sk_date
-      WHERE d.sk_donatur > 0
-        AND d.is_active = 1
-        AND f.nominal_valid > 0
-      GROUP BY d.sk_donatur, d.id_donatur, d.nama_lengkap, d.tipe, d.kontak_utama
-      HAVING total_transactions >= 1
-      ORDER BY total_amount DESC
-    `)
+    if (rfmCache && (now - rfmCache.timestamp) < CACHE_TTL) {
+      enriched = rfmCache.data
+    } else {
+      conn = await db.getConnection()
 
-    if (!rows || rows.length === 0) {
-      return NextResponse.json({ donatur: [], total: 0, page, limit })
+      // Query data RFM (shared query — includeProfile for tipe & kontak)
+      const { rows, rfmInput } = await fetchRFMData(conn, { includeProfile: true })
+
+      if (rfmInput.length === 0) {
+        return NextResponse.json({ donatur: [], total: 0, page, limit, total_pages: 0 })
+      }
+
+      // Hitung RFM
+      const { results } = calculateRFM(rfmInput)
+
+      // Enrich dengan segment labels + extra data
+      enriched = results.map((r, i) => {
+        const config = getSegmentConfig(r.segment_key)
+        return {
+          sk_donatur: r.sk_donatur,
+          id_donatur: r.id_donatur,
+          nama_lengkap: r.nama_lengkap,
+          tipe: rows[i]?.tipe || 'Individu',
+          kontak: rows[i]?.kontak_utama || '-',
+          recency: r.recency,
+          frequency: r.frequency,
+          monetary: r.monetary,
+          r_score: r.r_score,
+          f_score: r.f_score,
+          m_score: r.m_score,
+          rfm_score: r.rfm_score,
+          segment_key: r.segment_key,
+          segment_label: config.label,
+        }
+      })
+
+      // Simpan ke cache
+      rfmCache = { data: enriched, timestamp: now }
     }
 
-    // Transform + hitung RFM
-    const rfmInput: RFMInput[] = rows.map((row: any) => ({
-      sk_donatur: Number(row.sk_donatur),
-      id_donatur: String(row.id_donatur),
-      nama_lengkap: String(row.nama_lengkap || 'Tanpa Nama'),
-      last_donation_date: row.last_donation_date
-        ? new Date(row.last_donation_date).toISOString()
-        : new Date().toISOString(),
-      total_transactions: Number(row.total_transactions),
-      total_amount: Number(row.total_amount),
-    }))
-
-    const { results } = calculateRFM(rfmInput)
-
-    // Enrich dengan segment labels + extra data
-    const enriched = results.map((r, i) => {
-      const config = getSegmentConfig(r.segment_key)
-      return {
-        sk_donatur: r.sk_donatur,
-        id_donatur: r.id_donatur,
-        nama_lengkap: r.nama_lengkap,
-        tipe: rows[i].tipe || 'Individu',
-        kontak: rows[i].kontak_utama || '-',
-        recency: r.recency,
-        frequency: r.frequency,
-        monetary: r.monetary,
-        r_score: r.r_score,
-        f_score: r.f_score,
-        m_score: r.m_score,
-        rfm_score: r.rfm_score,
-        segment_key: r.segment_key,
-        segment_label: config.label,
-      }
-    })
-
-    // Filter by segment if provided
-    const filtered = segmentFilter
+    // Filter by segment
+    let filtered = segmentFilter
       ? enriched.filter(d => d.segment_key === segmentFilter)
       : enriched
+
+    // Server-side search (across ALL data, not just current page)
+    if (search) {
+      filtered = filtered.filter(d =>
+        d.nama_lengkap.toLowerCase().includes(search) ||
+        d.id_donatur.toLowerCase().includes(search) ||
+        (d.tipe && d.tipe.toLowerCase().includes(search))
+      )
+    }
+
+    // Server-side sort
+    if (sortKey && ['recency', 'frequency', 'monetary', 'rfm_score', 'nama_lengkap'].includes(sortKey)) {
+      filtered = [...filtered].sort((a, b) => {
+        if (sortKey === 'nama_lengkap') {
+          const cmp = a.nama_lengkap.localeCompare(b.nama_lengkap, 'id')
+          return sortOrder === 'asc' ? cmp : -cmp
+        }
+        const diff = a[sortKey] - b[sortKey]
+        return sortOrder === 'asc' ? diff : -diff
+      })
+    }
 
     // Paginate
     const total = filtered.length
@@ -98,13 +132,15 @@ export async function GET(request: NextRequest) {
       limit,
       total_pages: Math.ceil(total / limit),
     })
-  } catch (error: any) {
-    console.error('SEGMENTASI_DONATUR_ERROR:', error)
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('SEGMENTASI_DONATUR_ERROR:', msg)
     return NextResponse.json(
-      { error: 'Gagal memuat daftar donatur', details: error.message },
+      { error: 'Gagal memuat daftar donatur', details: msg },
       { status: 500 }
     )
   } finally {
     if (conn) conn.release()
   }
 }
+

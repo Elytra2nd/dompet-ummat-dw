@@ -1,11 +1,32 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { fetchRFMData } from '@/lib/segmentasi-query'
 import { calculateRFM, minMaxNormalize } from '@/lib/ml/rfm'
 import { runKMeans } from '@/lib/ml/kmeans'
 import { runKMedoids } from '@/lib/ml/kmedoids'
 import { runDBSCAN, autoTuneEps } from '@/lib/ml/dbscan'
 import { silhouetteScore, daviesBouldinIndex, calinskiHarabaszIndex } from '@/lib/ml/evaluation'
-import type { RFMInput } from '@/lib/ml/rfm'
+
+// ---- Server-side Compare Cache (TTL 30 menit) ----
+// K-Medoids butuh ~107 detik, jadi cache hasilnya
+let compareCache: { result: any; timestamp: number } | null = null
+const COMPARE_CACHE_TTL = 30 * 60 * 1000 // 30 menit
+
+/**
+ * GET /api/segmentasi/compare
+ * ===========================
+ * Ambil hasil perbandingan terakhir dari cache.
+ * Jika belum ada cache, return 404 dengan instruksi POST dulu.
+ */
+export async function GET() {
+  if (compareCache && (Date.now() - compareCache.timestamp) < COMPARE_CACHE_TTL) {
+    return NextResponse.json({ ...compareCache.result, from_cache: true })
+  }
+  return NextResponse.json(
+    { error: 'Belum ada hasil perbandingan. Kirim POST terlebih dahulu.', cached: false },
+    { status: 404 }
+  )
+}
 
 /**
  * POST /api/segmentasi/compare
@@ -16,51 +37,28 @@ import type { RFMInput } from '@/lib/ml/rfm'
  * 3. DBSCAN (density-based, auto-tune eps)
  *
  * Return metrics perbandingan untuk BAB IV laporan.
+ * Hasil di-cache selama 30 menit.
  */
 export async function POST() {
+  // Return cache jika masih valid
+  if (compareCache && (Date.now() - compareCache.timestamp) < COMPARE_CACHE_TTL) {
+    return NextResponse.json({ ...compareCache.result, from_cache: true })
+  }
+
   let conn
   const startTime = Date.now()
   try {
     conn = await db.getConnection()
 
-    // Query data (sama seperti /run)
-    const rows = await conn.query(`
-      SELECT
-        d.sk_donatur,
-        d.id_donatur,
-        d.nama_lengkap,
-        MAX(dd.tanggal) AS last_donation_date,
-        COUNT(f.sk_fakta_donasi) AS total_transactions,
-        COALESCE(SUM(f.nominal_valid), 0) AS total_amount
-      FROM fact_donasi f
-      JOIN dim_donatur d ON f.sk_donatur = d.sk_donatur
-      JOIN dim_date dd ON f.sk_tgl_bersih = dd.sk_date
-      WHERE d.sk_donatur > 0
-        AND d.is_active = 1
-        AND f.nominal_valid > 0
-      GROUP BY d.sk_donatur, d.id_donatur, d.nama_lengkap
-      HAVING total_transactions >= 1
-      ORDER BY total_amount DESC
-    `)
+    // Query + transform RFM (shared helper — no duplicate SQL)
+    const { rfmInput } = await fetchRFMData(conn)
 
-    if (!rows || rows.length === 0) {
+    if (rfmInput.length === 0) {
       return NextResponse.json(
         { error: 'Tidak ada data donatur' },
         { status: 404 }
       )
     }
-
-    // RFM
-    const rfmInput: RFMInput[] = rows.map((row: any) => ({
-      sk_donatur: Number(row.sk_donatur),
-      id_donatur: String(row.id_donatur),
-      nama_lengkap: String(row.nama_lengkap || 'Tanpa Nama'),
-      last_donation_date: row.last_donation_date
-        ? new Date(row.last_donation_date).toISOString()
-        : new Date().toISOString(),
-      total_transactions: Number(row.total_transactions),
-      total_amount: Number(row.total_amount),
-    }))
 
     const { results: rfmResults, stats } = calculateRFM(rfmInput)
 
@@ -189,7 +187,7 @@ export async function POST() {
     const winner = ranked[0].name
     const elapsedMs = Date.now() - startTime
 
-    return NextResponse.json({
+    const result = {
       success: true,
       timestamp: new Date().toISOString(),
       elapsed_ms: elapsedMs,
@@ -261,7 +259,12 @@ export async function POST() {
           composite_score: Math.round(r.score * 10000) / 10000,
         })),
       },
-    })
+    }
+
+    // Simpan ke cache (30 menit)
+    compareCache = { result, timestamp: Date.now() }
+
+    return NextResponse.json(result)
   } catch (error: any) {
     console.error('SEGMENTASI_COMPARE_ERROR:', error)
     return NextResponse.json(
