@@ -1,13 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const body = await req.json()
     const { nominal_valid, no_ref } = body
     
     const updated = await prisma.fact_donasi.update({
-      where: { sk_fakta_donasi: parseInt(params.id) },
+      where: { sk_fakta_donasi: parseInt(id) },
       data: {
         nominal_valid: nominal_valid ? parseFloat(nominal_valid) : undefined,
         no_ref: no_ref !== undefined ? no_ref : undefined,
@@ -21,10 +22,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     await prisma.fact_donasi.delete({
-      where: { sk_fakta_donasi: parseInt(params.id) }
+      where: { sk_fakta_donasi: parseInt(id) }
     })
     return NextResponse.json({ success: true })
   } catch (error: any) {
