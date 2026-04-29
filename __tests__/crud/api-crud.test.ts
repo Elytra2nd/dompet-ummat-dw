@@ -38,6 +38,8 @@ const mockPrisma = {
   fact_penyaluran: {
     findMany: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
   fact_layanan_ambulan: {
     create: vi.fn(),
@@ -167,11 +169,12 @@ describe('Mustahik CRUD', () => {
         is_active: true,
       }
       mockPrisma.dim_mustahik.findUnique.mockResolvedValue(oldData)
+      mockPrisma.dim_mustahik.findMany.mockResolvedValue([{ id_mustahik: 'MST-KES-0001' }]) // Mock existing versions
       mockPrisma.dim_mustahik.update.mockResolvedValue({ ...oldData, is_active: false })
       mockPrisma.dim_lokasi.create.mockResolvedValue({ sk_lokasi: 20 })
       mockPrisma.dim_mustahik.create.mockResolvedValue({
         sk_mustahik: 2,
-        id_mustahik: 'MST-KES-0001', // Same business ID
+        id_mustahik: 'MST-KES-0001-v2', // Versioned ID
         nama: 'New Name',
         is_active: true,
       })
@@ -197,8 +200,8 @@ describe('Mustahik CRUD', () => {
           data: expect.objectContaining({ is_active: false }),
         })
       )
-      // New record should keep same business ID
-      expect(data.id_mustahik).toBe('MST-KES-0001')
+      // New record should have versioned ID
+      expect(data.id_mustahik).toBe('MST-KES-0001-v2')
       expect(data.is_active).toBe(true)
     })
 
@@ -337,6 +340,86 @@ describe('Penyaluran CRUD', () => {
       const data = await res.json()
 
       expect(data.success).toBe(true)
+    })
+  })
+
+  describe('PUT /api/donasi/keluar — Update Penyaluran', () => {
+    it('should update penyaluran record', async () => {
+      const { PUT } = await import('@/app/api/donasi/keluar/route')
+
+      mockPrisma.fact_penyaluran.update.mockResolvedValue({
+        sk_fakta_penyaluran: 1,
+        dana_tersalur: 400000,
+        status_pengajuan: 'Disetujui',
+      })
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sk_fakta_penyaluran: 1,
+          dana_tersalur: 400000,
+          status_pengajuan: 'Disetujui',
+        }),
+      })
+
+      const res = await PUT(req)
+      const data = await res.json()
+
+      expect(data.success).toBe(true)
+      expect(mockPrisma.fact_penyaluran.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { sk_fakta_penyaluran: 1 },
+          data: expect.objectContaining({
+            dana_tersalur: 400000,
+            status_pengajuan: 'Disetujui',
+          }),
+        })
+      )
+    })
+
+    it('should return error if no sk is provided', async () => {
+      const { PUT } = await import('@/app/api/donasi/keluar/route')
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      const res = await PUT(req)
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('DELETE /api/donasi/keluar — Delete Penyaluran', () => {
+    it('should delete penyaluran record', async () => {
+      const { DELETE } = await import('@/app/api/donasi/keluar/route')
+
+      mockPrisma.fact_penyaluran.delete.mockResolvedValue({})
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar?sk=1', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      const data = await res.json()
+
+      expect(data.success).toBe(true)
+      expect(mockPrisma.fact_penyaluran.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { sk_fakta_penyaluran: 1 } })
+      )
+    })
+
+    it('should return error if no sk is provided', async () => {
+      const { DELETE } = await import('@/app/api/donasi/keluar/route')
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      expect(res.status).toBe(400)
     })
   })
 })

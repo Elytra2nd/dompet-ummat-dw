@@ -14,6 +14,7 @@ import {
   validateMustahikRow,
   validateAmbulanLayananRow,
   validateAmbulanAktivitasRow,
+  validateDonaturRow,
 } from '@/lib/import-validation'
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -386,3 +387,68 @@ describe('validateAmbulanAktivitasRow', () => {
     expect(parsed).not.toBeNull()
   })
 })
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// VALIDATOR: DONATUR
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('validateDonaturRow', () => {
+  const validRow = {
+    nama_lengkap: 'Budi Santoso',
+    kontak_utama: '081234567890',
+    tipe: 'Individu',
+    alamat: 'Jl. Merdeka No 1',
+    perusahaan: '-',
+  }
+
+  it('should accept a valid donatur row', () => {
+    const { errors, parsed } = validateDonaturRow(validRow, 1)
+    expect(errors).toHaveLength(0)
+    expect(parsed).not.toBeNull()
+    expect(parsed!.nama_lengkap).toBe('Budi Santoso')
+  })
+
+  it('should reject missing nama_lengkap', () => {
+    const { errors } = validateDonaturRow({ ...validRow, nama_lengkap: '' }, 1)
+    expect(errors.some(e => e.field === 'nama_lengkap')).toBe(true)
+  })
+
+  it('should reject short nama_lengkap', () => {
+    const { errors } = validateDonaturRow({ ...validRow, nama_lengkap: 'A' }, 1)
+    expect(errors.some(e => e.field === 'nama_lengkap')).toBe(true)
+  })
+
+  it('should reject missing kontak_utama', () => {
+    const { errors } = validateDonaturRow({ ...validRow, kontak_utama: '' }, 1)
+    expect(errors.some(e => e.field === 'kontak_utama')).toBe(true)
+  })
+
+  it('should warn on invalid kontak_utama format', () => {
+    const { errors } = validateDonaturRow({ ...validRow, kontak_utama: '123' }, 1) // Too short, but string length might be short
+    // Wait, the validation logic checks string length < 7 for required, then digits < 7 for format warning.
+    // If we pass '1234567A', length is 8, digits is 7.
+    // Let's pass '12345678A' -> length 9, digits 8. Valid format.
+    // Let's pass '1234567' -> length 7, digits 7. Valid format.
+    // Let's pass 'abcdefg' -> length 7, digits 0. Warning.
+    const { errors: warningErrors } = validateDonaturRow({ ...validRow, kontak_utama: 'abcdefg' }, 1)
+    const warning = warningErrors.find(e => e.field === 'kontak_utama' && e.severity === 'warning')
+    expect(warning).toBeDefined()
+  })
+
+  it('should reject invalid tipe donatur', () => {
+    const { errors } = validateDonaturRow({ ...validRow, tipe: 'Asing' }, 1)
+    expect(errors.some(e => e.field === 'tipe')).toBe(true)
+  })
+
+  it('should handle optional alamat and perusahaan', () => {
+    const { errors, parsed } = validateDonaturRow({
+      nama_lengkap: 'Budi Santoso',
+      kontak_utama: '081234567890',
+      tipe: 'Individu'
+    }, 1)
+    expect(errors).toHaveLength(0)
+    expect(parsed?.alamat).toBeUndefined()
+    expect(parsed?.perusahaan).toBeUndefined()
+  })
+})
+
