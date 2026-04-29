@@ -133,22 +133,20 @@ export default function LaporanIndividuPage() {
       <div className="min-h-screen bg-slate-50 pb-12 font-sans print:bg-white print:p-0">
         
         {/* NON-PRINTABLE CONTROL AREA */}
-        <div className="mx-auto max-w-5xl p-6 print:hidden">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2 text-slate-500 hover:text-indigo-600">
-                <Link href="/reports"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Pusat Laporan</Link>
-              </Button>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                <Printer className="h-8 w-8 text-indigo-600" /> Laporan Individu Donatur
-              </h1>
-              <p className="mt-1 text-slate-500">Buat laporan histori donasi siap cetak (A4) per donatur.</p>
-            </div>
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 print:hidden">
+          <div className="mb-6">
+            <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2 text-slate-500 hover:text-indigo-600">
+              <Link href="/reports"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Pusat Laporan</Link>
+            </Button>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <Printer className="h-7 w-7 text-indigo-600 shrink-0" /> Laporan Individu Donatur
+            </h1>
+            <p className="mt-1 text-slate-500 text-sm">Buat laporan histori donasi siap cetak (A4) per donatur.</p>
           </div>
 
           <Card className="shadow-md border-slate-200 mb-8">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-end gap-4">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col gap-4">
                 <div className="flex-1 w-full relative" ref={searchRef}>
                   <label className="block text-xs font-black uppercase text-slate-500 mb-2">Cari Donatur (Nama / No. HP)</label>
                   <div className="relative">
@@ -179,34 +177,36 @@ export default function LaporanIndividuPage() {
                   )}
                 </div>
 
-                <div className="w-full md:w-32">
-                  <label className="block text-xs font-black uppercase text-slate-500 mb-2">Tahun</label>
-                  <select 
-                    className="w-full h-10 rounded-md border border-slate-200 px-3 text-sm"
-                    value={selectedYear}
-                    onChange={e => setSelectedYear(e.target.value)}
-                  >
-                    {[...Array(5)].map((_, i) => {
-                      const yr = (new Date().getFullYear() - i).toString();
-                      return <option key={yr} value={yr}>{yr}</option>
-                    })}
-                  </select>
-                </div>
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+                  <div className="w-full sm:w-32">
+                    <label className="block text-xs font-black uppercase text-slate-500 mb-2">Tahun</label>
+                    <select 
+                      className="w-full h-10 rounded-md border border-slate-200 px-3 text-sm"
+                      value={selectedYear}
+                      onChange={e => setSelectedYear(e.target.value)}
+                    >
+                      {[...Array(5)].map((_, i) => {
+                        const yr = (new Date().getFullYear() - i).toString();
+                        return <option key={yr} value={yr}>{yr}</option>
+                      })}
+                    </select>
+                  </div>
 
-                <Button 
-                  onClick={generateLaporan} 
-                  disabled={!selectedDonatur || isLoadingLaporan}
-                  className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 font-bold"
-                >
-                  {isLoadingLaporan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Tampilkan Data'}
-                </Button>
+                  <Button 
+                    onClick={generateLaporan} 
+                    disabled={!selectedDonatur || isLoadingLaporan}
+                    className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 font-bold h-10"
+                  >
+                    {isLoadingLaporan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Tampilkan Data'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {laporan && (
             <div className="mb-4 flex justify-end">
-              <Button onClick={handlePrint} className="bg-emerald-600 hover:bg-emerald-700 shadow-lg" size="lg">
+              <Button onClick={handlePrint} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 shadow-lg" size="lg">
                 <Printer className="mr-2 h-5 w-5" /> Cetak / Simpan PDF
               </Button>
             </div>

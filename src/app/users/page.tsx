@@ -194,21 +194,21 @@ export default function UserManagementPage() {
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-6xl mx-auto">
+    <div className="space-y-6 p-4 sm:p-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-200">
-              <Users className="h-7 w-7 text-white" />
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-200">
+              <Users className="h-6 w-6 text-white" />
             </div>
             Manajemen Pengguna
           </h1>
-          <p className="text-slate-500 mt-2 ml-14">
+          <p className="text-slate-500 mt-1 ml-12 text-sm">
             Kelola hak akses sistem, tambah relawan baru, dan atur akun staf administrator.
           </p>
         </div>
-        <Button onClick={handleOpenCreate} className="bg-indigo-600 hover:bg-indigo-700 shadow-md">
+        <Button onClick={handleOpenCreate} className="bg-indigo-600 hover:bg-indigo-700 shadow-md w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" /> Tambah Pengguna
         </Button>
       </div>
@@ -234,10 +234,10 @@ export default function UserManagementPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="w-[250px]">Nama Lengkap</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead className="w-[200px]">Nama Lengkap</TableHead>
+                  <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Role Hak Akses</TableHead>
-                  <TableHead>Terdaftar Sejak</TableHead>
+                  <TableHead className="hidden md:table-cell">Terdaftar Sejak</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>

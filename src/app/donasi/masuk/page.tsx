@@ -41,7 +41,7 @@ export default function DonasiMasukPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="mb-2 flex items-center gap-4">
             <Button
               variant="ghost"
@@ -57,17 +57,17 @@ export default function DonasiMasukPage() {
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
-                <HeartHandshake className="h-8 w-8 text-indigo-600" />
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+                <HeartHandshake className="h-7 w-7 text-indigo-600 shrink-0" />
                 Penerimaan <span className="text-indigo-600">Donasi</span>
               </h1>
-              <p className="mt-1 font-medium text-slate-500">
+              <p className="mt-1 font-medium text-slate-500 text-sm">
                 Pencatatan dana Ziswaf masuk untuk pemberdayaan ummat
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <ImportButton modul="donasi" onImportSuccess={fetchStats} />
-              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 font-bold shadow-md">
+              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 font-bold shadow-md h-10">
                 <Link href="/donasi/masuk/baru">
                   Input Transaksi
                 </Link>
@@ -75,7 +75,7 @@ export default function DonasiMasukPage() {
               {loading && (
                 <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Sinkronisasi...
+                  <span className="hidden sm:inline">Sinkronisasi...</span>
                 </div>
               )}
             </div>
@@ -83,7 +83,7 @@ export default function DonasiMasukPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-8 px-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
         <DonationStats
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
