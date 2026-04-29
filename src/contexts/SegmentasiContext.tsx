@@ -16,6 +16,9 @@ interface SegmentData {
   avg_frequency: number
   avg_monetary: number
   total_monetary: number
+  avg_r_score: number
+  avg_f_score: number
+  avg_m_score: number
   recommendation: {
     title: string
     description: string

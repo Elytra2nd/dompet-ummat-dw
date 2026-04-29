@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -70,6 +71,9 @@ interface SegmentDetail {
   avg_frequency: number
   avg_monetary: number
   total_monetary: number
+  avg_r_score: number
+  avg_f_score: number
+  avg_m_score: number
 }
 
 // Format Rupiah
@@ -90,29 +94,44 @@ export default function SegmentDetailPage({
   const { segmen } = use(params)
   const config = getSegmentConfig(segmen)
 
+  const router = useRouter()
+  const searchParamsHook = useSearchParams()
+
+  // Init state dari URL params
   const [segment, setSegment] = useState<SegmentDetail | null>(null)
   const [donaturList, setDonaturList] = useState<DonaturRow[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingDonatur, setLoadingDonatur] = useState(true)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(() => parseInt(searchParamsHook.get('page') ?? '1'))
   const [totalPages, setTotalPages] = useState(1)
   const [totalDonatur, setTotalDonatur] = useState(0)
   const [overallStats, setOverallStats] = useState({ avg_recency: 0, avg_frequency: 0, avg_monetary: 0 })
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap' | ''>('')
-  const [sortAsc, setSortAsc] = useState(true)
+  const [searchQuery, setSearchQuery] = useState(() => searchParamsHook.get('search') ?? '')
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParamsHook.get('search') ?? '')
+  const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap' | ''>(
+    () => (searchParamsHook.get('sort') ?? '') as 'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap' | ''
+  )
+  const [sortAsc, setSortAsc] = useState(() => (searchParamsHook.get('order') ?? 'desc') === 'asc')
 
   const { data: analysisData, loading: analysisLoading, runAnalysis } = useSegmentasi()
 
-  // Use cached data from context
+  // Sync state ke URL (biar bisa share/refresh dan tetap di posisi yang sama)
+  const syncURL = useCallback((p: number, s: string, sk: string, sa: boolean) => {
+    const params = new URLSearchParams()
+    if (p > 1) params.set('page', String(p))
+    if (s) params.set('search', s)
+    if (sk) { params.set('sort', sk); params.set('order', sa ? 'asc' : 'desc') }
+    const qs = params.toString()
+    router.replace(`/segmentasi/${segmen}${qs ? `?${qs}` : ''}`, { scroll: false })
+  }, [segmen, router])
+
   useEffect(() => {
-    runAnalysis() // uses cache if available
+    runAnalysis()
   }, [segmen])
 
   useEffect(() => {
     if (analysisData) {
-      const found = analysisData.segments.find((s: any) => s.key === segmen)
+      const found = analysisData.segments.find((s: { key: string }) => s.key === segmen)
       if (found) setSegment(found)
       setOverallStats({
         avg_recency: analysisData.stats.avg_recency,
@@ -123,31 +142,30 @@ export default function SegmentDetailPage({
     }
   }, [analysisData, segmen])
 
-  // Debounce search — tunggu 400ms setelah user berhenti mengetik
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery)
-      setPage(1) // reset ke halaman 1 saat search berubah
+      setPage(1)
     }, 400)
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Fetch donatur list — server-side search, sort, pagination
+  // Fetch donatur + sync URL
   useEffect(() => {
+    syncURL(page, debouncedSearch, sortKey, sortAsc)
+
     async function fetchDonatur() {
       setLoadingDonatur(true)
       try {
-        const params = new URLSearchParams({
+        const apiParams = new URLSearchParams({
           segment: segmen,
           page: String(page),
           limit: '15',
         })
-        if (debouncedSearch) params.set('search', debouncedSearch)
-        if (sortKey) {
-          params.set('sort', sortKey)
-          params.set('order', sortAsc ? 'asc' : 'desc')
-        }
-        const res = await fetch(`/api/segmentasi/donatur?${params}`)
+        if (debouncedSearch) apiParams.set('search', debouncedSearch)
+        if (sortKey) { apiParams.set('sort', sortKey); apiParams.set('order', sortAsc ? 'asc' : 'desc') }
+        const res = await fetch(`/api/segmentasi/donatur?${apiParams}`)
         if (!res.ok) throw new Error('Gagal memuat donatur')
         const data = await res.json()
         setDonaturList(data.donatur)
@@ -162,23 +180,11 @@ export default function SegmentDetailPage({
     fetchDonatur()
   }, [segmen, page, debouncedSearch, sortKey, sortAsc])
 
-  // Radar chart data: perbandingan segmen ini vs rata-rata keseluruhan
+  // Radar chart: pakai RFM score (1–5) yang sudah terstandarisasi — jauh lebih akurat
   const radarData = segment ? [
-    {
-      metric: 'Waktu Donasi',
-      segment: Math.max(0, 5 - Math.min(5, segment.avg_recency / (overallStats.avg_recency || 1) * 2.5)),
-      overall: 2.5,
-    },
-    {
-      metric: 'Frekuensi',
-      segment: Math.min(5, (segment.avg_frequency / (overallStats.avg_frequency || 1)) * 2.5),
-      overall: 2.5,
-    },
-    {
-      metric: 'Nominal',
-      segment: Math.min(5, (segment.avg_monetary / (overallStats.avg_monetary || 1)) * 2.5),
-      overall: 2.5,
-    },
+    { metric: 'Recency', segment: segment.avg_r_score, overall: 3, max: 5 },
+    { metric: 'Frequency', segment: segment.avg_f_score, overall: 3, max: 5 },
+    { metric: 'Monetary', segment: segment.avg_m_score, overall: 3, max: 5 },
   ] : []
 
   const IconComponent = (LucideIcons as any)[config.iconName] || LucideIcons.Users
@@ -382,7 +388,7 @@ export default function SegmentDetailPage({
                       <RadarChart data={radarData}>
                         <PolarGrid stroke="#e2e8f0" />
                         <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fontWeight: 700, fill: '#475569' }} />
-                        <PolarRadiusAxis angle={90} domain={[0, 5]} tick={false} axisLine={false} />
+                        <PolarRadiusAxis angle={90} domain={[0, 5]} tick={{ fontSize: 8, fill: '#94a3b8' }} axisLine={false} />
                         <Radar name={config.label} dataKey="segment" stroke="#059669" fill="#059669" fillOpacity={0.3} strokeWidth={2} />
                         <Radar name="Rata-rata" dataKey="overall" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.1} strokeWidth={1} strokeDasharray="5 5" />
                         <Tooltip />
@@ -482,8 +488,22 @@ export default function SegmentDetailPage({
                   </div>
                 </div>
                 {loadingDonatur ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <tbody>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <tr key={i} className="border-b">
+                            <td className="px-4 py-3"><div className="h-3 w-32 rounded-full bg-slate-100 animate-pulse" /></td>
+                            <td className="px-4 py-3"><div className="h-3 w-16 rounded-full bg-slate-100 animate-pulse" /></td>
+                            <td className="px-4 py-3"><div className="h-6 w-28 rounded-full bg-slate-100 animate-pulse ml-auto" /></td>
+                            <td className="px-4 py-3"><div className="h-3 w-12 rounded-full bg-slate-100 animate-pulse ml-auto" /></td>
+                            <td className="px-4 py-3"><div className="h-3 w-10 rounded-full bg-slate-100 animate-pulse ml-auto" /></td>
+                            <td className="px-4 py-3"><div className="h-3 w-20 rounded-full bg-slate-100 animate-pulse ml-auto" /></td>
+                            <td className="px-4 py-3"><div className="h-5 w-8 rounded-full bg-slate-100 animate-pulse ml-auto" /></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ) : (
                   <>
@@ -578,7 +598,13 @@ export default function SegmentDetailPage({
                     {/* Pagination */}
                     <div className="flex items-center justify-between border-t px-4 py-3">
                       <p className="text-xs text-slate-400">
-                        Halaman {page} dari {totalPages}
+                        {(() => {
+                          const from = (page - 1) * 15 + 1
+                          const to = Math.min(page * 15, totalDonatur)
+                          return totalDonatur > 0
+                            ? `${from}–${to} dari ${totalDonatur.toLocaleString()} donatur`
+                            : '0 donatur'
+                        })()}
                       </p>
                       <div className="flex gap-2">
                         <Button

@@ -92,21 +92,20 @@ export async function POST() {
       const members = enrichedResults.filter(r => r.segment_key === key)
       const totalMonetary = members.reduce((sum, m) => sum + m.monetary, 0)
 
+      const n = members.length
       return {
         key,
         label: config.label,
-        count: members.length,
-        percentage: Math.round((members.length / enrichedResults.length) * 10000) / 100,
-        avg_recency: members.length > 0
-          ? Math.round(members.reduce((s, m) => s + m.recency, 0) / members.length)
-          : 0,
-        avg_frequency: members.length > 0
-          ? Math.round((members.reduce((s, m) => s + m.frequency, 0) / members.length) * 100) / 100
-          : 0,
-        avg_monetary: members.length > 0
-          ? Math.round(totalMonetary / members.length)
-          : 0,
+        count: n,
+        percentage: Math.round((n / enrichedResults.length) * 10000) / 100,
+        avg_recency: n > 0 ? Math.round(members.reduce((s, m) => s + m.recency, 0) / n) : 0,
+        avg_frequency: n > 0 ? Math.round((members.reduce((s, m) => s + m.frequency, 0) / n) * 100) / 100 : 0,
+        avg_monetary: n > 0 ? Math.round(totalMonetary / n) : 0,
         total_monetary: totalMonetary,
+        // RFM scores (1–5 scale) — untuk radar chart yang akurat
+        avg_r_score: n > 0 ? Math.round((members.reduce((s, m) => s + m.r_score, 0) / n) * 100) / 100 : 0,
+        avg_f_score: n > 0 ? Math.round((members.reduce((s, m) => s + m.f_score, 0) / n) * 100) / 100 : 0,
+        avg_m_score: n > 0 ? Math.round((members.reduce((s, m) => s + m.m_score, 0) / n) * 100) / 100 : 0,
       }
     }).filter(s => s.count > 0)
 

@@ -1,13 +1,18 @@
 import { PrismaClient } from "../src/generated/prisma/client.js"
 import { PrismaMariaDb } from "@prisma/adapter-mariadb"
 import bcrypt from "bcryptjs"
+import { config } from "dotenv"
+
+// Load .env.local first, fallback to .env
+config({ path: ".env.local" })
+config()
 
 const adapter = new PrismaMariaDb({
-  host: process.env.DB_HOST,
+  host: process.env.DB_HOST!,
   port: Number(process.env.DB_PORT ?? 4000),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  user: process.env.DB_USER!,
+  password: process.env.DB_PASSWORD!,
+  database: process.env.DB_NAME!,
   ssl: {
     rejectUnauthorized: true,
   },

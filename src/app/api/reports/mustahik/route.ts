@@ -1,74 +1,67 @@
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // 1. Grouping Berdasarkan Kategori PM (Existing)
-    const sebaranKategori = await prisma.dim_mustahik.groupBy({
-      by: ['kategori_pm'],
-      _count: { id_mustahik: true },
-      where: { is_active: true }
-    })
+    const { searchParams } = new URL(request.url)
+    const from = searchParams.get('from')
+    const to = searchParams.get('to')
 
-    // 2. INSIGHT BARU: Analisis Gender (Demografi)
-    const sebaranGender = await prisma.dim_mustahik.groupBy({
-      by: ['gender'],
-      _count: { id_mustahik: true },
-      where: { is_active: true }
-    })
+    const dateFilter = (from || to) ? {
+      valid_from: {
+        ...(from ? { gte: new Date(from) } : {}),
+        ...(to ? { lte: new Date(to + 'T23:59:59') } : {}),
+      }
+    } : {}
 
-    // 3. INSIGHT BARU: Analisis Lokasi Terpadat (Top 5 Kabupaten/Kota)
-    const sebaranWilayah = await prisma.dim_mustahik.groupBy({
-      by: ['kabupaten_kota'],
-      _count: { id_mustahik: true },
-      where: { is_active: true },
-      orderBy: { _count: { id_mustahik: 'desc' } },
-      take: 5
-    })
+    const [sebaranKategori, sebaranGender, sebaranWilayah, agregatSkor, total] = await Promise.all([
+      prisma.dim_mustahik.groupBy({
+        by: ['kategori_pm'],
+        _count: { id_mustahik: true },
+        where: { is_active: true, ...dateFilter },
+      }),
+      prisma.dim_mustahik.groupBy({
+        by: ['gender'],
+        _count: { id_mustahik: true },
+        where: { is_active: true, ...dateFilter },
+      }),
+      prisma.dim_mustahik.groupBy({
+        by: ['kabupaten_kota'],
+        _count: { id_mustahik: true },
+        where: { is_active: true, ...dateFilter },
+        orderBy: { _count: { id_mustahik: 'desc' } },
+        take: 5,
+      }),
+      prisma.dim_mustahik.aggregate({
+        _avg: { skoring: true },
+        _max: { skoring: true },
+        where: { is_active: true, ...dateFilter },
+      }),
+      prisma.dim_mustahik.count({ where: { is_active: true, ...dateFilter } }),
+    ])
 
-    // 4. INSIGHT BARU: Rata-rata Skor Kelayakan (Tingkat Kerentanan)
-    // Menghitung rata-rata skor dari mustahik yang aktif
-    const agregatSkor = await prisma.dim_mustahik.aggregate({
-      _avg: {
-        skoring: true
-      },
-      _max: {
-        skoring: true
-      },
-      where: { is_active: true }
-    })
-
-    // 5. INSIGHT BARU: Tren Registrasi Mustahik Baru (3 Bulan Terakhir)
     const threeMonthsAgo = new Date()
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
-    
     const mustahikBaru = await prisma.dim_mustahik.count({
-      where: {
-        valid_from: { gte: threeMonthsAgo },
-        is_active: true
-      }
+      where: { valid_from: { gte: threeMonthsAgo }, is_active: true, ...dateFilter },
     })
 
-    const total = await prisma.dim_mustahik.count({ where: { is_active: true } })
-
-    return NextResponse.json({ 
-      total, 
+    return NextResponse.json({
+      total,
+      period: { from: from || null, to: to || null },
       sebaranKategori,
       insights: {
         gender_stats: sebaranGender,
         top_locations: sebaranWilayah,
         avg_score: agregatSkor._avg.skoring ? Number(agregatSkor._avg.skoring).toFixed(2) : 0,
         max_score: agregatSkor._max.skoring ? Number(agregatSkor._max.skoring).toFixed(2) : 0,
-        new_registrations_3m: mustahikBaru
+        new_registrations_3m: mustahikBaru,
       },
-      // Rasio Ketergantungan (Contoh Analisis)
-      analysis: {
-        vulnerability_index: mustahikBaru > 0 ? (total / mustahikBaru).toFixed(1) : total
-      }
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
