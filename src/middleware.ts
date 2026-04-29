@@ -11,6 +11,7 @@ const ADMIN_ONLY_ROUTES = [
   '/reports',
   '/data',
   '/input-lokasi',
+  '/users',
 ]
 
 // Rute yang boleh diakses oleh SEMUA user yang sudah login (termasuk relawan)

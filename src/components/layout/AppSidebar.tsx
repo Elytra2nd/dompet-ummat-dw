@@ -100,6 +100,16 @@ const allNavItems = [
     adminOnly: true,
     items: [
       { title: "Pusat Laporan", url: "/reports" },
+      { title: "Backup Data", url: "/data/backup" },
+    ],
+  },
+  {
+    title: "Pengaturan Sistem",
+    url: "#",
+    icon: Shield,
+    adminOnly: true,
+    items: [
+      { title: "Manajemen Pengguna", url: "/users" },
     ],
   },
 ]
