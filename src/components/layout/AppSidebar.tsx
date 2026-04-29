@@ -11,10 +11,12 @@ import {
   PanelLeftClose,
   ClipboardCheck,
   FileBarChart,
+  Shield,
+  UserCircle2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react' // Import fungsi signOut
+import { signOut, useSession } from 'next-auth/react'
 
 import {
   Sidebar,
@@ -37,73 +39,101 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 
-const sidebarConfig = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Modul ZISWAF",
-      url: "#",
-      icon: HeartHandshake,
-      items: [
-        { title: "Database Donatur", url: "/donasi/donatur" },
-        { title: "Transaksi Masuk", url: "/donasi/masuk" },
-        { title: "Daftar Mustahik", url: "/mustahik" },
-        { title: "Transaksi Keluar", url: "/donasi/keluar" },
-      ],
-    },
-    {
-      title: "Operasional Ambulan",
-      url: "/ambulan",
-      icon: Ambulance,
-      items: [
-        { title: "Portal Utama", url: "/ambulan" },
-        { title: "Layanan Pasien", url: "/ambulan/monitoring" },
-        { title: "Aktivitas & Biaya", url: "/ambulan/riwayat" },
-      ],
-    },
-    {
-      title: "Survey & Kelayakan",
-      url: "#",
-      icon: ClipboardCheck,
-      items: [
-        { title: "Hasil Survey", url: "/survey/hasil" },
-        { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan" },
-        { title: "Input Survey Baru", url: "/survey/baru" },
-      ],
-    },
-    {
-      title: "BIDA Analitik",
-      url: "#",
-      icon: BrainCircuit,
-      items: [
-        { title: "Segmentasi Donatur", url: "/segmentasi" },
-        { title: "Perbandingan Segmen", url: "/segmentasi/perbandingan" },
-        { title: "Sebaran Spasial", url: "/mustahik/spasial" },
-        { title: "Log Audit SCD", url: "/reports/scd" },
-      ],
-    },
-    {
-      title: "Laporan & Export",
-      url: "#",
-      icon: FileBarChart,
-      items: [
-        { title: "Pusat Laporan", url: "/reports" },
-      ],
-    },
-  ],
-}
+// Konfigurasi navigasi dengan penanda role
+const allNavItems = [
+  {
+    title: "Dashboard",
+    url: "/",
+    icon: LayoutDashboard,
+    adminOnly: true,
+  },
+  {
+    title: "Modul ZISWAF",
+    url: "#",
+    icon: HeartHandshake,
+    adminOnly: true,
+    items: [
+      { title: "Database Donatur", url: "/donasi/donatur" },
+      { title: "Transaksi Masuk", url: "/donasi/masuk" },
+      { title: "Daftar Mustahik", url: "/mustahik" },
+      { title: "Transaksi Keluar", url: "/donasi/keluar" },
+    ],
+  },
+  {
+    title: "Operasional Ambulan",
+    url: "/ambulan",
+    icon: Ambulance,
+    adminOnly: true,
+    items: [
+      { title: "Portal Utama", url: "/ambulan" },
+      { title: "Layanan Pasien", url: "/ambulan/monitoring" },
+      { title: "Aktivitas & Biaya", url: "/ambulan/riwayat" },
+    ],
+  },
+  {
+    title: "Survey & Kelayakan",
+    url: "#",
+    icon: ClipboardCheck,
+    adminOnly: false, // Bisa diakses semua role
+    items: [
+      { title: "Hasil Survey", url: "/survey/hasil", adminOnly: true },
+      { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan", adminOnly: true },
+      { title: "Input Survey Baru", url: "/survey/baru" },
+    ],
+  },
+  {
+    title: "BIDA Analitik",
+    url: "#",
+    icon: BrainCircuit,
+    adminOnly: true,
+    items: [
+      { title: "Segmentasi Donatur", url: "/segmentasi" },
+      { title: "Perbandingan Segmen", url: "/segmentasi/perbandingan" },
+      { title: "Sebaran Spasial", url: "/mustahik/spasial" },
+      { title: "Log Audit SCD", url: "/reports/scd" },
+    ],
+  },
+  {
+    title: "Laporan & Export",
+    url: "#",
+    icon: FileBarChart,
+    adminOnly: true,
+    items: [
+      { title: "Pusat Laporan", url: "/reports" },
+    ],
+  },
+]
 
 export function AppSidebar() {
   const pathname = usePathname()
   const { toggleSidebar } = useSidebar()
+  const { data: session } = useSession()
+
+  const userRole = (session?.user as any)?.role as string | undefined
+  const userName = session?.user?.name || session?.user?.email || 'User'
+  const isAdmin = userRole === 'ADMIN'
+
+  // Sembunyikan sidebar di halaman login
+  if (pathname === '/login') return null
+
+  // Filter menu berdasarkan role
+  const filteredNavItems = allNavItems
+    .filter(item => isAdmin || !item.adminOnly)
+    .map(item => {
+      if (item.items) {
+        return {
+          ...item,
+          items: item.items.filter(sub => isAdmin || !(sub as any).adminOnly),
+        }
+      }
+      return item
+    })
+    // Hapus grup yang itemsnya kosong setelah filter
+    .filter(item => !item.items || item.items.length > 0)
 
   // Handler Logout
   const handleLogout = () => {
-    signOut({ callbackUrl: '/login' }) // Redirect ke login setelah keluar
+    signOut({ callbackUrl: '/login' })
   }
 
   return (
@@ -131,10 +161,10 @@ export function AppSidebar() {
       <SidebarContent className="py-4 scrollbar-hide">
         <SidebarGroup>
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 px-4">
-            Main Repository
+            {isAdmin ? 'Main Repository' : 'Menu Relawan'}
           </SidebarGroupLabel>
           <SidebarMenu className="px-2 space-y-1">
-            {sidebarConfig.navMain.map((item) => {
+            {filteredNavItems.map((item) => {
               const isChildActive = item.items?.some(sub => pathname === sub.url || pathname.startsWith(sub.url + '/'))
               const isParentActive = pathname === item.url || (item.url !== '#' && pathname.startsWith(item.url))
 
@@ -190,12 +220,25 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER - LOGOUT AREA */}
-      <SidebarFooter className="p-4 border-t bg-slate-50/50">
+      {/* FOOTER - USER INFO & LOGOUT */}
+      <SidebarFooter className="p-4 border-t bg-slate-50/50 space-y-2">
+        {/* User Info Card */}
+        <div className="flex items-center gap-3 px-2 py-2 group-data-[collapsible=icon]:justify-center">
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isAdmin ? 'bg-indigo-100 text-indigo-600' : 'bg-amber-100 text-amber-600'}`}>
+            {isAdmin ? <Shield className="h-4 w-4" /> : <UserCircle2 className="h-4 w-4" />}
+          </div>
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+            <span className="text-xs font-black text-slate-900 leading-none truncate max-w-[140px]">{userName}</span>
+            <span className={`text-[9px] font-black uppercase tracking-widest mt-1 ${isAdmin ? 'text-indigo-500' : 'text-amber-500'}`}>
+              {isAdmin ? 'Administrator' : 'Relawan'}
+            </span>
+          </div>
+        </div>
+        
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              onClick={handleLogout} // Trigger fungsi logout
+              onClick={handleLogout}
               className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3 group"
             >
               <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />

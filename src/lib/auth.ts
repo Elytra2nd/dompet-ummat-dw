@@ -44,18 +44,24 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   callbacks: {
-    async redirect({ baseUrl }) {
-      return baseUrl + "/"
+    async redirect({ url, baseUrl }) {
+      // Jika URL relatif, gabungkan dengan baseUrl
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Jika URL sudah absolute dan dari domain yang sama, izinkan
+      if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role
+        token.id = user.id
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role as string
+        (session.user as any).role = token.role as string;
+        (session.user as any).id = token.id as string
       }
       return session
     }
