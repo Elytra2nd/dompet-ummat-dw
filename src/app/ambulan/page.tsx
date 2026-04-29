@@ -158,7 +158,7 @@ export default function AmbulanExecutivePage() {
                       Catat Layanan Baru
                     </Button>
                   </Link>
-                  <ImportButton modul="ambulan_layanan" onImportSuccess={() => window.location.reload()} />
+                  <ImportButton modul="ambulan_layanan" onImportSuccess={() => window.location.reload()} fullWidth />
                 </div>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function AmbulanExecutivePage() {
                       Catat Biaya Internal
                     </Button>
                   </Link>
-                  <ImportButton modul="ambulan_aktivitas" onImportSuccess={() => window.location.reload()} />
+                  <ImportButton modul="ambulan_aktivitas" onImportSuccess={() => window.location.reload()} fullWidth />
                 </div>
               </div>
             </div>

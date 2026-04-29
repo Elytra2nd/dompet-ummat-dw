@@ -13,9 +13,11 @@ export type { ImportModul }
 interface ImportButtonProps {
   modul: ImportModul
   onImportSuccess?: () => void
+  className?: string
+  fullWidth?: boolean
 }
 
-export default function ImportButton({ modul, onImportSuccess }: ImportButtonProps) {
+export default function ImportButton({ modul, onImportSuccess, className = '', fullWidth = false }: ImportButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [report, setReport] = useState<ImportValidationResult | null>(null)
@@ -129,14 +131,14 @@ export default function ImportButton({ modul, onImportSuccess }: ImportButtonPro
         id={`import-file-${modul}`}
       />
 
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center gap-2 ${fullWidth ? 'w-full flex-col sm:flex-row' : ''} ${className}`}>
         {/* Tombol Download Template */}
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleDownloadTemplate}
-          className="gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-semibold text-xs"
+          className={`gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-semibold text-xs ${fullWidth ? 'w-full sm:w-auto h-10' : ''}`}
           id={`btn-download-template-${modul}`}
         >
           <FileDown className="h-4 w-4" />
@@ -148,7 +150,7 @@ export default function ImportButton({ modul, onImportSuccess }: ImportButtonPro
           type="button"
           size="sm"
           onClick={() => setDragDialogOpen(true)}
-          className="gap-2 bg-emerald-600 hover:bg-emerald-700 font-semibold text-xs shadow-md"
+          className={`gap-2 bg-emerald-600 hover:bg-emerald-700 font-semibold text-xs shadow-md ${fullWidth ? 'w-full sm:w-auto h-10' : ''}`}
           id={`btn-open-import-${modul}`}
         >
           <FileUp className="h-4 w-4" />
