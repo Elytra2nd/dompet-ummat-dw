@@ -108,11 +108,17 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r-2 bg-white transition-all duration-300 ease-in-out">
       {/* HEADER */}
       <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-4 overflow-hidden bg-white/50 backdrop-blur-sm">
-        <img
-          src="/logo-du.png"
-          alt="Dompet Ummat"
-          className="h-10 w-auto object-contain group-data-[collapsible=icon]:h-8 transition-all"
-        />
+        <div className="flex items-center gap-3 transition-all duration-300">
+          <img
+            src="/logo-du.png"
+            alt="Dompet Ummat"
+            className="h-10 w-auto object-contain scale-110 origin-left group-data-[collapsible=icon]:scale-100 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 transition-all duration-300"
+          />
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden border-l-2 border-slate-200 pl-3">
+            <span className="font-black tracking-tighter text-emerald-600 leading-none text-sm">BIDA</span>
+            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Analytics</span>
+          </div>
+        </div>
         
         <button 
           onClick={toggleSidebar}
