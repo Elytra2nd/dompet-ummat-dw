@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Loader2, Edit, Trash2, ChevronLeft, ChevronRight, History } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/utils-ambulan'
 
@@ -84,15 +84,28 @@ export default function TransactionHistoryTable() {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini secara permanen?')) return
-    
+  // Modal Hapus
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const confirmDelete = (id: number) => {
+    setItemToDelete(id)
+    setDeleteModalOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (itemToDelete === null) return
+    setIsDeleting(true)
     try {
-      const res = await fetch(`/api/donasi/riwayat/${id}`, {
+      const res = await fetch(`/api/donasi/riwayat/${itemToDelete}`, {
         method: 'DELETE'
       })
       if (!res.ok) throw new Error('Delete failed')
       toast.success('Transaksi berhasil dihapus')
+      
+      setDeleteModalOpen(false)
+      setItemToDelete(null)
       
       // Refresh data
       if (data.length === 1 && page > 1) {
@@ -102,6 +115,8 @@ export default function TransactionHistoryTable() {
       }
     } catch (error) {
       toast.error('Gagal menghapus transaksi')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -157,9 +172,9 @@ export default function TransactionHistoryTable() {
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)}>
-                          <Edit className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => handleDelete(item.sk_fakta_donasi)}>
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -243,6 +258,25 @@ export default function TransactionHistoryTable() {
             <Button variant="outline" onClick={() => setEditModalOpen(false)}>Batal</Button>
             <Button onClick={handleUpdate} disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700 font-bold">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Simpan Perubahan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-rose-600 font-black uppercase tracking-tight">
+              <AlertTriangle className="h-5 w-5" /> Konfirmasi Hapus
+            </DialogTitle>
+            <DialogDescription className="font-medium text-slate-600 pt-2">
+              Apakah Anda yakin ingin menghapus transaksi ini secara permanen? Tindakan ini tidak dapat dibatalkan dan akan mempengaruhi total rekapitulasi dasbor.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>Batal</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting} className="font-bold shadow-md">
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Ya, Hapus Permanen
             </Button>
           </DialogFooter>
         </DialogContent>
