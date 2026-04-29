@@ -324,9 +324,96 @@ export default function SegmentasiPage() {
                 </div>
               </div>
             </div>
+
+            {/* Conversion Funnel */}
+            <ConversionFunnel segments={data.segments} total={data.total_donatur} />
           </>
         )}
       </div>
     </div>
+  )
+}
+
+// ── Conversion Funnel ────────────────────────────────────────────────────────
+const FUNNEL_ORDER = [
+  'champions', 'loyal', 'potential', 'promising', 'new_donors',
+  'need_attention', 'at_risk', 'hibernating', 'lost',
+]
+const FUNNEL_LABELS: Record<string, string> = {
+  champions: 'Donatur Utama',
+  loyal: 'Donatur Setia',
+  potential: 'Calon Setia',
+  promising: 'Menjanjikan',
+  new_donors: 'Donatur Baru',
+  need_attention: 'Perlu Perhatian',
+  at_risk: 'Berisiko',
+  hibernating: 'Tidak Aktif',
+  lost: 'Hilang',
+}
+
+type FunnelSegment = { key: string; count: number; percentage: number }
+
+function ConversionFunnel({ segments, total }: { segments: FunnelSegment[]; total: number }) {
+  const segMap = Object.fromEntries(segments.map(s => [s.key, s]))
+  const funnel = FUNNEL_ORDER
+    .map(key => segMap[key])
+    .filter(Boolean)
+
+  const maxCount = Math.max(...funnel.map(s => s.count), 1)
+
+  return (
+    <Card className="border-2 bg-white shadow-sm">
+      <CardHeader className="border-b bg-slate-50/50 py-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-sm font-black text-slate-700">
+            <SearchX className="h-4 w-4 text-emerald-500" />
+            Distribusi & Konversi Segmen
+          </CardTitle>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            {total.toLocaleString()} donatur total
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="space-y-2">
+          {funnel.map((s, i) => {
+            const color = SEGMENT_COLORS[s.key] || '#94a3b8'
+            const barWidth = `${Math.max(8, (s.count / maxCount) * 100)}%`
+            const isHealth = i < 5
+            return (
+              <Link key={s.key} href={`/segmentasi/${s.key}`} className="group flex items-center gap-3">
+                <span className="w-28 shrink-0 text-[10px] font-bold uppercase text-slate-500 text-right group-hover:text-emerald-600 transition-colors">
+                  {FUNNEL_LABELS[s.key]}
+                </span>
+                <div className="flex-1 h-7 rounded-lg bg-slate-50 overflow-hidden relative">
+                  <div
+                    className="h-full rounded-lg transition-all duration-500 flex items-center pl-3"
+                    style={{ width: barWidth, backgroundColor: color + '33', borderLeft: `3px solid ${color}` }}
+                  >
+                    <span className="text-[10px] font-black" style={{ color }}>
+                      {s.count.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+                <span className="w-10 shrink-0 text-[10px] font-black text-slate-600 text-right">
+                  {s.percentage}%
+                </span>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${isHealth ? 'bg-emerald-400' : 'bg-rose-400'}`} title={isHealth ? 'Segmen sehat' : 'Perlu perhatian'} />
+              </Link>
+            )
+          })}
+        </div>
+        <div className="mt-4 flex items-center gap-4 pt-3 border-t">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Segmen sehat (Champions → Baru)
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+            <span className="h-2 w-2 rounded-full bg-rose-400" />
+            Perlu perhatian (Perlu Perhatian → Hilang)
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

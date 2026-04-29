@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
 import {
   type DonaturStats,
   type AmbulanWaktu,
@@ -65,27 +66,54 @@ export default function ReportsPage() {
   } | null>(null)
   const [period, setPeriod] = useState<ExportPeriod>({ from: '', to: '' })
 
-  const fetchData = async () => {
+  const buildPeriodParams = (p: ExportPeriod) => {
+    const params = new URLSearchParams()
+    if (p.from) params.set('from', p.from)
+    if (p.to) params.set('to', p.to)
+    return params.toString() ? `?${params}` : ''
+  }
+
+  const fetchData = async (p: ExportPeriod = period) => {
     setLoading(true)
+    const qs = buildPeriodParams(p)
     try {
       const [resSum, resDon, resAmb, resMus] = await Promise.all([
         fetch('/api/reports/summary'),
-        fetch('/api/reports/donatur'),
-        fetch('/api/reports/ambulan'),
-        fetch('/api/reports/mustahik')
+        fetch(`/api/reports/donatur${qs}`),
+        fetch(`/api/reports/ambulan${qs}`),
+        fetch(`/api/reports/mustahik${qs}`),
       ])
       setSummary(await resSum.json())
       setDonaturData(await resDon.json())
       setAmbulanData(await resAmb.json())
       setMustahikData(await resMus.json())
-    } catch (error) {
-      toast.error("Gagal sinkronisasi data warehouse")
+    } catch {
+      toast.error('Gagal sinkronisasi data warehouse')
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+  // Re-fetch saat periode berubah
+  useEffect(() => { fetchData(period) }, [period.from, period.to])
+
+  // Quick preset helper
+  const applyPreset = (preset: 'month' | 'quarter' | 'half' | 'year' | 'all') => {
+    const today = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+    const todayStr = fmt(today)
+
+    if (preset === 'all') { setPeriod({ from: '', to: '' }); return }
+
+    const from = new Date(today)
+    if (preset === 'month') from.setMonth(from.getMonth() - 1)
+    else if (preset === 'quarter') from.setMonth(from.getMonth() - 3)
+    else if (preset === 'half') from.setMonth(from.getMonth() - 6)
+    else if (preset === 'year') from.setFullYear(from.getFullYear() - 1)
+
+    setPeriod({ from: fmt(from), to: todayStr })
+  }
 
   const activePeriod: ExportPeriod = { from: period.from || undefined, to: period.to || undefined }
 
@@ -142,70 +170,124 @@ export default function ReportsPage() {
           <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-black px-4 py-2">
             SYSTEM: {summary?.system.status}
           </Badge>
-          <Button onClick={fetchData} variant="outline" className="font-bold border-2 bg-white"><RefreshCw className="mr-2 h-4 w-4" /> Sync</Button>
+          <Button onClick={() => fetchData()} variant="outline" className="font-bold border-2 bg-white"><RefreshCw className="mr-2 h-4 w-4" /> Sync</Button>
         </div>
       </div>
 
       {/* FILTER PERIODE */}
-      <div className="flex flex-wrap items-center gap-3 px-1 pb-2">
-        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Filter Periode Export:</span>
-        <div className="flex items-center gap-2">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Dari</label>
+      <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Filter Periode</span>
+          {(period.from || period.to) && (
+            <button
+              onClick={() => setPeriod({ from: '', to: '' })}
+              className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-wide"
+            >
+              Reset → Semua data
+            </button>
+          )}
+        </div>
+        {/* Quick presets */}
+        <div className="flex flex-wrap gap-2">
+          {[
+            { label: 'Semua', key: 'all' as const },
+            { label: '1 Bulan', key: 'month' as const },
+            { label: '3 Bulan', key: 'quarter' as const },
+            { label: '6 Bulan', key: 'half' as const },
+            { label: '1 Tahun', key: 'year' as const },
+          ].map(p => {
+            const isActive = p.key === 'all' ? !period.from && !period.to : false
+            return (
+              <button
+                key={p.key}
+                onClick={() => applyPreset(p.key)}
+                className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase transition-all ${
+                  isActive
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'border-slate-200 text-slate-500 hover:border-emerald-400 hover:text-emerald-600'
+                }`}
+              >
+                {p.label}
+              </button>
+            )
+          })}
+          <span className="text-[10px] text-slate-300 flex items-center">|</span>
+          <span className="text-[10px] font-bold text-slate-400 flex items-center">Custom:</span>
+        </div>
+        {/* Date inputs */}
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type="date"
             value={period.from ?? ''}
             onChange={e => setPeriod(p => ({ ...p, from: e.target.value }))}
             className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">s/d</label>
+          <span className="text-xs text-slate-400 font-bold">s/d</span>
           <input
             type="date"
             value={period.to ?? ''}
             onChange={e => setPeriod(p => ({ ...p, to: e.target.value }))}
             className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
           />
+          <span className="text-[10px] text-slate-400 italic ml-1">
+            {!period.from && !period.to ? '— Menampilkan seluruh data —' : `${period.from || '—'} s/d ${period.to || 'sekarang'}`}
+          </span>
         </div>
-        {(period.from || period.to) && (
-          <Button size="sm" variant="ghost" className="text-xs h-7 text-slate-400" onClick={() => setPeriod({ from: '', to: '' })}>
-            Reset
-          </Button>
-        )}
-        <span className="text-[10px] text-slate-400 italic">
-          {!period.from && !period.to ? 'Seluruh periode' : `${period.from || '—'} s/d ${period.to || 'sekarang'}`}
-        </span>
       </div>
 
-      {/* KPI CARDS */}
+      {/* KPI CARDS — clickable drill-down */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-none shadow-sm bg-white border-t-4 border-t-emerald-500">
-          <CardContent className="pt-6">
-            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Donatur Aktif</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-4xl font-black text-slate-800">{summary?.totals.donatur}</h3>
-              <Badge className="bg-emerald-100 text-emerald-700 border-none mb-1">+{summary?.growth.donatur_new} New</Badge>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-none shadow-sm bg-white border-t-4 border-t-blue-500">
-          <CardContent className="pt-6">
-            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Penerima Manfaat</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-4xl font-black text-slate-800">{summary?.totals.mustahik}</h3>
-              <Badge className="bg-blue-100 text-blue-700 border-none mb-1">+{summary?.growth.mustahik_new} Month</Badge>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-none shadow-sm bg-white border-t-4 border-t-rose-500">
-          <CardContent className="pt-6">
-            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Layanan Ambulan</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-4xl font-black text-slate-800">{summary?.totals.ambulan}</h3>
-              <Badge className="bg-rose-100 text-rose-700 border-none mb-1">{summary?.growth.ambulan_this_month} Trips</Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/donasi/donatur" className="group">
+          <Card className="border-none shadow-sm bg-white border-t-4 border-t-emerald-500 transition-all group-hover:shadow-md group-hover:-translate-y-0.5">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Donatur Aktif</p>
+                <Users className="h-4 w-4 text-slate-300 group-hover:text-emerald-400 transition-colors" />
+              </div>
+              <div className="flex items-end gap-2">
+                <h3 className="text-4xl font-black text-slate-800">{summary?.totals.donatur?.toLocaleString()}</h3>
+                <Badge className="bg-emerald-100 text-emerald-700 border-none mb-1">+{summary?.growth.donatur_new} bulan ini</Badge>
+              </div>
+              <p className="text-[10px] text-emerald-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                Lihat semua donatur →
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/mustahik" className="group">
+          <Card className="border-none shadow-sm bg-white border-t-4 border-t-blue-500 transition-all group-hover:shadow-md group-hover:-translate-y-0.5">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Penerima Manfaat</p>
+                <HeartHandshake className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
+              </div>
+              <div className="flex items-end gap-2">
+                <h3 className="text-4xl font-black text-slate-800">{summary?.totals.mustahik?.toLocaleString()}</h3>
+                <Badge className="bg-blue-100 text-blue-700 border-none mb-1">+{summary?.growth.mustahik_new} bulan ini</Badge>
+              </div>
+              <p className="text-[10px] text-blue-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                Lihat data mustahik →
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/ambulan" className="group">
+          <Card className="border-none shadow-sm bg-white border-t-4 border-t-rose-500 transition-all group-hover:shadow-md group-hover:-translate-y-0.5">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Layanan Ambulan</p>
+                <Ambulance className="h-4 w-4 text-slate-300 group-hover:text-rose-400 transition-colors" />
+              </div>
+              <div className="flex items-end gap-2">
+                <h3 className="text-4xl font-black text-slate-800">{summary?.totals.ambulan?.toLocaleString()}</h3>
+                <Badge className="bg-rose-100 text-rose-700 border-none mb-1">{summary?.growth.ambulan_this_month} trips bulan ini</Badge>
+              </div>
+              <p className="text-[10px] text-rose-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                Lihat data ambulan →
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <Tabs defaultValue="donatur" className="w-full">
@@ -227,7 +309,7 @@ export default function ReportsPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                {donaturData?.stats.map((item: DonaturStats, i: number) => (
+                {(donaturData?.stats ?? []).map((item: DonaturStats, i: number) => (
                   <div key={i} className="flex items-center justify-between group">
                     <span className="text-xs font-bold text-slate-600 uppercase">{item.tipe || 'Individu'}</span>
                     <span className="text-xs font-black text-slate-800">{item._count.id_donatur} Jiwa</span>
@@ -263,7 +345,7 @@ export default function ReportsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 grid grid-cols-2 gap-4">
-                   {ambulanData?.perWaktu.map((t: AmbulanWaktu, i: number) => (
+                   {(ambulanData?.perWaktu ?? []).map((t: AmbulanWaktu, i: number) => (
                      <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-rose-500" /><span className="text-[10px] font-black uppercase text-slate-500">{t.jam}</span></div>
                         <span className="text-lg font-black text-slate-800">{t._count.id_transaksi}</span>
@@ -276,7 +358,7 @@ export default function ReportsPage() {
                 <CardContent className="space-y-4">
                    <div className="flex items-center gap-3 p-3 bg-rose-50 rounded-lg">
                       <Truck className="h-5 w-5 text-rose-600" />
-                      <div><p className="text-[9px] font-black text-rose-400 uppercase">Armada Teraktif</p><p className="text-xs font-black text-slate-800">{ambulanData?.insight_summary.most_busy_armada.armada}</p></div>
+                      <div><p className="text-[9px] font-black text-rose-400 uppercase">Armada Teraktif</p><p className="text-xs font-black text-slate-800">{ambulanData?.insight_summary?.most_busy_armada?.armada ?? '-'}</p></div>
                    </div>
                 </CardContent>
              </Card>
@@ -295,7 +377,7 @@ export default function ReportsPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                {mustahikData?.insights.top_locations.map((loc: MustahikLocation, i: number) => (
+                {(mustahikData?.insights?.top_locations ?? []).map((loc: MustahikLocation, i: number) => (
                   <div key={i} className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-600 uppercase">{loc.kabupaten_kota}</span>
                     <span className="text-xs font-black text-slate-800">{loc._count.id_mustahik} Jiwa</span>
