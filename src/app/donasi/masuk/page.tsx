@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import DonationStats from '@/components/donasi/DonationStats'
+import TransactionHistoryTable from '@/components/donasi/TransactionHistoryTable'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, HeartHandshake, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
 
 export default function DonasiMasukPage() {
-  // 1. Perbarui Initial State agar sinkron dengan interface DonationStatsProps
   const [stats, setStats] = useState({
     totalDonasi: 0,
     jumlahDonatur: 0,
-    jumlahMustahik: 0, // Tambahkan ini
+    jumlahMustahik: 0,
     danaTersalur: 0,
     targetBulanan: 100000000,
     pertumbuhan: 0,
@@ -25,8 +25,6 @@ export default function DonasiMasukPage() {
       const res = await fetch('/api/donasi/stats')
       if (res.ok) {
         const data = await res.json()
-        // Gunakan spread untuk menjaga nilai default (seperti targetBulanan) 
-        // jika API tidak mengirimkan semua field
         setStats((prev) => ({ ...prev, ...data }))
       }
     } catch (error) {
@@ -93,6 +91,8 @@ export default function DonasiMasukPage() {
           danaTersalur={stats.danaTersalur}
           pertumbuhan={stats.pertumbuhan}
         />
+
+        <TransactionHistoryTable />
       </div>
     </div>
   )
