@@ -12,6 +12,8 @@ import {
   Loader2,
   Star,
   ArrowRight,
+  Info,
+  SearchX,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -55,6 +57,27 @@ function StarRating({ stars }: { stars: number }) {
   )
 }
 
+// Educational tooltip — penjelasan singkat saat hover (#28)
+const METRIC_TIPS: Record<string, string> = {
+  silhouette: '0.5–0.7 = Bagus, > 0.7 = Sangat Bagus. Mengukur seberapa mirip anggota dalam cluster dibanding cluster lain.',
+  dbi: 'Semakin kecil semakin baik (< 1 ideal). Mengukur rasio jarak intra-cluster vs inter-cluster.',
+  chi: 'Semakin besar semakin baik. Rasio dispersi antar-cluster terhadap dispersi intra-cluster.',
+}
+
+function MetricTooltip({ metricKey, children }: { metricKey: string; children: React.ReactNode }) {
+  const tip = METRIC_TIPS[metricKey]
+  if (!tip) return <>{children}</>
+  return (
+    <span className="group/tip relative inline-flex items-center gap-1 cursor-help">
+      {children}
+      <Info className="h-3 w-3 text-slate-400 group-hover/tip:text-emerald-500 transition-colors" />
+      <span className="invisible group-hover/tip:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-medium leading-relaxed text-white shadow-lg z-50 pointer-events-none">
+        {tip}
+        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 bg-slate-900" />
+      </span>
+    </span>
+  )
+}
 export default function SegmentasiPage() {
   const { data, loading, error, runAnalysis } = useSegmentasi()
 
@@ -189,18 +212,38 @@ export default function SegmentasiPage() {
                 </CardContent>
               </Card>
 
-              {/* Kualitas */}
+              {/* Kualitas + Metric Tooltips */}
               <Card className="border-2 border-amber-100 bg-white shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-bold uppercase tracking-tighter text-slate-500">Kualitas Analisis</p>
                     <div className="rounded-lg bg-amber-50 p-2"><Star className="h-4 w-4 text-amber-600" /></div>
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-3">
                     <StarRating stars={data.clustering.rating.stars} />
                     <p className="mt-1 text-[10px] font-bold uppercase text-amber-600">
                       {data.clustering.rating.label}
                     </p>
+                  </div>
+                  <div className="mt-3 space-y-1.5 border-t border-slate-100 pt-3">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <MetricTooltip metricKey="silhouette">
+                        <span className="font-bold text-slate-500 uppercase">Silhouette</span>
+                      </MetricTooltip>
+                      <span className="font-black text-slate-800">{data.clustering.silhouette.toFixed(4)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px]">
+                      <MetricTooltip metricKey="dbi">
+                        <span className="font-bold text-slate-500 uppercase">DBI</span>
+                      </MetricTooltip>
+                      <span className="font-black text-slate-800">{data.clustering.davies_bouldin.toFixed(4)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px]">
+                      <MetricTooltip metricKey="chi">
+                        <span className="font-bold text-slate-500 uppercase">CHI</span>
+                      </MetricTooltip>
+                      <span className="font-black text-slate-800">{data.clustering.calinski_harabasz.toFixed(2)}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -4,16 +4,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import * as LucideIcons from 'lucide-react'
-import type { SegmentConfig } from '@/lib/constants-segmentasi'
+import { getSegmentConfig } from '@/lib/constants-segmentasi'
+
+interface SegmentData {
+  key: string
+  label: string
+  count: number
+  percentage: number
+  avg_recency: number
+  avg_frequency: number
+  avg_monetary: number
+}
 
 interface SegmentCardProps {
-  segment: SegmentConfig & {
-    count: number
-    percentage: number
-    avg_recency: number
-    avg_frequency: number
-    avg_monetary: number
-  }
+  segment: SegmentData
 }
 
 function formatRupiah(value: number): string {
@@ -22,18 +26,35 @@ function formatRupiah(value: number): string {
   return `Rp${value}`
 }
 
+// Status label untuk a11y — teks di samping warna (#29)
+const SEGMENT_STATUS: Record<string, { text: string; badgeClass: string }> = {
+  champions: { text: 'Excellent', badgeClass: 'bg-emerald-100 text-emerald-700' },
+  loyal: { text: 'Baik', badgeClass: 'bg-blue-100 text-blue-700' },
+  potential: { text: 'Potensial', badgeClass: 'bg-teal-100 text-teal-700' },
+  new_donors: { text: 'Baru', badgeClass: 'bg-indigo-100 text-indigo-700' },
+  promising: { text: 'Menjanjikan', badgeClass: 'bg-cyan-100 text-cyan-700' },
+  need_attention: { text: 'Perhatian', badgeClass: 'bg-amber-100 text-amber-700' },
+  at_risk: { text: 'Berisiko', badgeClass: 'bg-orange-100 text-orange-700' },
+  hibernating: { text: 'Tidak Aktif', badgeClass: 'bg-slate-100 text-slate-700' },
+  lost: { text: 'Hilang', badgeClass: 'bg-red-100 text-red-700' },
+}
+
 export function SegmentCard({ segment }: SegmentCardProps) {
+  // Resolve full config dari constants berdasarkan key
+  const config = getSegmentConfig(segment.key)
+  const status = SEGMENT_STATUS[segment.key] || { text: 'N/A', badgeClass: 'bg-slate-100 text-slate-600' }
+
   // Dynamic icon lookup
-  const IconComponent = (LucideIcons as any)[segment.iconName] || LucideIcons.Users
+  const IconComponent = (LucideIcons as any)[config.iconName] || LucideIcons.Users
 
   return (
     <Link href={`/segmentasi/${segment.key}`} className="group">
-      <Card className={`relative overflow-hidden border-2 ${segment.borderColor} bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.02]`}>
+      <Card className={`relative overflow-hidden border-2 ${config.borderColor} bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.02]`}>
         <CardContent className="p-5">
           {/* Header: Icon + Count */}
           <div className="flex items-start justify-between">
-            <div className={`p-2.5 rounded-xl ${segment.bgColor} transition-colors`}>
-              <IconComponent className={`h-5 w-5 ${segment.color}`} />
+            <div className={`p-2.5 rounded-xl ${config.bgColor} transition-colors`}>
+              <IconComponent className={`h-5 w-5 ${config.color}`} />
             </div>
             <div className="text-right">
               <p className="text-2xl font-black text-slate-900">{segment.count.toLocaleString()}</p>
@@ -41,11 +62,16 @@ export function SegmentCard({ segment }: SegmentCardProps) {
             </div>
           </div>
 
-          {/* Title + Description */}
+          {/* Title + Status Badge (a11y) + Description */}
           <div className="mt-3">
-            <h3 className={`text-sm font-black ${segment.color}`}>{segment.label}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className={`text-sm font-black ${config.color}`}>{segment.label}</h3>
+              <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${status.badgeClass}`}>
+                {status.text}
+              </span>
+            </div>
             <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1 line-clamp-2">
-              {segment.description}
+              {config.description}
             </p>
           </div>
 
@@ -67,10 +93,11 @@ export function SegmentCard({ segment }: SegmentCardProps) {
 
           {/* Hover Arrow */}
           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowRight className={`h-4 w-4 ${segment.color}`} />
+            <ArrowRight className={`h-4 w-4 ${config.color}`} />
           </div>
         </CardContent>
       </Card>
     </Link>
   )
 }
+
