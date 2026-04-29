@@ -12,9 +12,21 @@ import {
   Download,
   Lightbulb,
   MessageSquare,
+  MessageCircle,
   Search,
   ArrowUpDown,
+  FileSpreadsheet,
+  FileText,
+  Users,
 } from 'lucide-react'
+import {
+  exportExcel,
+  exportPDF,
+  downloadBlob,
+  buildFilename,
+  SEGMEN_DONATUR_SCHEMA,
+} from '@/lib/export'
+import { toast } from 'sonner'
 import * as LucideIcons from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -44,22 +56,12 @@ interface DonaturRow {
 interface SegmentDetail {
   key: string
   label: string
-  description: string
-  color: string
-  bgColor: string
-  borderColor: string
-  iconName: string
   count: number
   percentage: number
   avg_recency: number
   avg_frequency: number
   avg_monetary: number
   total_monetary: number
-  recommendation: {
-    title: string
-    description: string
-    channels: string[]
-  }
 }
 
 // Format Rupiah
@@ -89,6 +91,7 @@ export default function SegmentDetailPage({
   const [totalDonatur, setTotalDonatur] = useState(0)
   const [overallStats, setOverallStats] = useState({ avg_recency: 0, avg_frequency: 0, avg_monetary: 0 })
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | ''>('')
   const [sortAsc, setSortAsc] = useState(true)
 
@@ -112,12 +115,31 @@ export default function SegmentDetailPage({
     }
   }, [analysisData, segmen])
 
-  // Fetch donatur list
+  // Debounce search — tunggu 400ms setelah user berhenti mengetik
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(1) // reset ke halaman 1 saat search berubah
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Fetch donatur list — server-side search, sort, pagination
   useEffect(() => {
     async function fetchDonatur() {
       setLoadingDonatur(true)
       try {
-        const res = await fetch(`/api/segmentasi/donatur?segment=${segmen}&page=${page}&limit=15`)
+        const params = new URLSearchParams({
+          segment: segmen,
+          page: String(page),
+          limit: '15',
+        })
+        if (debouncedSearch) params.set('search', debouncedSearch)
+        if (sortKey) {
+          params.set('sort', sortKey)
+          params.set('order', sortAsc ? 'asc' : 'desc')
+        }
+        const res = await fetch(`/api/segmentasi/donatur?${params}`)
         if (!res.ok) throw new Error('Gagal memuat donatur')
         const data = await res.json()
         setDonaturList(data.donatur)
@@ -130,7 +152,7 @@ export default function SegmentDetailPage({
       }
     }
     fetchDonatur()
-  }, [segmen, page])
+  }, [segmen, page, debouncedSearch, sortKey, sortAsc])
 
   // Radar chart data: perbandingan segmen ini vs rata-rata keseluruhan
   const radarData = segment ? [
@@ -153,14 +175,8 @@ export default function SegmentDetailPage({
 
   const IconComponent = (LucideIcons as any)[config.iconName] || LucideIcons.Users
 
-  // Filter + Sort donatur
+  // Donatur sudah di-filter & sort dari server, langsung pakai
   const filteredDonatur = donaturList
-    .filter(d => searchQuery === '' || d.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => {
-      if (!sortKey) return 0
-      const diff = a[sortKey] - b[sortKey]
-      return sortAsc ? diff : -diff
-    })
 
   const handleSort = (key: typeof sortKey) => {
     if (sortKey === key) {
@@ -168,6 +184,56 @@ export default function SegmentDetailPage({
     } else {
       setSortKey(key)
       setSortAsc(key === 'recency') // recency: ascending default, others: desc
+    }
+  }
+
+  // Escape CSV value — wrap in quotes if contains comma, quote, or newline
+  const escapeCSV = (value: string | number | null | undefined): string => {
+    const str = String(value ?? '')
+    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+      return `"${str.replace(/"/g, '""')}"`
+    }
+    return str
+  }
+
+  const exportTitle = `Segmen_${config.label}_Donatur`
+
+  const exportXLSX = async () => {
+    try {
+      const res = await fetch(`/api/segmentasi/donatur?segment=${segmen}&page=1&limit=99999`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      const rows = data.donatur as Record<string, unknown>[]
+      const blob = await exportExcel({
+        title: exportTitle,
+        subtitle: config.description,
+        columns: SEGMEN_DONATUR_SCHEMA,
+        rows,
+      })
+      downloadBlob(blob, buildFilename(exportTitle, 'xlsx'))
+      toast.success('Excel berhasil diunduh')
+    } catch {
+      toast.error('Gagal export Excel')
+    }
+  }
+
+  const exportPDFFile = async () => {
+    try {
+      const res = await fetch(`/api/segmentasi/donatur?segment=${segmen}&page=1&limit=99999`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      const rows = data.donatur as Record<string, unknown>[]
+      const blob = exportPDF({
+        title: exportTitle,
+        subtitle: config.description,
+        columns: SEGMEN_DONATUR_SCHEMA,
+        rows,
+        landscape: true,
+      })
+      downloadBlob(blob, buildFilename(exportTitle, 'pdf'))
+      toast.success('PDF berhasil dibuat')
+    } catch {
+      toast.error('Gagal export PDF')
     }
   }
 
@@ -188,19 +254,59 @@ export default function SegmentDetailPage({
     if (rows.length === 0) return
     const headers = ['ID', 'Nama', 'Tipe', 'Kontak', 'Recency', 'Frequency', 'Monetary', 'RFM Score']
     const csvRows = rows.map((d: any) => [
-      d.id_donatur, d.nama_lengkap, d.tipe, d.kontak,
+      escapeCSV(d.id_donatur), escapeCSV(d.nama_lengkap), escapeCSV(d.tipe), escapeCSV(d.kontak),
       d.recency, d.frequency, d.monetary, d.rfm_score,
     ])
-    const csv = [headers, ...csvRows].map(r => r.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
+    const csv = [headers.map(escapeCSV), ...csvRows].map(r => r.join(',')).join('\n')
+    // BOM UTF-8 prefix agar Excel bisa baca karakter Indonesia dengan benar
+    const bom = '\ufeff'
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `donatur_${segmen}${all ? '_semua' : `_page${page}`}.csv`
+    // Dynamic filename dengan tanggal (YYYYMMDD)
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    a.download = `donatur_${segmen}${all ? '_semua' : `_page${page}`}_${dateStr}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
 
+  // Export Kontak WA — nama + nomor untuk broadcast (#25)
+  const exportWAKontak = async () => {
+    try {
+      const res = await fetch(`/api/segmentasi/donatur?segment=${segmen}&page=1&limit=99999`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      const rows = data.donatur as DonaturRow[]
+      const contacts = rows
+        .filter(d => d.kontak && d.kontak !== '-' && d.kontak.trim() !== '')
+        .map(d => {
+          // Normalize nomor: +62 → 62
+          let nomor = String(d.kontak).replace(/\D/g, '')
+          if (nomor.startsWith('0')) nomor = '62' + nomor.slice(1)
+          return `${d.nama_lengkap}\t${nomor}`
+        })
+
+      if (contacts.length === 0) {
+        toast.error('Tidak ada kontak WA yang tersedia di segmen ini')
+        return
+      }
+
+      const header = `# Kontak WA - ${config.label} (${contacts.length} kontak)\n# Digenerate: ${new Date().toLocaleString('id-ID')}\n# Format: Nama <TAB> Nomor\n\n`
+      const bom = '\ufeff'
+      const blob = new Blob([bom + header + contacts.join('\n')], { type: 'text/plain;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      a.download = `kontak_wa_${segmen}_${dateStr}.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`${contacts.length} kontak WA berhasil diekspor`)
+    } catch {
+      toast.error('Gagal export kontak WA')
+    }
+  }
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -316,15 +422,15 @@ export default function SegmentDetailPage({
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <h3 className="text-lg font-black text-slate-800">{segment.recommendation.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{segment.recommendation.description}</p>
+                <h3 className="text-lg font-black text-slate-800">{config.recommendation.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{config.recommendation.description}</p>
                 <div className="mt-4">
                   <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase text-slate-400">
                     <MessageSquare className="h-3 w-3" />
                     Channel yang Disarankan
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {segment.recommendation.channels.map((ch, i) => (
+                    {config.recommendation.channels.map((ch, i) => (
                       <span key={i} className={`rounded-full px-3 py-1 text-xs font-bold ${config.bgColor} ${config.color}`}>
                         {ch}
                       </span>
@@ -340,12 +446,21 @@ export default function SegmentDetailPage({
                 <CardTitle className="text-sm font-black text-slate-700">
                   Daftar Donatur ({totalDonatur.toLocaleString()})
                 </CardTitle>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button onClick={() => exportCSV(false)} variant="outline" size="sm" className="text-xs font-bold">
-                    <Download className="mr-1 h-3 w-3" /> Halaman Ini
+                    <Download className="mr-1 h-3 w-3" /> CSV Halaman
                   </Button>
-                  <Button onClick={() => exportCSV(true)} size="sm" className="bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-700">
-                    <Download className="mr-1 h-3 w-3" /> Semua ({totalDonatur})
+                  <Button onClick={() => exportCSV(true)} variant="outline" size="sm" className="text-xs font-bold">
+                    <Download className="mr-1 h-3 w-3" /> CSV Semua
+                  </Button>
+                  <Button onClick={exportXLSX} size="sm" className="bg-emerald-700 text-xs font-bold text-white hover:bg-emerald-800">
+                    <FileSpreadsheet className="mr-1 h-3 w-3" /> Excel
+                  </Button>
+                  <Button onClick={exportPDFFile} size="sm" className="bg-slate-900 text-xs font-bold text-white hover:bg-slate-800">
+                    <FileText className="mr-1 h-3 w-3" /> PDF
+                  </Button>
+                  <Button onClick={exportWAKontak} size="sm" variant="outline" className="text-xs font-bold text-green-700 border-green-200 hover:bg-green-50">
+                    <MessageCircle className="mr-1 h-3 w-3" /> Kontak WA
                   </Button>
                 </div>
               </CardHeader>
@@ -390,7 +505,34 @@ export default function SegmentDetailPage({
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredDonatur.map((d, i) => (
+                          {filteredDonatur.length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="px-4 py-12 text-center">
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className={`rounded-2xl p-4 ${config.bgColor}`}>
+                                    <Users className={`h-8 w-8 ${config.color} opacity-50`} />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-bold text-slate-600">
+                                      {debouncedSearch ? 'Tidak ditemukan donatur yang cocok' : 'Belum ada donatur di segmen ini'}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-400">
+                                      {debouncedSearch
+                                        ? `Coba kata kunci lain — pencarian "${debouncedSearch}" tidak menghasilkan data.`
+                                        : 'Jalankan ulang analisis segmentasi untuk memperbarui data donatur.'
+                                      }
+                                    </p>
+                                  </div>
+                                  {debouncedSearch && (
+                                    <Button variant="outline" size="sm" className="text-xs font-bold" onClick={() => setSearchQuery('')}>
+                                      Reset Pencarian
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                          filteredDonatur.map((d, i) => (
                             <tr key={d.sk_donatur} className={`border-b transition-colors hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-25'}`}>
                               <td className="px-4 py-3 font-semibold text-slate-800">{d.nama_lengkap}</td>
                               <td className="px-4 py-3 text-slate-500">{d.tipe}</td>
@@ -403,7 +545,8 @@ export default function SegmentDetailPage({
                                 </span>
                               </td>
                             </tr>
-                          ))}
+                          ))
+                          )}
                         </tbody>
                       </table>
                     </div>

@@ -26,22 +26,44 @@ import {
   Truck,
   ShieldCheck
 } from 'lucide-react'
-import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import {
+  type DonaturStats,
+  type AmbulanWaktu,
+  type MustahikLocation,
+  type ReportsSummary,
+  type DonaturReport,
+  type AmbulanReport,
+  type MustahikReport,
+} from '@/types/reports'
+import {
+  exportExcel,
+  exportPDF,
+  downloadBlob,
+  buildFilename,
+  DONATUR_SCHEMA,
+  AMBULAN_SCHEMA,
+  MUSTAHIK_SCHEMA,
+  type ExportPeriod,
+} from '@/lib/export'
 
 export default function ReportsPage() {
-  const [summary, setSummary] = useState<any>(null)
-  const [donaturData, setDonaturData] = useState<any>(null)
-  const [ambulanData, setAmbulanData] = useState<any>(null)
-  const [mustahikData, setMustahikData] = useState<any>(null)
+  const [summary, setSummary] = useState<ReportsSummary | null>(null)
+  const [donaturData, setDonaturData] = useState<DonaturReport | null>(null)
+  const [ambulanData, setAmbulanData] = useState<AmbulanReport | null>(null)
+  const [mustahikData, setMustahikData] = useState<MustahikReport | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // STATE UNTUK PREVIEW
+  // STATE UNTUK PREVIEW & FILTER PERIODE
   const [previewOpen, setPreviewOpen] = useState(false)
-  const [previewData, setPreviewData] = useState<{data: any[], title: string, type: 'excel' | 'pdf'} | null>(null)
+  const [previewData, setPreviewData] = useState<{
+    rows: Record<string, unknown>[]
+    title: string
+    type: 'excel' | 'pdf'
+    domain: 'donatur' | 'ambulan' | 'mustahik'
+  } | null>(null)
+  const [period, setPeriod] = useState<ExportPeriod>({ from: '', to: '' })
 
   const fetchData = async () => {
     setLoading(true)
@@ -65,61 +87,38 @@ export default function ReportsPage() {
 
   useEffect(() => { fetchData() }, [])
 
-  const handlePreview = (data: any[], title: string, type: 'excel' | 'pdf') => {
-    setPreviewData({ data, title, type })
+  const activePeriod: ExportPeriod = { from: period.from || undefined, to: period.to || undefined }
+
+  const handlePreview = (
+    rows: Record<string, unknown>[],
+    title: string,
+    type: 'excel' | 'pdf',
+    domain: 'donatur' | 'ambulan' | 'mustahik'
+  ) => {
+    setPreviewData({ rows, title, type, domain })
     setPreviewOpen(true)
   }
 
-  const executeExport = () => {
+  const schemaFor = (domain: 'donatur' | 'ambulan' | 'mustahik') => {
+    if (domain === 'donatur') return DONATUR_SCHEMA
+    if (domain === 'ambulan') return AMBULAN_SCHEMA
+    return MUSTAHIK_SCHEMA
+  }
+
+  const executeExport = async () => {
     if (!previewData) return
+    const columns = schemaFor(previewData.domain)
+    const opts = { title: previewData.title, columns, rows: previewData.rows, period: activePeriod }
     if (previewData.type === 'excel') {
-      exportCustomExcel(previewData.data, previewData.title)
+      const blob = await exportExcel(opts)
+      downloadBlob(blob, buildFilename(previewData.title, 'xlsx', activePeriod))
+      toast.success('Excel berhasil diunduh')
     } else {
-      exportCustomPDF(previewData.data, previewData.title)
+      const blob = exportPDF(opts)
+      downloadBlob(blob, buildFilename(previewData.title, 'pdf', activePeriod))
+      toast.success('PDF berhasil dibuat')
     }
     setPreviewOpen(false)
-  }
-
-  const exportCustomExcel = (data: any[], title: string) => {
-    const worksheet = XLSX.utils.json_to_sheet([]);
-    const header = [
-      ["LAPORAN EKSEKUTIF - DOMPET UMMAT"],
-      [`Kategori: ${title}`],
-      [`Tgl Cetak: ${new Date().toLocaleString('id-ID')}`],
-      ["Status: Official Data Warehouse Record"],
-      []
-    ];
-    XLSX.utils.sheet_add_aoa(worksheet, header, { origin: "A1" });
-    const tableData = data.map(item => ({
-      'Kategori/Label': item.tipe || item.armada || item.kategori_pm || item.jam || item.kabupaten_kota || 'N/A',
-      'Total Accumulation': item._count?.id_donatur || item._count?.id_transaksi || item._count?.id_mustahik || 0
-    }));
-    XLSX.utils.sheet_add_json(worksheet, tableData, { origin: "A6" });
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-    XLSX.writeFile(workbook, `${title.replace(/\s+/g, '_')}_2026.xlsx`);
-    toast.success("Excel Formal berhasil diunduh");
-  }
-
-  const exportCustomPDF = (data: any[], title: string) => {
-    const doc = new jsPDF();
-    doc.setFontSize(18).setFont("helvetica", "bold").text("DOMPET UMMAT KALBAR", 105, 15, { align: "center" });
-    doc.setFontSize(10).setFont("helvetica", "normal").text("Jl. Danau Sentarum No. 99, Pontianak, Kalimantan Barat", 105, 22, { align: "center" });
-    doc.line(15, 25, 195, 25);
-    doc.setFontSize(12).setFont("helvetica", "bold").text(`LAPORAN: ${title.toUpperCase()}`, 15, 35);
-    autoTable(doc, {
-      startY: 45,
-      head: [['No', 'Dimensi Analisis', 'Total Aggregation']],
-      body: data.map((item, index) => [
-        index + 1, 
-        item.tipe || item.armada || item.kategori_pm || item.jam || item.kabupaten_kota || 'N/A', 
-        `${item._count?.id_donatur || item._count?.id_transaksi || item._count?.id_mustahik || 0} Records`
-      ]),
-      theme: 'grid',
-      headStyles: { fillColor: [16, 185, 129] }
-    });
-    doc.save(`${title.replace(/\s+/g, '_')}_Official.pdf`);
-    toast.success("PDF Official berhasil dibuat");
   }
 
   if (loading) return (
@@ -140,11 +139,42 @@ export default function ReportsPage() {
           <p className="text-slate-500 font-bold text-xs tracking-widest mt-1 uppercase">Executive Decision Support System</p>
         </div>
         <div className="flex gap-2">
-           <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-black px-4 py-2">
-             SYSTEM: {summary?.system.status}
-           </Badge>
-           <Button onClick={fetchData} variant="outline" className="font-bold border-2 bg-white"><RefreshCw className="mr-2 h-4 w-4" /> Sync</Button>
+          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-black px-4 py-2">
+            SYSTEM: {summary?.system.status}
+          </Badge>
+          <Button onClick={fetchData} variant="outline" className="font-bold border-2 bg-white"><RefreshCw className="mr-2 h-4 w-4" /> Sync</Button>
         </div>
+      </div>
+
+      {/* FILTER PERIODE */}
+      <div className="flex flex-wrap items-center gap-3 px-1 pb-2">
+        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Filter Periode Export:</span>
+        <div className="flex items-center gap-2">
+          <label className="text-[10px] font-bold text-slate-500 uppercase">Dari</label>
+          <input
+            type="date"
+            value={period.from ?? ''}
+            onChange={e => setPeriod(p => ({ ...p, from: e.target.value }))}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-[10px] font-bold text-slate-500 uppercase">s/d</label>
+          <input
+            type="date"
+            value={period.to ?? ''}
+            onChange={e => setPeriod(p => ({ ...p, to: e.target.value }))}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
+          />
+        </div>
+        {(period.from || period.to) && (
+          <Button size="sm" variant="ghost" className="text-xs h-7 text-slate-400" onClick={() => setPeriod({ from: '', to: '' })}>
+            Reset
+          </Button>
+        )}
+        <span className="text-[10px] text-slate-400 italic">
+          {!period.from && !period.to ? 'Seluruh periode' : `${period.from || '—'} s/d ${period.to || 'sekarang'}`}
+        </span>
       </div>
 
       {/* KPI CARDS */}
@@ -192,12 +222,12 @@ export default function ReportsPage() {
               <CardHeader className="flex flex-row items-center justify-between border-b">
                 <CardTitle className="text-sm font-black uppercase tracking-tighter">Segmentasi Tipe Donatur</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => handlePreview(donaturData.stats, 'Laporan Donatur', 'excel')}>Excel Preview</Button>
-                  <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => handlePreview(donaturData.stats, 'Laporan Donatur', 'pdf')}>PDF Preview</Button>
+                  <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => donaturData && handlePreview(donaturData.stats as unknown as Record<string, unknown>[], 'Laporan Donatur', 'excel', 'donatur')}>Excel</Button>
+                  <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => donaturData && handlePreview(donaturData.stats as unknown as Record<string, unknown>[], 'Laporan Donatur', 'pdf', 'donatur')}>PDF</Button>
                 </div>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                {donaturData?.stats.map((item: any, i: number) => (
+                {donaturData?.stats.map((item: DonaturStats, i: number) => (
                   <div key={i} className="flex items-center justify-between group">
                     <span className="text-xs font-bold text-slate-600 uppercase">{item.tipe || 'Individu'}</span>
                     <span className="text-xs font-black text-slate-800">{item._count.id_donatur} Jiwa</span>
@@ -228,12 +258,12 @@ export default function ReportsPage() {
                 <CardHeader className="flex flex-row items-center justify-between border-b">
                   <CardTitle className="text-sm font-black uppercase tracking-tighter">Beban Waktu Operasional</CardTitle>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => handlePreview(ambulanData.perWaktu, 'Beban Operasional Ambulan', 'excel')}>Excel Preview</Button>
-                    <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => handlePreview(ambulanData.perWaktu, 'Beban Operasional Ambulan', 'pdf')}>PDF Preview</Button>
+                    <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => ambulanData && handlePreview(ambulanData.perWaktu as unknown as Record<string, unknown>[], 'Beban Operasional Ambulan', 'excel', 'ambulan')}>Excel</Button>
+                    <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => ambulanData && handlePreview(ambulanData.perWaktu as unknown as Record<string, unknown>[], 'Beban Operasional Ambulan', 'pdf', 'ambulan')}>PDF</Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 grid grid-cols-2 gap-4">
-                   {ambulanData?.perWaktu.map((t: any, i: number) => (
+                   {ambulanData?.perWaktu.map((t: AmbulanWaktu, i: number) => (
                      <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-rose-500" /><span className="text-[10px] font-black uppercase text-slate-500">{t.jam}</span></div>
                         <span className="text-lg font-black text-slate-800">{t._count.id_transaksi}</span>
@@ -260,12 +290,12 @@ export default function ReportsPage() {
               <CardHeader className="flex flex-row items-center justify-between border-b">
                 <CardTitle className="text-sm font-black uppercase tracking-tighter">Sebaran Wilayah Mustahik</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => handlePreview(mustahikData.insights.top_locations, 'Sebaran Lokasi Mustahik', 'excel')}>Excel Preview</Button>
-                  <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => handlePreview(mustahikData.insights.top_locations, 'Sebaran Lokasi Mustahik', 'pdf')}>PDF Preview</Button>
+                  <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => mustahikData && handlePreview(mustahikData.insights.top_locations as unknown as Record<string, unknown>[], 'Sebaran Lokasi Mustahik', 'excel', 'mustahik')}>Excel</Button>
+                  <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => mustahikData && handlePreview(mustahikData.insights.top_locations as unknown as Record<string, unknown>[], 'Sebaran Lokasi Mustahik', 'pdf', 'mustahik')}>PDF</Button>
                 </div>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                {mustahikData?.insights.top_locations.map((loc: any, i: number) => (
+                {mustahikData?.insights.top_locations.map((loc: MustahikLocation, i: number) => (
                   <div key={i} className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-600 uppercase">{loc.kabupaten_kota}</span>
                     <span className="text-xs font-black text-slate-800">{loc._count.id_mustahik} Jiwa</span>
@@ -330,21 +360,24 @@ export default function ReportsPage() {
                 <table className="w-full text-left text-[11px]">
                   <thead className="bg-slate-900 text-white font-black uppercase text-[9px]">
                     <tr>
-                      <th className="p-3 border-r border-slate-700 w-12 text-center">No</th>
-                      <th className="p-3 border-r border-slate-700">Dimensi Analisis</th>
-                      <th className="p-3 text-right">Total Akumulasi</th>
+                      <th className="p-3 border-r border-slate-700 w-8 text-center">No</th>
+                      {previewData && schemaFor(previewData.domain).map(col => (
+                        <th key={col.key} className="p-3 border-r border-slate-700">{col.header}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="font-bold text-slate-700">
-                    {previewData?.data.map((item, idx) => (
+                    {previewData?.rows.map((row, idx) => (
                       <tr key={idx} className="border-b border-slate-100">
                         <td className="p-3 border-r border-slate-100 text-center text-slate-400">{idx + 1}</td>
-                        <td className="p-3 border-r border-slate-100 uppercase">
-                          {item.tipe || item.armada || item.kategori_pm || item.jam || item.kabupaten_kota || 'Data Point'}
-                        </td>
-                        <td className="p-3 text-right text-emerald-600 font-black">
-                          {item._count?.id_donatur || item._count?.id_transaksi || item._count?.id_mustahik || 0} Records
-                        </td>
+                        {schemaFor(previewData.domain).map(col => {
+                          const val = col.key.split('.').reduce((a: unknown, k) => a && typeof a === 'object' ? (a as Record<string, unknown>)[k] : undefined, row as unknown)
+                          return (
+                            <td key={col.key} className="p-3 border-r border-slate-100">
+                              {String(val ?? '-')}
+                            </td>
+                          )
+                        })}
                       </tr>
                     ))}
                   </tbody>
