@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from 'react'
 
 interface SegmentData {
   key: string
@@ -64,9 +64,20 @@ export function SegmentasiProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('')
   const [lastFetched, setLastFetched] = useState<number | null>(null)
 
+  // Refs biar runAnalysis stabil (tidak recreate tiap state change)
+  const dataRef = useRef(data)
+  const lastFetchedRef = useRef(lastFetched)
+  const loadingRef = useRef(loading)
+  useEffect(() => { dataRef.current = data }, [data])
+  useEffect(() => { lastFetchedRef.current = lastFetched }, [lastFetched])
+  useEffect(() => { loadingRef.current = loading }, [loading])
+
   const runAnalysis = useCallback(async (force = false) => {
-    // Jika cache masih valid dan tidak force refresh, skip
-    if (!force && data && lastFetched && (Date.now() - lastFetched < CACHE_TTL_MS)) {
+    // Hindari parallel request
+    if (loadingRef.current) return
+    // Gunakan cache client jika masih valid
+    if (!force && dataRef.current && lastFetchedRef.current &&
+        (Date.now() - lastFetchedRef.current < CACHE_TTL_MS)) {
       return
     }
 
@@ -78,12 +89,12 @@ export function SegmentasiProvider({ children }: { children: ReactNode }) {
       const result = await res.json()
       setData(result)
       setLastFetched(Date.now())
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
     } finally {
       setLoading(false)
     }
-  }, [data, lastFetched])
+  }, []) // stable — baca state lewat refs
 
   return (
     <SegmentasiContext.Provider value={{ data, loading, error, runAnalysis, lastFetched }}>
