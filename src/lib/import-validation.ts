@@ -18,7 +18,7 @@ export interface RowError {
 }
 
 /** Modul yang mendukung fitur import Excel */
-export type ImportModul = 'donasi' | 'penyaluran' | 'mustahik' | 'ambulan_layanan' | 'ambulan_aktivitas'
+export type ImportModul = 'donasi' | 'donatur' | 'penyaluran' | 'mustahik' | 'ambulan_layanan' | 'ambulan_aktivitas'
 
 export interface ImportValidationResult {
   status: 'validation_failed' | 'success'
@@ -96,6 +96,14 @@ export interface AmbulanAktivitasRowParsed {
   armada: string
   kategori_aktivitas: string
   biaya_operasional: number
+}
+
+export interface DonaturRowParsed {
+  nama_lengkap: string
+  kontak_utama: string
+  tipe: string
+  alamat?: string
+  perusahaan?: string
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -535,3 +543,50 @@ export function validateAmbulanAktivitasRow(
   }
 }
 
+// ─── VALIDATOR: DONATUR ───────────────────────────────────────────────────────
+
+const ENUM_TIPE_DONATUR_DIM = ['Individu', 'Lembaga/Korporasi', 'Komunitas']
+
+export function validateDonaturRow(
+  raw: Record<string, unknown>,
+  rowNumber: number,
+): { errors: RowError[]; parsed: DonaturRowParsed | null } {
+  const errors: RowError[] = []
+  const id = undefined // donatur tidak punya ID unik dari file
+
+  // nama_lengkap
+  const nama = raw['nama_lengkap']
+  if (!nama || String(nama).trim().length < 2) {
+    errors.push(err(rowNumber, id, 'nama_lengkap', nama, 'required', 'Nama Lengkap wajib diisi dan minimal 2 karakter'))
+  }
+
+  // kontak_utama
+  const kontak = raw['kontak_utama']
+  if (!kontak || String(kontak).trim().length < 7) {
+    errors.push(err(rowNumber, id, 'kontak_utama', kontak, 'required', 'No. HP / Kontak wajib diisi dan minimal 7 karakter'))
+  } else {
+    const hp = String(kontak).trim().replace(/\D/g, '')
+    if (hp.length < 7 || hp.length > 15) {
+      errors.push(err(rowNumber, id, 'kontak_utama', kontak, 'format', 'Format No. HP tidak valid (7-15 digit angka)', 'warning'))
+    }
+  }
+
+  // tipe
+  const tipe = raw['tipe']
+  if (!tipe || !ENUM_TIPE_DONATUR_DIM.includes(String(tipe).trim())) {
+    errors.push(err(rowNumber, id, 'tipe', tipe, 'enum', `Tipe Donatur harus salah satu: ${ENUM_TIPE_DONATUR_DIM.join(', ')}`))
+  }
+
+  if (errors.length > 0) return { errors, parsed: null }
+
+  return {
+    errors: [],
+    parsed: {
+      nama_lengkap: String(nama).trim(),
+      kontak_utama: String(kontak).trim(),
+      tipe: String(tipe).trim(),
+      alamat: raw['alamat'] ? String(raw['alamat']).trim() : undefined,
+      perusahaan: raw['perusahaan'] ? String(raw['perusahaan']).trim() : undefined,
+    },
+  }
+}

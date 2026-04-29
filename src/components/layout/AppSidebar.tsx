@@ -189,9 +189,9 @@ export function AppSidebar() {
                             tooltip={item.title} 
                             className={`h-10 font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-all ${isChildActive ? 'bg-emerald-50/50 text-emerald-700' : ''}`}
                           >
-                            {item.icon && <item.icon className={`h-5 w-5 ${isChildActive ? 'text-emerald-600' : ''}`} />}
-                            <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                            <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                            {item.icon && <item.icon className={`h-5 w-5 shrink-0 ${isChildActive ? 'text-emerald-600' : ''}`} />}
+                            <span className="truncate group-data-[collapsible=icon]:hidden min-w-0 flex-1">{item.title}</span>
+                            <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="transition-all duration-300">
@@ -200,7 +200,7 @@ export function AppSidebar() {
                               <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
                                   <Link href={subItem.url} className="text-[13px] font-semibold py-2 transition-all">
-                                    {subItem.title}
+                                    <span className="truncate">{subItem.title}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
@@ -218,8 +218,8 @@ export function AppSidebar() {
                         className={`h-10 font-bold transition-all hover:bg-emerald-50 ${isParentActive ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'text-slate-600'}`}
                       >
                         <Link href={item.url}>
-                          {item.icon && <item.icon className="h-5 w-5" />}
-                          <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                          {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
+                          <span className="truncate group-data-[collapsible=icon]:hidden min-w-0 flex-1">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
