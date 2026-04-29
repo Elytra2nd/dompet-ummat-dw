@@ -27,26 +27,31 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Donatur tidak ditemukan' }, { status: 404 })
     }
 
+    // Ambil tanggal untuk tahun yang dipilih
+    const targetDates = await prisma.dim_date.findMany({
+      where: { tahun: Number(year) },
+      select: { sk_date: true, tanggal: true }
+    })
+    const targetSkDates = targetDates.map(d => d.sk_date)
+    const dateMap = new Map(targetDates.map(d => [d.sk_date, d.tanggal]))
+
     // Ambil histori transaksi pada tahun yang dipilih
     const transactions = await prisma.fact_donasi.findMany({
       where: {
         sk_donatur: donatur.sk_donatur,
-        dim_date: {
-          tahun: Number(year)
-        }
+        sk_tgl_bersih: { in: targetSkDates }
       },
       include: {
-        dim_date: true,
         dim_program_donasi: true,
       },
       orderBy: {
-        dim_date: { tanggal: 'asc' }
+        sk_tgl_bersih: 'asc'
       }
     })
 
     // Mapping dan agregasi transaksi
     const riwayat = transactions.map(trx => ({
-      tanggal: trx.dim_date?.tanggal || new Date(),
+      tanggal: (trx.sk_tgl_bersih && dateMap.get(trx.sk_tgl_bersih)) ? dateMap.get(trx.sk_tgl_bersih) : new Date(),
       jenis_transaksi: trx.dim_program_donasi?.program_induk || '-',
       sub_donasi: trx.dim_program_donasi?.sub_program || '-',
       jumlah: Number(trx.nominal_valid || 0)
