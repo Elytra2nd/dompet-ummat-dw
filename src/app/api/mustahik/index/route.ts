@@ -76,7 +76,23 @@ export async function PUT(req: Request) {
 
     if (!oldData) throw new Error("Data tidak ditemukan")
 
-    // 2. Nonaktifkan record lama
+    // 2. Ambil business key asli (tanpa suffix versi jika sudah ada)
+    const baseId = oldData.id_mustahik.replace(/-v\d+$/, '')
+
+    // 3. Hitung jumlah versi yang sudah ada untuk business key ini
+    const existingVersions = await prisma.dim_mustahik.findMany({
+      where: {
+        OR: [
+          { id_mustahik: baseId },
+          { id_mustahik: { startsWith: `${baseId}-v` } },
+        ],
+      },
+      select: { id_mustahik: true },
+    })
+    const nextVersion = existingVersions.length + 1
+    const newIdMustahik = `${baseId}-v${nextVersion}`
+
+    // 4. Nonaktifkan record lama
     await prisma.dim_mustahik.update({
       where: { sk_mustahik },
       data: {
@@ -85,7 +101,7 @@ export async function PUT(req: Request) {
       }
     })
 
-    // 3. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
+    // 5. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
     const lokasiBaru = await prisma.dim_lokasi.create({
       data: {
         provinsi: "Kalimantan Barat",
@@ -95,10 +111,10 @@ export async function PUT(req: Request) {
       }
     })
 
-    // 4. Buat record mustahik baru sebagai versi terbaru (Active)
+    // 6. Buat record mustahik baru sebagai versi terbaru (Active) dengan ID unik
     const updatedMustahik = await prisma.dim_mustahik.create({
       data: {
-        id_mustahik: oldData.id_mustahik, // ID Bisnis tetap sama
+        id_mustahik: newIdMustahik,
         nama,
         nik,
         alamat,
