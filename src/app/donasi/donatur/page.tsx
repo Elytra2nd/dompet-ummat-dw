@@ -105,11 +105,11 @@ export default function ManajemenDonaturPage() {
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
             <Link href="/donasi/masuk"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
           </Button>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
-              <Users className="h-8 w-8 text-indigo-600" /> Database <span className="text-indigo-600">Donatur</span>
+              <Users className="h-7 w-7 text-indigo-600 shrink-0" /> Database <span className="text-indigo-600">Donatur</span>
             </h1>
-            <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700">
+            <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 w-full sm:w-auto">
               <Link href="/donasi/donatur/baru">
                 <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
               </Link>
@@ -121,11 +121,11 @@ export default function ManajemenDonaturPage() {
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
         <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
           <CardHeader className="border-b py-4 bg-slate-50/50">
-            <div className="relative max-w-sm">
+            <div className="relative w-full max-w-md">
               <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="Cari nama, kontak, atau perusahaan..." 
-                className="pl-10 font-bold" 
+                className="pl-10 font-bold w-full" 
                 value={search} 
                 onChange={(e) => {
                   setSearch(e.target.value)

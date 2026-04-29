@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link'
 import { toast } from 'sonner'
+import ImportButton from '@/components/import/ImportButton'
 
 export default function RiwayatAktivitasPage() {
   const [data, setData] = useState<any>(null)
@@ -148,13 +149,13 @@ export default function RiwayatAktivitasPage() {
           <p className="text-slate-500 text-sm pl-10 italic font-medium">Internal Operational Tracking • BIDA Warehouse</p>
         </div>
         
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <Link href="/ambulan/layanan" className="flex-1 md:flex-initial">
             <Button variant="outline" className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-bold shadow-sm uppercase text-[10px] tracking-widest h-10 px-6">
               <HandHeart className="mr-2 h-4 w-4" /> Layanan Pasien
             </Button>
           </Link>
-          {/* PERBAIKAN: Tombol Input mengarah ke halaman aktivitas khusus */}
+          <ImportButton modul="ambulan_aktivitas" onImportSuccess={fetchAktivitas} />
           <Link href="/ambulan/aktivitas" className="flex-1 md:flex-initial">
             <Button className="w-full bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-bold uppercase text-[10px] tracking-widest h-10 px-6">
               <Plus className="mr-2 h-4 w-4" /> Catat Biaya Baru

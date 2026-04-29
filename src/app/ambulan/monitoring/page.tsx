@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import ImportButton from '@/components/import/ImportButton'
 
 interface AmbulanLog {
   sk_fakta_layanan_ambulan: number;
@@ -154,12 +155,11 @@ export default function MonitoringAmbulanPage() {
           </h1>
           <p className="text-slate-500 text-sm">Rekapitulasi Transaksi Bantuan Pasien & Masyarakat</p>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm border-slate-200 font-bold uppercase text-[10px]">
             <RefreshCw className={`mr-2 h-3 w-3 ${loading ? 'animate-spin' : ''}`} /> Sync Data
           </Button>
-          
-          {/* PERUBAHAN: Tombol diarahkan ke halaman input layanan khusus */}
+          <ImportButton modul="ambulan_layanan" onImportSuccess={fetchAmbulan} />
           <Link href="/ambulan/layanan" className="w-full md:w-auto">
             <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white w-full font-bold uppercase text-[10px] tracking-widest">
               <Plus className="mr-2 h-4 w-4" /> Catat Layanan Baru
