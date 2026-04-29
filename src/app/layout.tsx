@@ -50,14 +50,7 @@ export default function RootLayout({
                     
                     {/* Menggunakan Komponen Breadcrumb Dinamis */}
                     <DynamicBreadcrumb />
-                  </div>
-
-                  {/* LOGO DI KANAN */}
-                  <div className="ml-auto flex items-center gap-2">
-                    <div className="font-black text-slate-900 tracking-tighter text-sm md:text-base">
-                      DOMPET <span className="text-emerald-600">UMMAT</span>
-                    </div>
-                  </div>
+                </div>
                 </header>
 
                 <div className="flex-1 overflow-y-auto">
