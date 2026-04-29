@@ -55,6 +55,7 @@ export default function ReportsPage() {
   const [ambulanData, setAmbulanData] = useState<AmbulanReport | null>(null)
   const [mustahikData, setMustahikData] = useState<MustahikReport | null>(null)
   const [loading, setLoading] = useState(true)
+  const [prevSummary, setPrevSummary] = useState<ReportsSummary | null>(null)
 
   // STATE UNTUK PREVIEW & FILTER PERIODE
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -94,8 +95,11 @@ export default function ReportsPage() {
     }
   }
 
-  // Re-fetch saat periode berubah
-  useEffect(() => { fetchData(period) }, [period.from, period.to])
+  // Re-fetch saat periode berubah + compare prev period
+  useEffect(() => {
+    fetchData(period)
+    fetchPrevPeriod(period)
+  }, [period.from, period.to])
 
   // Quick preset helper
   const applyPreset = (preset: 'month' | 'quarter' | 'half' | 'year' | 'all') => {
@@ -115,7 +119,33 @@ export default function ReportsPage() {
     setPeriod({ from: fmt(from), to: todayStr })
   }
 
+  // Fetch periode sebelumnya untuk compare delta
+  const fetchPrevPeriod = async (p: ExportPeriod) => {
+    if (!p.from && !p.to) { setPrevSummary(null); return }
+    try {
+      const from = p.from ? new Date(p.from) : null
+      const to = p.to ? new Date(p.to) : new Date()
+      if (!from) { setPrevSummary(null); return }
+
+      const span = to.getTime() - from.getTime()
+      const prevTo = new Date(from.getTime() - 1)
+      const prevFrom = new Date(prevTo.getTime() - span)
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+      const qs = `?from=${fmt(prevFrom)}&to=${fmt(prevTo)}`
+      const res = await fetch(`/api/reports/summary${qs}`)
+      if (res.ok) setPrevSummary(await res.json())
+    } catch { /* silent */ }
+  }
+
   const activePeriod: ExportPeriod = { from: period.from || undefined, to: period.to || undefined }
+
+  const delta = (curr: number | undefined, prev: number | undefined): string | null => {
+    if (!prev || !curr || !activePeriod.from) return null
+    if (prev === 0) return curr > 0 ? '+100%' : null
+    const pct = Math.round(((curr - prev) / prev) * 100)
+    return pct >= 0 ? `+${pct}%` : `${pct}%`
+  }
 
   const handlePreview = (
     rows: Record<string, unknown>[],
@@ -248,6 +278,13 @@ export default function ReportsPage() {
                 <h3 className="text-4xl font-black text-slate-800">{summary?.totals.donatur?.toLocaleString()}</h3>
                 <Badge className="bg-emerald-100 text-emerald-700 border-none mb-1">+{summary?.growth.donatur_new} bulan ini</Badge>
               </div>
+              {delta(summary?.totals.donatur, prevSummary?.totals.donatur) && (
+                <p className="text-[10px] font-bold mt-1">
+                  <span className={`${(summary?.totals.donatur ?? 0) >= (prevSummary?.totals.donatur ?? 0) ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    {delta(summary?.totals.donatur, prevSummary?.totals.donatur)} vs periode sebelumnya
+                  </span>
+                </p>
+              )}
               <p className="text-[10px] text-emerald-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 Lihat semua donatur →
               </p>
@@ -265,6 +302,13 @@ export default function ReportsPage() {
                 <h3 className="text-4xl font-black text-slate-800">{summary?.totals.mustahik?.toLocaleString()}</h3>
                 <Badge className="bg-blue-100 text-blue-700 border-none mb-1">+{summary?.growth.mustahik_new} bulan ini</Badge>
               </div>
+              {delta(summary?.totals.mustahik, prevSummary?.totals.mustahik) && (
+                <p className="text-[10px] font-bold mt-1">
+                  <span className={`${(summary?.totals.mustahik ?? 0) >= (prevSummary?.totals.mustahik ?? 0) ? 'text-blue-600' : 'text-rose-500'}`}>
+                    {delta(summary?.totals.mustahik, prevSummary?.totals.mustahik)} vs periode sebelumnya
+                  </span>
+                </p>
+              )}
               <p className="text-[10px] text-blue-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 Lihat data mustahik →
               </p>
@@ -282,6 +326,13 @@ export default function ReportsPage() {
                 <h3 className="text-4xl font-black text-slate-800">{summary?.totals.ambulan?.toLocaleString()}</h3>
                 <Badge className="bg-rose-100 text-rose-700 border-none mb-1">{summary?.growth.ambulan_this_month} trips bulan ini</Badge>
               </div>
+              {delta(summary?.totals.ambulan, prevSummary?.totals.ambulan) && (
+                <p className="text-[10px] font-bold mt-1">
+                  <span className={`${(summary?.totals.ambulan ?? 0) >= (prevSummary?.totals.ambulan ?? 0) ? 'text-rose-600' : 'text-rose-500'}`}>
+                    {delta(summary?.totals.ambulan, prevSummary?.totals.ambulan)} vs periode sebelumnya
+                  </span>
+                </p>
+              )}
               <p className="text-[10px] text-rose-600 font-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 Lihat data ambulan →
               </p>

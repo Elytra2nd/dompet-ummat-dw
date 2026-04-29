@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use, useCallback } from 'react'
+import { useState, useEffect, use, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -117,6 +117,7 @@ export default function SegmentDetailPage({
   const [minMonetary, setMinMonetary] = useState('')
   const [maxMonetary, setMaxMonetary] = useState('')
   const [maxRecency, setMaxRecency] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
   const { data: analysisData, loading: analysisLoading, runAnalysis } = useSegmentasi()
 
@@ -187,6 +188,29 @@ export default function SegmentDetailPage({
     }
     fetchDonatur()
   }, [segmen, page, debouncedSearch, sortKey, sortAsc, minMonetary, maxMonetary, maxRecency])
+
+  // Keyboard shortcuts: "/" focus search, Esc clear search/filter
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // "/" → focus search (kalau tidak sedang typing di input lain)
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+        searchInputRef.current?.select()
+      }
+      // Esc → clear search dan filter
+      if (e.key === 'Escape' && document.activeElement === searchInputRef.current) {
+        setSearchQuery('')
+        setMinMonetary('')
+        setMaxMonetary('')
+        setMaxRecency('')
+        searchInputRef.current?.blur()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Radar chart: pakai RFM score (1–5) yang sudah terstandarisasi — jauh lebih akurat
   const radarData = segment ? [
@@ -291,6 +315,51 @@ export default function SegmentDetailPage({
     a.download = `donatur_${segmen}${all ? '_semua' : `_page${page}`}_${dateStr}.csv`
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  const toggleSelect = (sk: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(sk) ? next.delete(sk) : next.add(sk)
+      return next
+    })
+  }
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredDonatur.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredDonatur.map(d => d.sk_donatur)))
+    }
+  }
+  const selectedDonatur = filteredDonatur.filter(d => selectedIds.has(d.sk_donatur))
+
+  const exportSelected = async (fmt: 'csv' | 'xlsx' | 'pdf') => {
+    if (selectedDonatur.length === 0) return
+    const rows = selectedDonatur as unknown as Record<string, unknown>[]
+    if (fmt === 'csv') {
+      const headers = ['ID', 'Nama', 'Tipe', 'Kontak', 'Recency', 'Frequency', 'Monetary', 'RFM Score']
+      const csvRows = selectedDonatur.map(d => [
+        escapeCSV(d.id_donatur), escapeCSV(d.nama_lengkap), escapeCSV(d.tipe), escapeCSV(d.kontak),
+        d.recency, d.frequency, d.monetary, d.rfm_score,
+      ])
+      const csv = [headers, ...csvRows].map(r => r.join(',')).join('\n')
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `seleksi_${segmen}_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`${selectedDonatur.length} donatur diekspor ke CSV`)
+    } else {
+      const title = `Seleksi_${config.label}_${selectedDonatur.length}donatur`
+      const blob = fmt === 'xlsx'
+        ? await exportExcel({ title, subtitle: config.description, columns: SEGMEN_DONATUR_SCHEMA, rows })
+        : exportPDF({ title, subtitle: config.description, columns: SEGMEN_DONATUR_SCHEMA, rows, landscape: true })
+      downloadBlob(blob, buildFilename(title, fmt))
+      toast.success(`${selectedDonatur.length} donatur diekspor ke ${fmt.toUpperCase()}`)
+    }
+    setSelectedIds(new Set())
   }
 
   // Normalize nomor WA: 0xxx / +62xxx / 8xxx → 62xxx (return null kalau invalid)
@@ -510,8 +579,9 @@ export default function SegmentDetailPage({
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <input
+                        ref={searchInputRef}
                         type="text"
-                        placeholder="Cari nama, ID, atau tipe donatur..."
+                        placeholder="Cari nama, ID, atau tipe... (tekan / untuk fokus)"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-all"
@@ -578,6 +648,20 @@ export default function SegmentDetailPage({
                     </div>
                   )}
                 </div>
+                {/* Bulk action bar — muncul saat ada selection */}
+                {selectedIds.size > 0 && (
+                  <div className="flex items-center justify-between border-b bg-emerald-50 px-4 py-2.5">
+                    <span className="text-xs font-bold text-emerald-700">
+                      {selectedIds.size} donatur dipilih
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => exportSelected('csv')} className="rounded-lg border border-emerald-300 bg-white px-3 py-1 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100 transition-colors">CSV</button>
+                      <button onClick={() => exportSelected('xlsx')} className="rounded-lg border border-emerald-500 bg-emerald-600 px-3 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 transition-colors">Excel</button>
+                      <button onClick={() => exportSelected('pdf')} className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1 text-[10px] font-bold text-white hover:bg-slate-800 transition-colors">PDF</button>
+                      <button onClick={() => setSelectedIds(new Set())} className="ml-1 text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors">Batal</button>
+                    </div>
+                  </div>
+                )}
                 {loadingDonatur ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
@@ -602,6 +686,14 @@ export default function SegmentDetailPage({
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="border-b bg-slate-50 text-left">
+                            <th className="w-10 px-4 py-3">
+                              <input
+                                type="checkbox"
+                                className="rounded border-slate-300 accent-emerald-600"
+                                checked={filteredDonatur.length > 0 && selectedIds.size === filteredDonatur.length}
+                                onChange={toggleSelectAll}
+                              />
+                            </th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500 cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('nama_lengkap')}>
                               <span className="inline-flex items-center gap-1">Nama <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
@@ -624,7 +716,7 @@ export default function SegmentDetailPage({
                         <tbody>
                           {filteredDonatur.length === 0 ? (
                             <tr>
-                              <td colSpan={7} className="px-4 py-12 text-center">
+                              <td colSpan={8} className="px-4 py-12 text-center">
                                 <div className="flex flex-col items-center gap-3">
                                   <div className={`rounded-2xl p-4 ${config.bgColor}`}>
                                     <Users className={`h-8 w-8 ${config.color} opacity-50`} />
@@ -652,7 +744,15 @@ export default function SegmentDetailPage({
                           filteredDonatur.map((d, i) => {
                             const wa = normalizeWA(d.kontak)
                             return (
-                              <tr key={d.sk_donatur} className={`border-b transition-colors hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-25'}`}>
+                              <tr key={d.sk_donatur} className={`border-b transition-colors hover:bg-slate-50 ${selectedIds.has(d.sk_donatur) ? 'bg-emerald-50' : i % 2 === 0 ? '' : 'bg-slate-25'}`}>
+                                <td className="px-4 py-3">
+                                  <input
+                                    type="checkbox"
+                                    className="rounded border-slate-300 accent-emerald-600"
+                                    checked={selectedIds.has(d.sk_donatur)}
+                                    onChange={() => toggleSelect(d.sk_donatur)}
+                                  />
+                                </td>
                                 <td className="px-4 py-3 font-semibold text-slate-800">{d.nama_lengkap}</td>
                                 <td className="px-4 py-3 text-slate-500">{d.tipe}</td>
                                 <td className="px-4 py-3">
