@@ -85,12 +85,29 @@ export async function PUT(req: Request) {
 
       if (!oldRecord) throw new Error("Record asal tidak ditemukan di Warehouse")
 
+      // Ambil business key asli (tanpa suffix versi jika sudah ada)
+      const baseId = oldRecord.id_donatur.replace(/-v\d+$/, '')
+
+      // Hitung jumlah versi yang sudah ada untuk business key ini
+      const existingVersions = await tx.dim_donatur.findMany({
+        where: {
+          OR: [
+            { id_donatur: baseId },
+            { id_donatur: { startsWith: `${baseId}-v` } },
+          ],
+        },
+        select: { id_donatur: true },
+      })
+      // Versi baru = total existing + 1 (v1 = id asli, v2, v3, dst.)
+      const nextVersion = existingVersions.length + 1
+      const newIdDonatur = `${baseId}-v${nextVersion}`
+
       const now = new Date()
       const nextSecond = new Date(now.getTime() + 1000)
 
       const newVersion = await tx.dim_donatur.create({
         data: {
-          id_donatur: oldRecord.id_donatur,
+          id_donatur: newIdDonatur,
           nama_lengkap: nama_donatur,
           kontak_utama: no_hp,
           alamat: alamat,
