@@ -150,20 +150,22 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-2 bg-white transition-all duration-300 ease-in-out">
       {/* HEADER */}
-      <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-3 overflow-hidden bg-white/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3 transition-opacity duration-300">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-lg shadow-emerald-100">
-            <HeartHandshake className="h-5 w-5" />
-          </div>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="font-black tracking-tighter text-slate-900 leading-none italic">DOMPET <span className="text-emerald-600 font-black">UMMAT</span></span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">BIDA Warehouse v2</span>
+      <SidebarHeader className="h-16 border-b flex flex-row items-center justify-between px-4 overflow-hidden bg-white/50 backdrop-blur-sm">
+        <div className="flex items-center gap-3 transition-all duration-300">
+          <img
+            src="/logo-du.png"
+            alt="Dompet Ummat"
+            className="h-10 w-auto object-contain scale-110 origin-left group-data-[collapsible=icon]:scale-100 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 transition-all duration-300"
+          />
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden border-l-2 border-slate-200 pl-3">
+            <span className="font-black tracking-tighter text-emerald-600 leading-none text-sm">BIDA</span>
+            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Analytics</span>
           </div>
         </div>
         
         <button 
           onClick={toggleSidebar}
-          className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 group-data-[collapsible=icon]:hidden transition-colors"
+          className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 group-data-[collapsible=icon]:hidden transition-colors shrink-0"
         >
           <PanelLeftClose size={18} />
         </button>

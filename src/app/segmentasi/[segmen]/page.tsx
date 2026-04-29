@@ -9,16 +9,24 @@ import {
   Repeat,
   Banknote,
   Loader2,
-  Download,
   Lightbulb,
   MessageSquare,
-  MessageCircle,
   Search,
   ArrowUpDown,
   FileSpreadsheet,
   FileText,
+  FileDown,
+  ChevronDown,
   Users,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu'
 import {
   exportExcel,
   exportPDF,
@@ -92,7 +100,7 @@ export default function SegmentDetailPage({
   const [overallStats, setOverallStats] = useState({ avg_recency: 0, avg_frequency: 0, avg_monetary: 0 })
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | ''>('')
+  const [sortKey, setSortKey] = useState<'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap' | ''>('')
   const [sortAsc, setSortAsc] = useState(true)
 
   const { data: analysisData, loading: analysisLoading, runAnalysis } = useSegmentasi()
@@ -271,42 +279,24 @@ export default function SegmentDetailPage({
     URL.revokeObjectURL(url)
   }
 
-  // Export Kontak WA — nama + nomor untuk broadcast (#25)
-  const exportWAKontak = async () => {
-    try {
-      const res = await fetch(`/api/segmentasi/donatur?segment=${segmen}&page=1&limit=99999`)
-      if (!res.ok) throw new Error()
-      const data = await res.json()
-      const rows = data.donatur as DonaturRow[]
-      const contacts = rows
-        .filter(d => d.kontak && d.kontak !== '-' && d.kontak.trim() !== '')
-        .map(d => {
-          // Normalize nomor: +62 → 62
-          let nomor = String(d.kontak).replace(/\D/g, '')
-          if (nomor.startsWith('0')) nomor = '62' + nomor.slice(1)
-          return `${d.nama_lengkap}\t${nomor}`
-        })
-
-      if (contacts.length === 0) {
-        toast.error('Tidak ada kontak WA yang tersedia di segmen ini')
-        return
-      }
-
-      const header = `# Kontak WA - ${config.label} (${contacts.length} kontak)\n# Digenerate: ${new Date().toLocaleString('id-ID')}\n# Format: Nama <TAB> Nomor\n\n`
-      const bom = '\ufeff'
-      const blob = new Blob([bom + header + contacts.join('\n')], { type: 'text/plain;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-      a.download = `kontak_wa_${segmen}_${dateStr}.txt`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success(`${contacts.length} kontak WA berhasil diekspor`)
-    } catch {
-      toast.error('Gagal export kontak WA')
-    }
+  // Normalize nomor WA: 0xxx / +62xxx / 8xxx → 62xxx (return null kalau invalid)
+  const normalizeWA = (raw: string | null | undefined): string | null => {
+    if (!raw) return null
+    const digits = String(raw).replace(/\D/g, '')
+    if (digits.length < 9) return null
+    if (digits.startsWith('0')) return '62' + digits.slice(1)
+    if (digits.startsWith('62')) return digits
+    if (digits.startsWith('8')) return '62' + digits
+    return digits
   }
+
+  // Format display nomor: 628987749739 → +62 898 7749 739
+  const formatPhoneDisplay = (wa: string | null): string => {
+    if (!wa) return '-'
+    if (wa.length < 10) return wa
+    return `+${wa.slice(0, 2)} ${wa.slice(2, 5)} ${wa.slice(5, 9)} ${wa.slice(9)}`
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -446,23 +436,36 @@ export default function SegmentDetailPage({
                 <CardTitle className="text-sm font-black text-slate-700">
                   Daftar Donatur ({totalDonatur.toLocaleString()})
                 </CardTitle>
-                <div className="flex flex-wrap gap-2">
-                  <Button onClick={() => exportCSV(false)} variant="outline" size="sm" className="text-xs font-bold">
-                    <Download className="mr-1 h-3 w-3" /> CSV Halaman
-                  </Button>
-                  <Button onClick={() => exportCSV(true)} variant="outline" size="sm" className="text-xs font-bold">
-                    <Download className="mr-1 h-3 w-3" /> CSV Semua
-                  </Button>
-                  <Button onClick={exportXLSX} size="sm" className="bg-emerald-700 text-xs font-bold text-white hover:bg-emerald-800">
-                    <FileSpreadsheet className="mr-1 h-3 w-3" /> Excel
-                  </Button>
-                  <Button onClick={exportPDFFile} size="sm" className="bg-slate-900 text-xs font-bold text-white hover:bg-slate-800">
-                    <FileText className="mr-1 h-3 w-3" /> PDF
-                  </Button>
-                  <Button onClick={exportWAKontak} size="sm" variant="outline" className="text-xs font-bold text-green-700 border-green-200 hover:bg-green-50">
-                    <MessageCircle className="mr-1 h-3 w-3" /> Kontak WA
-                  </Button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" className="bg-slate-900 text-xs font-bold text-white hover:bg-slate-800">
+                      <FileDown className="mr-1.5 h-3.5 w-3.5" />
+                      Export
+                      <ChevronDown className="ml-1.5 h-3 w-3 opacity-70" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Format Resmi</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={exportXLSX}>
+                      <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+                      <span>Excel <span className="font-normal text-slate-400">(.xlsx)</span></span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportPDFFile}>
+                      <FileText className="h-3.5 w-3.5 text-rose-600" />
+                      <span>PDF <span className="font-normal text-slate-400">(.pdf)</span></span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Data Mentah</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => exportCSV(true)}>
+                      <FileText className="h-3.5 w-3.5 text-slate-500" />
+                      <span>CSV — semua donatur</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportCSV(false)}>
+                      <FileText className="h-3.5 w-3.5 text-slate-400" />
+                      <span>CSV — halaman ini</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardHeader>
               <CardContent className="p-0">
                 {/* Search Box */}
@@ -488,26 +491,29 @@ export default function SegmentDetailPage({
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="border-b bg-slate-50 text-left">
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500">Nama</th>
+                            <th className="px-4 py-3 font-bold uppercase text-slate-500 cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('nama_lengkap')}>
+                              <span className="inline-flex items-center gap-1">Nama <ArrowUpDown className="h-3 w-3" /></span>
+                            </th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500">Tipe</th>
+                            <th className="px-4 py-3 font-bold uppercase text-slate-500">Kontak WA</th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('recency')}>
-                              <span className="inline-flex items-center gap-1">Terakhir (hari) <ArrowUpDown className="h-3 w-3" /></span>
+                              <span className="inline-flex items-center gap-1 justify-end w-full">Terakhir (hari) <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('frequency')}>
-                              <span className="inline-flex items-center gap-1">Frekuensi <ArrowUpDown className="h-3 w-3" /></span>
+                              <span className="inline-flex items-center gap-1 justify-end w-full">Frekuensi <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('monetary')}>
-                              <span className="inline-flex items-center gap-1">Total Donasi <ArrowUpDown className="h-3 w-3" /></span>
+                              <span className="inline-flex items-center gap-1 justify-end w-full">Total Donasi <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
                             <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('rfm_score')}>
-                              <span className="inline-flex items-center gap-1">Skor <ArrowUpDown className="h-3 w-3" /></span>
+                              <span className="inline-flex items-center gap-1 justify-end w-full">Skor <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {filteredDonatur.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="px-4 py-12 text-center">
+                              <td colSpan={7} className="px-4 py-12 text-center">
                                 <div className="flex flex-col items-center gap-3">
                                   <div className={`rounded-2xl p-4 ${config.bgColor}`}>
                                     <Users className={`h-8 w-8 ${config.color} opacity-50`} />
@@ -532,20 +538,39 @@ export default function SegmentDetailPage({
                               </td>
                             </tr>
                           ) : (
-                          filteredDonatur.map((d, i) => (
-                            <tr key={d.sk_donatur} className={`border-b transition-colors hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-25'}`}>
-                              <td className="px-4 py-3 font-semibold text-slate-800">{d.nama_lengkap}</td>
-                              <td className="px-4 py-3 text-slate-500">{d.tipe}</td>
-                              <td className="px-4 py-3 text-right text-slate-600">{d.recency.toLocaleString()}</td>
-                              <td className="px-4 py-3 text-right text-slate-600">{d.frequency}x</td>
-                              <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatRupiah(d.monetary)}</td>
-                              <td className="px-4 py-3 text-right">
-                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${config.bgColor} ${config.color}`}>
-                                  {d.rfm_score}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
+                          filteredDonatur.map((d, i) => {
+                            const wa = normalizeWA(d.kontak)
+                            return (
+                              <tr key={d.sk_donatur} className={`border-b transition-colors hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-25'}`}>
+                                <td className="px-4 py-3 font-semibold text-slate-800">{d.nama_lengkap}</td>
+                                <td className="px-4 py-3 text-slate-500">{d.tipe}</td>
+                                <td className="px-4 py-3">
+                                  {wa ? (
+                                    <a
+                                      href={`https://wa.me/${wa}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 hover:bg-green-100 transition-colors"
+                                      title={`Chat ${d.nama_lengkap} via WhatsApp`}
+                                    >
+                                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                      {formatPhoneDisplay(wa)}
+                                    </a>
+                                  ) : (
+                                    <span className="text-[11px] text-slate-300 italic">tidak tersedia</span>
+                                  )}
+                                </td>
+                                <td className="px-4 py-3 text-right text-slate-600">{d.recency.toLocaleString()}</td>
+                                <td className="px-4 py-3 text-right text-slate-600">{d.frequency}x</td>
+                                <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatRupiah(d.monetary)}</td>
+                                <td className="px-4 py-3 text-right">
+                                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${config.bgColor} ${config.color}`}>
+                                    {d.rfm_score}
+                                  </span>
+                                </td>
+                              </tr>
+                            )
+                          })
                           )}
                         </tbody>
                       </table>

@@ -9,7 +9,17 @@ import {
   AlertTriangle,
   TrendingUp,
   Info,
+  FileSpreadsheet,
+  FileText,
 } from 'lucide-react'
+import {
+  exportExcel,
+  exportPDF,
+  downloadBlob,
+  buildFilename,
+  type ExportColumn,
+} from '@/lib/export'
+import { toast } from 'sonner'
 import Link from 'next/link'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -138,6 +148,57 @@ export default function PerbandinganPage() {
 
   const insights = generateInsights(segments, totalDonatur)
 
+  const PERBANDINGAN_SCHEMA: ExportColumn[] = [
+    { header: 'Segmen', key: 'label', width: 20 },
+    { header: 'Donatur', key: 'count', width: 12, format: 'number' },
+    { header: '%', key: 'percentage', width: 8, format: 'number' },
+    { header: 'Avg Terakhir (hr)', key: 'avg_recency', width: 18, format: 'number' },
+    { header: 'Avg Frekuensi', key: 'avg_frequency', width: 16, format: 'number' },
+    { header: 'Avg Donasi (Rp)', key: 'avg_monetary', width: 20, format: 'rupiah' },
+    { header: 'Total Kontribusi (Rp)', key: 'total_monetary', width: 24, format: 'rupiah' },
+  ]
+
+  const exportRows = segments.map(s => ({
+    label: SEGMENT_CONFIGS[s.key]?.label || s.label,
+    count: s.count,
+    percentage: s.percentage,
+    avg_recency: s.avg_recency,
+    avg_frequency: s.avg_frequency,
+    avg_monetary: s.avg_monetary,
+    total_monetary: s.total_monetary,
+  })) as Record<string, unknown>[]
+
+  const handleExportExcel = async () => {
+    try {
+      const blob = await exportExcel({
+        title: 'Perbandingan Segmen Donatur',
+        subtitle: 'Ringkasan RFM & kontribusi per segmen',
+        columns: PERBANDINGAN_SCHEMA,
+        rows: exportRows,
+      })
+      downloadBlob(blob, buildFilename('Perbandingan_Segmen', 'xlsx'))
+      toast.success('Excel berhasil diunduh')
+    } catch {
+      toast.error('Gagal export Excel')
+    }
+  }
+
+  const handleExportPDF = () => {
+    try {
+      const blob = exportPDF({
+        title: 'Perbandingan Segmen Donatur',
+        subtitle: 'Ringkasan RFM & kontribusi per segmen — BIDA Analytics',
+        columns: PERBANDINGAN_SCHEMA,
+        rows: exportRows,
+        landscape: true,
+      })
+      downloadBlob(blob, buildFilename('Perbandingan_Segmen', 'pdf'))
+      toast.success('PDF berhasil dibuat')
+    } catch {
+      toast.error('Gagal export PDF')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -230,8 +291,22 @@ export default function PerbandinganPage() {
 
         {/* Tabel Ringkasan */}
         <Card className="border-2 bg-white shadow-sm">
-          <CardHeader className="border-b bg-slate-50/50 py-4">
+          <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 py-4">
             <CardTitle className="text-sm font-black text-slate-700">Ringkasan Semua Segmen</CardTitle>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExportExcel}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase text-slate-600 transition-all hover:border-emerald-400 hover:text-emerald-700"
+              >
+                <FileSpreadsheet className="h-3 w-3" /> Excel
+              </button>
+              <button
+                onClick={handleExportPDF}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-900 px-3 py-1.5 text-[10px] font-bold uppercase text-white transition-all hover:bg-slate-800"
+              >
+                <FileText className="h-3 w-3" /> PDF
+              </button>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
