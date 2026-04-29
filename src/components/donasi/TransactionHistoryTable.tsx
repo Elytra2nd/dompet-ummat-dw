@@ -129,14 +129,15 @@ export default function TransactionHistoryTable() {
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
+          {/* Desktop Table - hidden on xs */}
+          <table className="hidden sm:table w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b">
               <tr>
                 <th className="px-6 py-4">ID Transaksi</th>
                 <th className="px-6 py-4">Donatur</th>
                 <th className="px-6 py-4">Program</th>
                 <th className="px-6 py-4 text-right">Nominal</th>
-                <th className="px-6 py-4">Keterangan</th>
+                <th className="px-6 py-4 hidden lg:table-cell">Keterangan</th>
                 <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
             </thead>
@@ -168,7 +169,7 @@ export default function TransactionHistoryTable() {
                     <td className="px-6 py-4 text-right font-black text-indigo-600">
                       {formatRupiah(Number(item.nominal_valid))}
                     </td>
-                    <td className="px-6 py-4 text-xs">{item.no_ref || '-'}</td>
+                    <td className="px-6 py-4 text-xs hidden lg:table-cell">{item.no_ref || '-'}</td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)}>
@@ -184,6 +185,48 @@ export default function TransactionHistoryTable() {
               )}
             </tbody>
           </table>
+
+          {/* Mobile Card View - visible on xs only */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {loading ? (
+              <div className="flex flex-col items-center py-12 gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                <p className="text-xs font-bold text-slate-400">Memuat data...</p>
+              </div>
+            ) : data.length === 0 ? (
+              <div className="py-8 text-center text-slate-500 italic text-sm px-4">
+                Belum ada transaksi donasi yang tercatat.
+              </div>
+            ) : (
+              data.map((item) => (
+                <div key={item.sk_fakta_donasi} className="p-4 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-800 truncate">
+                        {item.dim_donatur?.nama_lengkap || 'Hamba Allah'}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs font-semibold text-emerald-600">{item.dim_program_donasi?.program_induk || '-'}</span>
+                        <span className="text-[10px] text-slate-400">•</span>
+                        <span className="text-[10px] text-slate-400 uppercase">{item.dim_program_donasi?.sub_program || '-'}</span>
+                      </div>
+                      <p className="text-lg font-black text-indigo-600 mt-2">
+                        {formatRupiah(Number(item.nominal_valid))}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Paginasi */}

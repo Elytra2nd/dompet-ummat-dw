@@ -29,6 +29,7 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { formatRupiah } from '@/lib/utils-ambulan'
+import { toast } from 'sonner'
 
 type FilterType = 'none' | 'year' | 'month' | 'day'
 type Grain = 'year' | 'month' | 'day'
@@ -209,15 +210,15 @@ export default function DonationStats({
     const normalized = normalizeFilter(draftFilter)
 
     if (normalized.filterType === 'year' && (!normalized.startYear || !normalized.endYear)) {
-      alert('Pilih tahun awal dan tahun akhir terlebih dahulu')
+      toast.error('Pilih tahun awal dan tahun akhir terlebih dahulu')
       return
     }
     if (normalized.filterType === 'month' && (!normalized.startMonth || !normalized.endMonth)) {
-      alert('Pilih bulan awal dan bulan akhir terlebih dahulu')
+      toast.error('Pilih bulan awal dan bulan akhir terlebih dahulu')
       return
     }
     if (normalized.filterType === 'day' && (!normalized.startDate || !normalized.endDate)) {
-      alert('Pilih tanggal awal dan tanggal akhir terlebih dahulu')
+      toast.error('Pilih tanggal awal dan tanggal akhir terlebih dahulu')
       return
     }
 
@@ -405,9 +406,9 @@ export default function DonationStats({
               </button>
             )}
 
-            {/* Filter Dropdown */}
+            {/* Filter Dropdown — safe against viewport overflow */}
             {isFilterOpen && (
-              <div className="absolute right-0 top-12 z-20 w-[320px] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
+              <div className="absolute right-0 top-12 z-20 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
                 <div className="mb-4 flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-slate-500" />
                   <p className="text-sm font-black text-slate-800">Filter Waktu</p>

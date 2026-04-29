@@ -259,15 +259,15 @@ export default function UserManagementPage() {
                   users.map((user) => (
                     <TableRow key={user.id} className="group hover:bg-slate-50/50">
                       <TableCell className="font-semibold text-slate-900">{user.name}</TableCell>
-                      <TableCell className="text-slate-600">{user.email}</TableCell>
+                      <TableCell className="text-slate-600 hidden sm:table-cell">{user.email}</TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell className="text-slate-500 text-sm">
+                      <TableCell className="text-slate-500 text-sm hidden md:table-cell">
                         {new Date(user.createdAt).toLocaleDateString('id-ID', {
                           day: 'numeric', month: 'long', year: 'numeric'
                         })}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex justify-end gap-2">
                           <Button 
                             variant="outline" 
                             size="icon" 
@@ -340,7 +340,7 @@ export default function UserManagementPage() {
               </Label>
               <Input 
                 id="password" 
-                type="text" 
+                type="password" 
                 required={!isEditing}
                 value={formData.password} 
                 onChange={e => setFormData({...formData, password: e.target.value})} 
