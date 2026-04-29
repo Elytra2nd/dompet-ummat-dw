@@ -135,7 +135,7 @@ export default function ReportsPage() {
 
   const executeExport = async () => {
     if (!previewData) return
-    const columns = schemaFor(previewData.domain)
+    const columns = schemaFor(previewData?.domain ?? 'donatur')
     const opts = { title: previewData.title, columns, rows: previewData.rows, period: activePeriod }
     if (previewData.type === 'excel') {
       const blob = await exportExcel(opts)
@@ -402,86 +402,148 @@ export default function ReportsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* MODAL PREVIEW SESUAI FORMAT DOWNLOAD */}
+      {/* MODAL PREVIEW */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-3xl border-4 border-slate-900 rounded-none shadow-[12px_12px_0px_0px_rgba(16,185,129,1)] p-0 overflow-hidden">
-          <div className="bg-slate-900 p-6 flex items-center justify-between">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-2xl border-0 shadow-2xl">
+          {/* Header */}
+          <div className={`p-5 flex items-center justify-between ${previewData?.type === 'excel' ? 'bg-emerald-800' : 'bg-slate-900'}`}>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500 rounded-lg">
-                {previewData?.type === 'excel' ? <FileSpreadsheet className="text-white h-5 w-5" /> : <FileText className="text-white h-5 w-5" />}
+              <div className={`p-2 rounded-lg ${previewData?.type === 'excel' ? 'bg-emerald-600' : 'bg-slate-700'}`}>
+                {previewData?.type === 'excel'
+                  ? <FileSpreadsheet className="text-white h-5 w-5" />
+                  : <FileText className="text-white h-5 w-5" />}
               </div>
               <div>
-                <DialogTitle className="text-xl font-black uppercase italic text-white leading-none">
-                  Preview {previewData?.type === 'pdf' ? 'Official PDF' : 'Formal Excel'}
+                <DialogTitle className="text-base font-black uppercase text-white leading-none">
+                  Preview {previewData?.type === 'pdf' ? 'PDF' : 'Excel'}
                 </DialogTitle>
-                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mt-1">BIDA Platform • Document Ready for Export</p>
+                <p className="text-[10px] text-white/60 mt-0.5">{previewData?.title}</p>
               </div>
             </div>
-            <Badge className="bg-emerald-600 text-white border-none animate-pulse">VERIFIED</Badge>
+            <div className="flex items-center gap-2">
+              {(activePeriod.from || activePeriod.to) && (
+                <Badge className="bg-white/10 text-white/80 border-0 text-[10px]">
+                  {activePeriod.from || '—'} s/d {activePeriod.to || 'sekarang'}
+                </Badge>
+              )}
+              <Badge className="bg-white/20 text-white border-0 text-[10px]">{previewData?.rows.length} baris</Badge>
+            </div>
           </div>
 
-          <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto bg-[#fdfdfd]">
-            <div className="text-center border-b-2 border-double border-slate-300 pb-4 mb-6">
-              <h4 className="font-black text-slate-800 text-sm uppercase leading-none">Dompet Ummat Kalimantan Barat</h4>
-              <p className="text-[9px] text-slate-500 font-medium mt-1">Sistem Warehouse Analitik - Laporan Resmi Operasional 2026</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase">Judul Laporan:</p>
-                  <h5 className="font-black text-slate-800 uppercase tracking-tight">{previewData?.title}</h5>
+          <div className="max-h-[65vh] overflow-y-auto">
+            {previewData && previewData.type === 'excel' ? (
+              /* EXCEL PREVIEW — spreadsheet look */
+              <div className="bg-white">
+                <div className="bg-emerald-50 border-b border-emerald-100 px-4 py-2 flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase">Sheet: Data</span>
+                  <span className="text-[10px] text-emerald-600/60">• {previewData.rows.length} rows × {schemaFor(previewData?.domain ?? 'donatur').length} columns</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase">Timestamp Audit:</p>
-                  <p className="text-[10px] font-bold text-slate-700">{new Date().toLocaleString('id-ID')}</p>
-                </div>
-              </div>
-
-              <div className="border-2 border-slate-900 rounded-none overflow-hidden bg-white">
-                <table className="w-full text-left text-[11px]">
-                  <thead className="bg-slate-900 text-white font-black uppercase text-[9px]">
-                    <tr>
-                      <th className="p-3 border-r border-slate-700 w-8 text-center">No</th>
-                      {previewData && schemaFor(previewData.domain).map(col => (
-                        <th key={col.key} className="p-3 border-r border-slate-700">{col.header}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="font-bold text-slate-700">
-                    {previewData?.rows.map((row, idx) => (
-                      <tr key={idx} className="border-b border-slate-100">
-                        <td className="p-3 border-r border-slate-100 text-center text-slate-400">{idx + 1}</td>
-                        {schemaFor(previewData.domain).map(col => {
-                          const val = col.key.split('.').reduce((a: unknown, k) => a && typeof a === 'object' ? (a as Record<string, unknown>)[k] : undefined, row as unknown)
-                          return (
-                            <td key={col.key} className="p-3 border-r border-slate-100">
-                              {String(val ?? '-')}
-                            </td>
-                          )
-                        })}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-emerald-700 text-white">
+                        <th className="border border-emerald-600 px-2 py-1.5 text-center w-8 font-bold">#</th>
+                        {schemaFor(previewData?.domain ?? 'donatur').map(col => (
+                          <th key={col.key} className="border border-emerald-600 px-3 py-1.5 text-left font-bold whitespace-nowrap">
+                            {col.header}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {(previewData?.rows?.slice(0, 20) ?? []).map((row, idx) => (
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}>
+                          <td className="border border-slate-200 px-2 py-1.5 text-center text-slate-400 font-mono text-[10px]">{idx + 1}</td>
+                          {schemaFor(previewData?.domain ?? 'donatur').map(col => {
+                            const val = col.key.split('.').reduce((a: unknown, k) => a && typeof a === 'object' ? (a as Record<string, unknown>)[k] : undefined, row as unknown)
+                            return (
+                              <td key={col.key} className={`border border-slate-200 px-3 py-1.5 ${col.format === 'number' || col.format === 'rupiah' ? 'text-right font-mono' : ''}`}>
+                                {String(val ?? '')}
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {(previewData?.rows?.length ?? 0) > 20 && (
+                  <p className="text-center text-[10px] text-slate-400 py-2 bg-slate-50 border-t">
+                    + {(previewData?.rows?.length ?? 0) - 20} baris lainnya di file Excel
+                  </p>
+                )}
               </div>
-            </div>
-
-            <div className="flex justify-end pt-10">
-              <div className="text-center w-44">
-                <p className="text-[10px] font-black text-slate-400 uppercase mb-12">Mengetahui,</p>
-                <div className="border-b-2 border-slate-300 w-full mb-1"></div>
-                <p className="text-[9px] font-black text-slate-800 uppercase tracking-tighter flex items-center justify-center gap-1">
-                  <ShieldCheck size={10} className="text-emerald-600" /> Kepala Divisi BIDA Platform
-                </p>
+            ) : (
+              /* PDF PREVIEW — A4 document look */
+              <div className="bg-slate-200 p-6">
+                <div className="mx-auto bg-white shadow-lg" style={{ maxWidth: '595px', minHeight: '400px' }}>
+                  {/* Kop surat */}
+                  <div className="border-b-4 border-double border-emerald-800 px-8 py-5">
+                    <p className="text-center text-base font-black text-emerald-900 tracking-tight">DOMPET UMMAT KALIMANTAN BARAT</p>
+                    <p className="text-center text-[9px] text-slate-500 mt-0.5">Jl. Danau Sentarum No. 99, Pontianak, Kalimantan Barat</p>
+                    <p className="text-center text-[9px] text-slate-400 mt-0.5">BIDA Analytics Platform — Official Report</p>
+                  </div>
+                  <div className="px-8 py-4 space-y-4">
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-[9px] font-bold uppercase text-slate-400">Laporan</p>
+                        <p className="text-sm font-black text-slate-800 uppercase">{previewData?.title}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-bold uppercase text-slate-400">Dicetak</p>
+                        <p className="text-[10px] text-slate-600">{new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}</p>
+                        {(activePeriod.from || activePeriod.to) && (
+                          <p className="text-[9px] text-slate-500 mt-0.5">Periode: {activePeriod.from || '—'} s/d {activePeriod.to || 'kini'}</p>
+                        )}
+                      </div>
+                    </div>
+                    <table className="w-full text-[10px] border-collapse">
+                      <thead>
+                        <tr className="bg-emerald-700 text-white">
+                          <th className="border px-2 py-1 text-center">No</th>
+                          {schemaFor(previewData?.domain ?? 'donatur').map(col => (
+                            <th key={col.key} className="border px-2 py-1 text-left">{col.header}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(previewData?.rows?.slice(0, 10) ?? []).map((row, idx) => (
+                          <tr key={idx} className={idx % 2 === 0 ? '' : 'bg-slate-50'}>
+                            <td className="border px-2 py-1 text-center text-slate-400">{idx + 1}</td>
+                            {schemaFor(previewData?.domain ?? 'donatur').map(col => {
+                              const val = col.key.split('.').reduce((a: unknown, k) => a && typeof a === 'object' ? (a as Record<string, unknown>)[k] : undefined, row as unknown)
+                              return (
+                                <td key={col.key} className="border px-2 py-1">{String(val ?? '-')}</td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {(previewData?.rows?.length ?? 0) > 10 && (
+                      <p className="text-[9px] text-slate-400 text-center">... {(previewData?.rows?.length ?? 0) - 10} baris lainnya</p>
+                    )}
+                    <div className="flex justify-end pt-4">
+                      <div className="text-center w-36">
+                        <p className="text-[9px] text-slate-400 mb-8">Mengetahui,</p>
+                        <div className="border-b border-slate-400 mb-1" />
+                        <p className="text-[8px] font-bold text-slate-600 uppercase">Kepala Divisi BIDA</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <DialogFooter className="p-6 bg-slate-100 border-t-2 border-slate-200 gap-3">
-            <Button variant="ghost" className="font-black uppercase text-xs" onClick={() => setPreviewOpen(false)}>Batal</Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700 font-black uppercase text-xs px-10 shadow-[4px_4px_0px_0px_rgba(6,78,59,1)] active:translate-y-1 active:shadow-none transition-all" onClick={executeExport}>
-              <DownloadCloud className="mr-2 h-4 w-4" /> Download {previewData?.type.toUpperCase()}
+          <DialogFooter className="p-4 border-t border-slate-200 gap-3 bg-slate-50">
+            <Button variant="ghost" className="font-bold text-xs" onClick={() => setPreviewOpen(false)}>Batal</Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs px-8"
+              onClick={executeExport}
+            >
+              <DownloadCloud className="mr-2 h-4 w-4" />
+              Download {previewData?.type === 'excel' ? 'Excel' : 'PDF'}
             </Button>
           </DialogFooter>
         </DialogContent>

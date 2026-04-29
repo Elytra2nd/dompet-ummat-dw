@@ -18,6 +18,7 @@ import {
   FileText,
   FileDown,
   ChevronDown,
+  SlidersHorizontal,
   Users,
 } from 'lucide-react'
 import {
@@ -42,7 +43,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip,
 } from 'recharts'
-import { SEGMENT_CONFIGS, getSegmentConfig, SEGMENT_ORDER } from '@/lib/constants-segmentasi'
+import { SEGMENT_CONFIGS, SEGMENT_ORDER, getSegmentConfig } from '@/lib/constants-segmentasi'
 import { useSegmentasi } from '@/contexts/SegmentasiContext'
 
 interface DonaturRow {
@@ -112,6 +113,10 @@ export default function SegmentDetailPage({
     () => (searchParamsHook.get('sort') ?? '') as 'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap' | ''
   )
   const [sortAsc, setSortAsc] = useState(() => (searchParamsHook.get('order') ?? 'desc') === 'asc')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [minMonetary, setMinMonetary] = useState('')
+  const [maxMonetary, setMaxMonetary] = useState('')
+  const [maxRecency, setMaxRecency] = useState('')
 
   const { data: analysisData, loading: analysisLoading, runAnalysis } = useSegmentasi()
 
@@ -165,6 +170,9 @@ export default function SegmentDetailPage({
         })
         if (debouncedSearch) apiParams.set('search', debouncedSearch)
         if (sortKey) { apiParams.set('sort', sortKey); apiParams.set('order', sortAsc ? 'asc' : 'desc') }
+        if (minMonetary) apiParams.set('min_monetary', minMonetary)
+        if (maxMonetary) apiParams.set('max_monetary', maxMonetary)
+        if (maxRecency) apiParams.set('max_recency', maxRecency)
         const res = await fetch(`/api/segmentasi/donatur?${apiParams}`)
         if (!res.ok) throw new Error('Gagal memuat donatur')
         const data = await res.json()
@@ -178,7 +186,7 @@ export default function SegmentDetailPage({
       }
     }
     fetchDonatur()
-  }, [segmen, page, debouncedSearch, sortKey, sortAsc])
+  }, [segmen, page, debouncedSearch, sortKey, sortAsc, minMonetary, maxMonetary, maxRecency])
 
   // Radar chart: pakai RFM score (1–5) yang sudah terstandarisasi — jauh lebih akurat
   const radarData = segment ? [
@@ -319,6 +327,28 @@ export default function SegmentDetailPage({
           <Link href="/segmentasi" className="mb-4 inline-flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors">
             <ArrowLeft className="h-3 w-3" /> Kembali ke Overview
           </Link>
+          {/* Segmen switcher */}
+          <div className="mb-5 flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+            {SEGMENT_ORDER.map(key => {
+              const cfg = SEGMENT_CONFIGS[key]
+              const segData = analysisData?.segments.find((s: { key: string }) => s.key === key)
+              const isActive = key === segmen
+              return (
+                <Link
+                  key={key}
+                  href={`/segmentasi/${key}`}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
+                    isActive
+                      ? `${cfg.bgColor} ${cfg.color} ${cfg.borderColor}`
+                      : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                  }`}
+                >
+                  {cfg.label}
+                  {segData ? <span className="ml-1.5 opacity-60">({segData.count.toLocaleString()})</span> : null}
+                </Link>
+              )
+            })}
+          </div>
           <div className="flex items-center gap-4">
             <div className={`rounded-2xl p-4 ${config.bgColor}`}>
               <IconComponent className={`h-8 w-8 ${config.color}`} />
@@ -474,18 +504,79 @@ export default function SegmentDetailPage({
                 </DropdownMenu>
               </CardHeader>
               <CardContent className="p-0">
-                {/* Search Box */}
-                <div className="border-b px-4 py-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Cari nama donatur..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-all"
-                    />
+                {/* Search + Filter toggle */}
+                <div className="border-b px-4 py-3 space-y-3">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Cari nama, ID, atau tipe donatur..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-all"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setShowAdvanced(v => !v)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition-all ${
+                        showAdvanced || minMonetary || maxMonetary || maxRecency
+                          ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                          : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                    >
+                      <SlidersHorizontal className="h-3.5 w-3.5" />
+                      Filter
+                      {(minMonetary || maxMonetary || maxRecency) && (
+                        <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      )}
+                    </button>
                   </div>
+
+                  {showAdvanced && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Donasi Min (Rp)</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 1000000"
+                          value={minMonetary}
+                          onChange={e => { setMinMonetary(e.target.value); setPage(1) }}
+                          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Donasi Max (Rp)</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 10000000"
+                          value={maxMonetary}
+                          onChange={e => { setMaxMonetary(e.target.value); setPage(1) }}
+                          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Terakhir Donasi ≤ (hari)</label>
+                        <input
+                          type="number"
+                          placeholder="e.g. 90"
+                          value={maxRecency}
+                          onChange={e => { setMaxRecency(e.target.value); setPage(1) }}
+                          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
+                        />
+                      </div>
+                      {(minMonetary || maxMonetary || maxRecency) && (
+                        <div className="sm:col-span-3">
+                          <button
+                            onClick={() => { setMinMonetary(''); setMaxMonetary(''); setMaxRecency(''); setPage(1) }}
+                            className="text-[10px] font-bold text-rose-500 hover:text-rose-600"
+                          >
+                            Reset semua filter
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {loadingDonatur ? (
                   <div className="overflow-x-auto">
