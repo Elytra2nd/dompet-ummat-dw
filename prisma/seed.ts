@@ -17,7 +17,8 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  const hashedPassword = await bcrypt.hash("admin123", 10)
+  const hashedPasswordAdmin = await bcrypt.hash("admin123", 10)
+  const hashedPasswordRelawan = await bcrypt.hash("relawan123", 10)
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@dompetummat.id" },
@@ -25,12 +26,23 @@ async function main() {
     create: {
       email: "admin@dompetummat.id",
       name: "Admin BIDA",
-      password: hashedPassword,
+      password: hashedPasswordAdmin,
       role: "ADMIN",
     },
   })
 
-  console.log("Seed success: Admin account created", { admin })
+  const relawan = await prisma.user.upsert({
+    where: { email: "relawan@dompetummat.id" },
+    update: {},
+    create: {
+      email: "relawan@dompetummat.id",
+      name: "Relawan Dompet Ummat",
+      password: hashedPasswordRelawan,
+      role: "SURVEYOR",
+    },
+  })
+
+  console.log("✅ Seed success:", { admin: admin.email, relawan: relawan.email })
 }
 
 main()
