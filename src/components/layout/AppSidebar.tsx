@@ -100,6 +100,7 @@ const allNavItems = [
     adminOnly: true,
     items: [
       { title: "Pusat Laporan", url: "/reports" },
+      { title: "Laporan Individu", url: "/reports/individu" },
       { title: "Backup Data", url: "/data/backup" },
     ],
   },
