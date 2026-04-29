@@ -69,11 +69,11 @@ export default function AddLayananForm() {
     nama_pasien: '',
     gender: 'L',
     no_hp: '',
-    status_ekonomi: 'Dhuafa',
+    status_ekonomi: STATUS_EKONOMI[0].value,
     alamat_jemput: '',
-    jam: SHIFT_JAM[0],
-    armada: LIST_ARMADA[0],
-    kategori_layanan: KATEGORI_LAYANAN[0],
+    jam: SHIFT_JAM[0].value,
+    armada: LIST_ARMADA[0].value,
+    kategori_layanan: KATEGORI_LAYANAN[0].value,
     desa: '',
     kelurahan_kecamatan: '',
     kabupaten_kota: '',
@@ -149,7 +149,7 @@ export default function AddLayananForm() {
       return toast.error('Tentukan lokasi tujuan di peta')
     setLoading(true)
     try {
-      const res = await fetch('/app/ambulan/api/layanan', {
+      const res = await fetch('/api/ambulan/layanan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -178,7 +178,7 @@ export default function AddLayananForm() {
         </CardHeader>
         <CardContent className="space-y-5 pt-6">
           {/* SEKSI ARMADA & SHIFT */}
-          <div className="grid grid-cols-2 gap-4 rounded-xl border border-red-100 bg-red-50/50 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-red-100 bg-red-50/50 p-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-[10px] font-bold text-red-700 uppercase">
                 <Car className="h-3 w-3" /> Armada
@@ -191,8 +191,8 @@ export default function AddLayananForm() {
                 }
               >
                 {LIST_ARMADA.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
+                  <option key={a.value} value={a.value}>
+                    {a.label}
                   </option>
                 ))}
               </select>
@@ -209,8 +209,8 @@ export default function AddLayananForm() {
                 }
               >
                 {SHIFT_JAM.map((j) => (
-                  <option key={j} value={j}>
-                    {j}
+                  <option key={j.value} value={j.value}>
+                    {j.label}
                   </option>
                 ))}
               </select>
@@ -218,7 +218,7 @@ export default function AddLayananForm() {
           </div>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="font-semibold text-slate-700">
                   Nama Pasien
@@ -246,15 +246,15 @@ export default function AddLayananForm() {
                   }
                 >
                   {KATEGORI_LAYANAN.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
+                    <option key={k.value} value={k.value}>
+                      {k.label}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Gender</Label>
                 <select
@@ -278,8 +278,8 @@ export default function AddLayananForm() {
                   }
                 >
                   {STATUS_EKONOMI.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                    <option key={s.value} value={s.value}>
+                      {s.label}
                     </option>
                   ))}
                 </select>
@@ -321,9 +321,9 @@ export default function AddLayananForm() {
           </div>
         </CardHeader>
         <CardContent className="flex-1 space-y-4 bg-white pt-6">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <select
-              className="h-9 rounded border text-xs"
+              className="h-9 w-full rounded border text-xs px-2"
               onChange={(e) => {
                 setSelectedIds({ ...selectedIds, prov: e.target.value })
                 setFormData({
@@ -341,7 +341,7 @@ export default function AddLayananForm() {
               ))}
             </select>
             <select
-              className="h-9 rounded border text-xs"
+              className="h-9 w-full rounded border text-xs px-2"
               disabled={!selectedIds.prov}
               onChange={(e) => {
                 setSelectedIds({ ...selectedIds, kab: e.target.value })
@@ -381,7 +381,7 @@ export default function AddLayananForm() {
             </Button>
           </div>
 
-          <div className="relative h-[300px] w-full overflow-hidden rounded-xl border-2">
+          <div className="relative h-[250px] sm:h-[300px] w-full overflow-hidden rounded-xl border-2">
             <MapPicker
               center={mapCenter}
               onLocationSelect={(lat, lng) => {

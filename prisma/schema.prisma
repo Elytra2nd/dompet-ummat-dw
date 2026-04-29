@@ -100,6 +100,9 @@ model dim_pasien_ambulan {
   desa                 String?                            @db.VarChar(100)
   kelurahan_kecamatan  String?                            @db.VarChar(100)
   kabupaten_kota       String?                            @db.VarChar(100)
+  valid_from          DateTime? @default(dbgenerated("'2018-01-01'")) @db.Date
+  valid_to            DateTime? @default(dbgenerated("'9999-12-31'")) @db.Date
+  is_active           Boolean?  @default(true)
   fact_layanan_ambulan fact_layanan_ambulan[]
 }
 
@@ -123,6 +126,9 @@ model dim_petugas {
   id_petugas          String                    @unique(map: "id_petugas") @db.VarChar(50)
   nama_petugas        String?                   @db.VarChar(255)
   tipe_petugas        dim_petugas_tipe_petugas?
+  valid_from    DateTime? @default(dbgenerated("'2018-01-01'")) @db.Date
+  valid_to      DateTime? @default(dbgenerated("'9999-12-31'")) @db.Date
+  is_active     Boolean?  @default(true)
   fact_donasi         fact_donasi[]
   fact_skor_kelayakan fact_skor_kelayakan[]
 }
@@ -632,4 +638,60 @@ enum fact_skor_kelayakan_kategori_rekomendasi {
   Tidak_Direkomendasikan           @map("Tidak Direkomendasikan")
   To_Be_Determined                 @map("To Be Determined")
   Not_Applicable                   @map("Not Applicable")
+}
+
+// --- AUTH MODELS ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?   // Simpan hash password di sini
+  image         String?
+  role          UserRole  @default(STAFF)
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  SURVEYOR
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

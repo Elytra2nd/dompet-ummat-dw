@@ -7,7 +7,7 @@ export default function AktivitasAmbulanPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
           <div className="mb-2 flex items-center gap-4">
             <Button
               variant="ghost"
@@ -15,19 +15,19 @@ export default function AktivitasAmbulanPage() {
               asChild
               className="-ml-2 text-slate-500 transition-colors hover:text-blue-600"
             >
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Dashboard
+              <Link href="/ambulan">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Ambulan
               </Link>
             </Button>
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
-                <Settings className="h-8 w-8 text-blue-600" />
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+                <Settings className="h-7 w-7 text-blue-600 shrink-0" />
                 Operasional <span className="text-blue-600">Ambulans</span>
               </h1>
-              <p className="mt-1 font-medium text-slate-500">
+              <p className="mt-1 font-medium text-slate-500 text-sm">
                 Pencatatan biaya bensin, pemeliharaan, dan operasional armada
               </p>
             </div>
@@ -35,7 +35,7 @@ export default function AktivitasAmbulanPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 pb-12">
         <AddAktivitasForm />
       </div>
     </div>

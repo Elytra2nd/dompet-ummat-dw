@@ -1,18 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AddDonasiForm from '@/components/donasi/AddDonasiForm'
 import DonationStats from '@/components/donasi/DonationStats'
+import TransactionHistoryTable from '@/components/donasi/TransactionHistoryTable'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, HeartHandshake, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import ImportButton from '@/components/import/ImportButton'
 
 export default function DonasiMasukPage() {
-  // 1. Perbarui Initial State agar sinkron dengan interface DonationStatsProps
   const [stats, setStats] = useState({
     totalDonasi: 0,
     jumlahDonatur: 0,
-    jumlahMustahik: 0, // Tambahkan ini
+    jumlahMustahik: 0,
     danaTersalur: 0,
     targetBulanan: 100000000,
     pertumbuhan: 0,
@@ -25,8 +25,6 @@ export default function DonasiMasukPage() {
       const res = await fetch('/api/donasi/stats')
       if (res.ok) {
         const data = await res.json()
-        // Gunakan spread untuk menjaga nilai default (seperti targetBulanan) 
-        // jika API tidak mengirimkan semua field
         setStats((prev) => ({ ...prev, ...data }))
       }
     } catch (error) {
@@ -43,7 +41,7 @@ export default function DonasiMasukPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="mb-2 flex items-center gap-4">
             <Button
               variant="ghost"
@@ -59,26 +57,33 @@ export default function DonasiMasukPage() {
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
-                <HeartHandshake className="h-8 w-8 text-indigo-600" />
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+                <HeartHandshake className="h-7 w-7 text-indigo-600 shrink-0" />
                 Penerimaan <span className="text-indigo-600">Donasi</span>
               </h1>
-              <p className="mt-1 font-medium text-slate-500">
+              <p className="mt-1 font-medium text-slate-500 text-sm">
                 Pencatatan dana Ziswaf masuk untuk pemberdayaan ummat
               </p>
             </div>
-            {loading && (
-              <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Sinkronisasi Data...
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <ImportButton modul="donasi" onImportSuccess={fetchStats} />
+              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 font-bold shadow-md h-10">
+                <Link href="/donasi/masuk/baru">
+                  Input Transaksi
+                </Link>
+              </Button>
+              {loading && (
+                <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="hidden sm:inline">Sinkronisasi...</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-8 px-8">
-        {/* 2. Kirim Props secara lengkap ke komponen DonationStats */}
+      <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
         <DonationStats
           totalDonasi={stats.totalDonasi}
           jumlahDonatur={stats.jumlahDonatur}
@@ -87,8 +92,7 @@ export default function DonasiMasukPage() {
           pertumbuhan={stats.pertumbuhan}
         />
 
-        {/* FORM UTAMA */}
-        <AddDonasiForm />
+        <TransactionHistoryTable />
       </div>
     </div>
   )

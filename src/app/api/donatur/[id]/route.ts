@@ -18,7 +18,7 @@ export async function GET(
           },
           orderBy: { sk_tgl_bersih: 'desc' }
         }
-      }
+      } 
     })
 
     if (!dataDonatur) {

@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link'
 import { toast } from 'sonner'
+import ImportButton from '@/components/import/ImportButton'
 
 export default function RiwayatAktivitasPage() {
   const [data, setData] = useState<any>(null)
@@ -148,13 +149,13 @@ export default function RiwayatAktivitasPage() {
           <p className="text-slate-500 text-sm pl-10 italic font-medium">Internal Operational Tracking • BIDA Warehouse</p>
         </div>
         
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <Link href="/ambulan/layanan" className="flex-1 md:flex-initial">
             <Button variant="outline" className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-bold shadow-sm uppercase text-[10px] tracking-widest h-10 px-6">
               <HandHeart className="mr-2 h-4 w-4" /> Layanan Pasien
             </Button>
           </Link>
-          {/* PERBAIKAN: Tombol Input mengarah ke halaman aktivitas khusus */}
+          <ImportButton modul="ambulan_aktivitas" onImportSuccess={fetchAktivitas} />
           <Link href="/ambulan/aktivitas" className="flex-1 md:flex-initial">
             <Button className="w-full bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-bold uppercase text-[10px] tracking-widest h-10 px-6">
               <Plus className="mr-2 h-4 w-4" /> Catat Biaya Baru
@@ -245,67 +246,112 @@ export default function RiwayatAktivitasPage() {
           </div>
         </div>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-slate-50 border-b">
-              <TableRow>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4 px-6">ID & Kategori</TableHead>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Unit Armada</TableHead>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Biaya Operasional</TableHead>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-8">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading && !data ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 animate-pulse uppercase text-[10px] font-black tracking-[0.2em]">Synchronizing Warehouse...</TableCell></TableRow>
-              ) : filteredLogs.length > 0 ? (
-                filteredLogs.map((log: any) => (
-                  <TableRow key={log.sk_fakta_aktivitas_ambulan} className="hover:bg-slate-50 transition-colors border-b last:border-0 group">
-                    <TableCell className="px-6 py-4">
-                      <p className="font-bold text-xs text-slate-900 uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ') || 'Umum'}</p>
-                      <p className="text-[10px] font-mono font-semibold text-slate-400 mt-0.5 tracking-tighter uppercase">{log.id_transaksi}</p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
-                        <Truck size={14} className="text-slate-400"/> {log.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Ready'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="font-bold text-sm text-rose-600">
-                        {formatIDR(log.biaya_operasional || 0)}
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-right pr-6">
-                      <div className="flex justify-end gap-1 items-center">
-                        <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
-                        </Link>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(log)}><Edit3 size={16}/></Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16}/></Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-2xl border-2">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="font-black uppercase text-lg">Hapus Record Biaya?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-sm text-slate-500 font-medium leading-relaxed">
-                                Data dengan ID <strong>{log.id_transaksi}</strong> akan dihapus permanen dari tabel fakta aktivitas warehouse.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="rounded-lg font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(log.sk_fakta_aktivitas_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white font-bold uppercase text-[10px]">Ya, Hapus</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 italic font-medium uppercase text-xs">Tidak ada log aktivitas ditemukan.</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {/* Desktop Table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-slate-50 border-b">
+                <TableRow>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4 px-6">ID & Kategori</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 hidden md:table-cell">Unit Armada</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Biaya Operasional</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-8">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && !data ? (
+                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 animate-pulse uppercase text-[10px] font-black tracking-[0.2em]">Synchronizing Warehouse...</TableCell></TableRow>
+                ) : filteredLogs.length > 0 ? (
+                  filteredLogs.map((log: any) => (
+                    <TableRow key={log.sk_fakta_aktivitas_ambulan} className="hover:bg-slate-50 transition-colors border-b last:border-0 group">
+                      <TableCell className="px-6 py-4">
+                        <p className="font-bold text-xs text-slate-900 uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ') || 'Umum'}</p>
+                        <p className="text-[10px] font-mono font-semibold text-slate-400 mt-0.5 tracking-tighter uppercase">{log.id_transaksi}</p>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
+                          <Truck size={14} className="text-slate-400"/> {log.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Ready'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-bold text-sm text-rose-600">
+                          {formatIDR(log.biaya_operasional || 0)}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <div className="flex justify-end gap-1 items-center">
+                          <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
+                          </Link>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(log)}><Edit3 size={16}/></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16}/></Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-2xl border-2">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="font-black uppercase text-lg">Hapus Record Biaya?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-sm text-slate-500 font-medium leading-relaxed">
+                                  Data dengan ID <strong>{log.id_transaksi}</strong> akan dihapus permanen dari tabel fakta aktivitas warehouse.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-lg font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(log.sk_fakta_aktivitas_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white font-bold uppercase text-[10px]">Ya, Hapus</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 italic font-medium uppercase text-xs">Tidak ada log aktivitas ditemukan.</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {loading && !data ? (
+              <div className="py-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" /></div>
+            ) : filteredLogs.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 italic text-sm">Tidak ada log aktivitas ditemukan.</div>
+            ) : (
+              filteredLogs.map((log: any) => (
+                <div key={log.sk_fakta_aktivitas_ambulan} className="p-4 hover:bg-slate-50">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-900 text-sm uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ')}</p>
+                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">{log.id_transaksi}</p>
+                      <p className="text-base font-black text-rose-600 mt-2">{formatIDR(log.biaya_operasional || 0)}</p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600"><Eye size={15} /></Button>
+                      </Link>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(log)}><Edit3 size={15}/></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600"><Trash2 size={15}/></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="font-black text-rose-600">Hapus Record?</AlertDialogTitle>
+                            <AlertDialogDescription>Data <strong>{log.id_transaksi}</strong> akan dihapus permanen.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(log.sk_fakta_aktivitas_ambulan)} className="bg-rose-600 hover:bg-rose-700">Ya, Hapus</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

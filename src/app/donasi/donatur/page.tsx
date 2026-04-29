@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -31,17 +30,14 @@ import {
   Search,
   Loader2,
   Phone,
-  MapPin,
-  Heart,
   ArrowLeft,
-  X,
   Edit3,
   Trash2,
   AlertTriangle,
   Building2,
   ChevronLeft,
   ChevronRight,
-  Eye // Ikon Detail
+  Eye
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -58,31 +54,11 @@ interface Donatur {
 export default function ManajemenDonaturPage() {
   const [donatur, setDonatur] = useState<Donatur[]>([])
   const [loading, setLoading] = useState(true)
-  const [isAdding, setIsAdding] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
   const [search, setSearch] = useState('')
 
   // --- STATE PAGINASI ---
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-
-  const [formData, setFormData] = useState({
-    sk_donatur: 0,
-    nama_donatur: '',
-    no_hp: '',
-    alamat: '',
-    perusahaan: '',
-    kategori_donatur: 'Individu',
-  })
-
-  const kategoriOptions = [
-    { label: 'Individu', value: 'Individu' },
-    { label: 'Lembaga / Korporasi', value: 'Lembaga_Korporasi' },
-    { label: 'Komunitas', value: 'Komunitas' },
-    { label: 'To Be Determined', value: 'To_Be_Determined' },
-    { label: 'Not Applicable', value: 'Not_Applicable' },
-    { label: 'Data Corrupted', value: 'Data_Corrupted' },
-  ]
 
   useEffect(() => { fetchDonatur() }, [])
 
@@ -99,34 +75,6 @@ export default function ManajemenDonaturPage() {
     }
   }
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    const method = isEditing ? 'PUT' : 'POST'
-    try {
-      const res = await fetch('/api/donasi/donatur', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      
-      const result = await res.json()
-
-      if (res.ok) {
-        toast.success(isEditing ? 'Versi data terbaru disimpan (SCD Type 2)' : 'Donatur baru terdaftar')
-        resetForm()
-        await fetchDonatur()
-        setCurrentPage(1)
-      } else {
-        toast.error(result.error || 'Gagal menyimpan data')
-      }
-    } catch (e) { 
-      toast.error('Terjadi kesalahan koneksi database') 
-    } finally { 
-      setLoading(false) 
-    }
-  }
-
   const handleDelete = async (sk: number, nama: string) => {
     try {
       const res = await fetch(`/api/donasi/donatur?sk=${sk}`, { method: 'DELETE' })
@@ -135,26 +83,6 @@ export default function ManajemenDonaturPage() {
         fetchDonatur()
       }
     } catch (e) { toast.error('Gagal menonaktifkan data') }
-  }
-
-  const startEdit = (d: Donatur) => {
-    setFormData({
-      sk_donatur: d.sk_donatur,
-      nama_donatur: d.nama_lengkap || '',
-      no_hp: d.kontak_utama || '',
-      alamat: d.alamat || '',
-      perusahaan: d.perusahaan || '',
-      kategori_donatur: d.tipe || 'Individu',
-    })
-    setIsEditing(true)
-    setIsAdding(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const resetForm = () => {
-    setIsAdding(false)
-    setIsEditing(false)
-    setFormData({ sk_donatur: 0, nama_donatur: '', no_hp: '', alamat: '', perusahaan: '', kategori_donatur: 'Individu' })
   }
 
   const filteredDonatur = donatur.filter((d) => {
@@ -177,77 +105,27 @@ export default function ManajemenDonaturPage() {
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
             <Link href="/donasi/masuk"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
           </Button>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
-              <Users className="h-8 w-8 text-indigo-600" /> Database <span className="text-indigo-600">Donatur</span>
+              <Users className="h-7 w-7 text-indigo-600 shrink-0" /> Database <span className="text-indigo-600">Donatur</span>
             </h1>
-            {!isAdding && (
-              <Button onClick={() => setIsAdding(true)} className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700">
+            <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 w-full sm:w-auto">
+              <Link href="/donasi/donatur/baru">
                 <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
-              </Button>
-            )}
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
-        {isAdding && (
-          <Card className="animate-in fade-in slide-in-from-top-4 border-2 border-indigo-100 shadow-xl overflow-hidden bg-white">
-            <CardHeader className="bg-indigo-50/50 py-4 border-b">
-              <CardTitle className="flex items-center justify-between text-sm font-black text-indigo-700 uppercase tracking-widest">
-                <span className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" /> {isEditing ? 'Update Dimensi Donatur' : 'Registrasi Donatur Baru'}
-                </span>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400" onClick={resetForm}><X className="h-4 w-4" /></Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSave} className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Nama Lengkap</Label>
-                  <Input required className="font-bold" value={formData.nama_donatur} onChange={(e) => setFormData({...formData, nama_donatur: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">No. WhatsApp</Label>
-                  <Input required value={formData.no_hp} onChange={(e) => setFormData({...formData, no_hp: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Kategori</Label>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500"
-                    value={formData.kategori_donatur}
-                    onChange={(e) => setFormData({...formData, kategori_donatur: e.target.value})}
-                  >
-                    {kategoriOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Instansi / Perusahaan</Label>
-                  <Input placeholder="Nama Perusahaan (Opsional)" value={formData.perusahaan} onChange={(e) => setFormData({...formData, perusahaan: e.target.value})} />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Alamat</Label>
-                  <Input value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} />
-                </div>
-                <div className="md:col-span-4 flex justify-end">
-                  <Button type="submit" disabled={loading} className="w-full md:w-auto px-12 bg-indigo-600 font-black uppercase tracking-tighter hover:bg-indigo-700 shadow-lg">
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Simpan Perubahan' : 'Push to Warehouse')}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
         <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
           <CardHeader className="border-b py-4 bg-slate-50/50">
-            <div className="relative max-w-sm">
+            <div className="relative w-full max-w-md">
               <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="Cari nama, kontak, atau perusahaan..." 
-                className="pl-10 font-bold" 
+                className="pl-10 font-bold w-full" 
                 value={search} 
                 onChange={(e) => {
                   setSearch(e.target.value)
@@ -289,7 +167,6 @@ export default function ManajemenDonaturPage() {
                     </TableCell>
                     <TableCell className="text-right pr-4">
                       <div className="flex items-center justify-end gap-1">
-                        {/* TOMBOL DETAIL REKAM JEJAK */}
                         <Link href={`/donasi/donatur/${d.id_donatur}`}>
                           <Button 
                             variant="ghost" 
@@ -301,9 +178,12 @@ export default function ManajemenDonaturPage() {
                           </Button>
                         </Link>
 
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(d)}>
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
+                        <Link href={`/donasi/donatur/baru?id=${d.id_donatur}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600">
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        </Link>
+
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">

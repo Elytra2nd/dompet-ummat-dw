@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import ImportButton from '@/components/import/ImportButton'
 
 interface AmbulanLog {
   sk_fakta_layanan_ambulan: number;
@@ -154,12 +155,11 @@ export default function MonitoringAmbulanPage() {
           </h1>
           <p className="text-slate-500 text-sm">Rekapitulasi Transaksi Bantuan Pasien & Masyarakat</p>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm border-slate-200 font-bold uppercase text-[10px]">
             <RefreshCw className={`mr-2 h-3 w-3 ${loading ? 'animate-spin' : ''}`} /> Sync Data
           </Button>
-          
-          {/* PERUBAHAN: Tombol diarahkan ke halaman input layanan khusus */}
+          <ImportButton modul="ambulan_layanan" onImportSuccess={fetchAmbulan} />
           <Link href="/ambulan/layanan" className="w-full md:w-auto">
             <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white w-full font-bold uppercase text-[10px] tracking-widest">
               <Plus className="mr-2 h-4 w-4" /> Catat Layanan Baru
@@ -227,75 +227,126 @@ export default function MonitoringAmbulanPage() {
         </div>
         
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-slate-50 border-b">
-              <TableRow>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4">Layanan & ID</TableHead>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Identitas Pasien</TableHead>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Unit & Lokasi</TableHead>
-                <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-6">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading && data.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-16 text-slate-400 font-medium animate-pulse uppercase text-xs tracking-widest">Sinkronisasi Data...</TableCell></TableRow>
-              ) : currentItems.length > 0 ? (
-                currentItems.map((item) => (
-                  <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0 group">
-                    <TableCell>
-                      <Badge variant="secondary" className="mb-1 font-bold text-[9px] bg-rose-50 text-rose-700 hover:bg-rose-50 border-none px-2 py-0.5 rounded-none uppercase">
+          {/* Desktop Table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-slate-50 border-b">
+                <TableRow>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4">Layanan & ID</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Identitas Pasien</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 hidden md:table-cell">Unit & Lokasi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-6">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && data.length === 0 ? (
+                  <TableRow><TableCell colSpan={4} className="text-center py-16 text-slate-400 font-medium animate-pulse uppercase text-xs tracking-widest">Sinkronisasi Data...</TableCell></TableRow>
+                ) : currentItems.length > 0 ? (
+                  currentItems.map((item) => (
+                    <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0 group">
+                      <TableCell>
+                        <Badge variant="secondary" className="mb-1 font-bold text-[9px] bg-rose-50 text-rose-700 hover:bg-rose-50 border-none px-2 py-0.5 rounded-none uppercase">
+                          {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
+                        </Badge>
+                        <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter uppercase">{item.id_transaksi}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-bold text-sm text-slate-900 uppercase group-hover:text-rose-600 transition-colors">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{item.dim_pasien_ambulan?.status_ekonomi || 'Non-Subsidi'}</p>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="space-y-1">
+                          <div className="flex items-center text-[11px] text-slate-700 font-semibold gap-1.5 uppercase">
+                             <Truck size={13} className="text-slate-400"/> {item.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Standar'}
+                          </div>
+                          <div className="flex items-center text-[10px] text-slate-400 font-bold gap-1.5 uppercase">
+                             <MapPin size={12} className="text-rose-400"/> {item.dim_lokasi?.kabupaten_kota || 'PONTIANAK'}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-4">
+                        <div className="flex justify-end gap-1 items-center">
+                          <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
+                          </Link>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16} /></Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-xl border-2">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="font-black uppercase text-lg flex items-center gap-2">
+                                  <AlertCircle className="text-rose-600" /> Hapus Record?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-slate-500 text-sm font-medium leading-relaxed">
+                                  Data ID <strong>{item.id_transaksi}</strong> akan dihapus permanen dari tabel fakta layanan warehouse.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-lg font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white font-bold uppercase text-[10px]">Ya, Hapus</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 font-medium italic uppercase text-xs">Belum ada data fakta ditemukan.</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {loading && data.length === 0 ? (
+              <div className="py-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" /></div>
+            ) : currentItems.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 italic text-sm">Belum ada data.</div>
+            ) : (
+              currentItems.map((item) => (
+                <div key={item.sk_fakta_layanan_ambulan} className="p-4 hover:bg-slate-50">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <Badge className="mb-1 bg-rose-50 text-rose-700 border-none text-[9px] font-bold uppercase rounded-sm">
                         {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
                       </Badge>
-                      <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter uppercase">{item.id_transaksi}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="font-bold text-sm text-slate-900 uppercase group-hover:text-rose-600 transition-colors">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{item.dim_pasien_ambulan?.status_ekonomi || 'Non-Subsidi'}</p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center text-[11px] text-slate-700 font-semibold gap-1.5 uppercase">
-                           <Truck size={13} className="text-slate-400"/> {item.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Standar'}
-                        </div>
-                        <div className="flex items-center text-[10px] text-slate-400 font-bold gap-1.5 uppercase">
-                           <MapPin size={12} className="text-rose-400"/> {item.dim_lokasi?.kabupaten_kota || 'PONTIANAK'}
-                        </div>
+                      <p className="font-bold text-slate-900 truncate uppercase">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
+                      <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-bold uppercase">
+                        <Truck size={11} />{item.armada?.split('__')[0].replace(/_/g, ' ')}
+                        <span>•</span>
+                        <MapPin size={11} className="text-rose-400" />{item.dim_lokasi?.kabupaten_kota || 'PONTIANAK'}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right pr-4">
-                      <div className="flex justify-end gap-1 items-center">
-                        <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
-                        </Link>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16} /></Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-xl border-2">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="font-black uppercase text-lg flex items-center gap-2">
-                                <AlertCircle className="text-rose-600" /> Hapus Record?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-500 text-sm font-medium leading-relaxed">
-                                Data ID <strong>{item.id_transaksi}</strong> akan dihapus permanen dari tabel fakta layanan warehouse.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="rounded-lg font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600 hover:bg-rose-700 rounded-lg text-white font-bold uppercase text-[10px]">Ya, Hapus</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 font-medium italic uppercase text-xs">Belum ada data fakta ditemukan.</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600"><Eye size={15} /></Button>
+                      </Link>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(item)}><Edit3 size={15} /></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600"><Trash2 size={15} /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="font-black text-rose-600">Hapus Record?</AlertDialogTitle>
+                            <AlertDialogDescription>Data <strong>{item.id_transaksi}</strong> akan dihapus permanen.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(item.sk_fakta_layanan_ambulan)} className="bg-rose-600 hover:bg-rose-700">Ya, Hapus</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
 
           {/* PAGINATION */}
           <div className="p-4 border-t flex items-center justify-between bg-slate-50/30">

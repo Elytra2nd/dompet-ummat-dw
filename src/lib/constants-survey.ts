@@ -1,34 +1,34 @@
 export const STATUS_KELAYAKAN = [
-  'Sangat Layak',
-  'Layak',
-  'Dipertimbangkan',
-  'Tidak Layak',
+  { label: 'Sangat Layak', value: 'Sangat_Layak' },
+  { label: 'Layak', value: 'Layak' },
+  { label: 'Dipertimbangkan', value: 'Dipertimbangkan' },
+  { label: 'Tidak Layak', value: 'Tidak_Layak' },
 ]
 
 export const KONDISI_TEMPAT_TINGGAL = [
-  'Sangat Baik',
-  'Baik',
-  'Cukup',
-  'Buruk',
-  'Sangat Buruk',
+  { label: 'Sangat Baik', value: 'Sangat_Baik' },
+  { label: 'Baik', value: 'Baik' },
+  { label: 'Cukup', value: 'Cukup' },
+  { label: 'Buruk', value: 'Buruk' },
+  { label: 'Sangat Buruk', value: 'Sangat_Buruk' },
 ]
 
 export const KATEGORI_REKOMENDASI = [
-  'Bantuan Konsumtif (Sembako/Uang)',
-  'Bantuan Produktif (Modal Usaha)',
-  'Bantuan Medis',
-  'Bantuan Pendidikan',
-  'Lainnya',
-  'Tidak Direkomendasikan',
+  { label: 'Bantuan Konsumtif (Sembako/Uang)', value: 'Bantuan_Konsumtif__Sembako_Uang_' },
+  { label: 'Bantuan Produktif (Modal Usaha)', value: 'Bantuan_Produktif__Modal_Usaha_' },
+  { label: 'Bantuan Medis', value: 'Bantuan_Medis' },
+  { label: 'Bantuan Pendidikan', value: 'Bantuan_Pendidikan' },
+  { label: 'Lainnya', value: 'Lainnya' },
+  { label: 'Tidak Direkomendasikan', value: 'Tidak_Direkomendasikan' },
 ]
 
 export const GOLONGAN_ASNAF = [
-  'Fakir',
-  'Miskin',
-  'Amil',
-  'Muallaf',
-  'Riqab',
-  'Gharimin',
-  'Fisabilillah',
-  'Ibnu Sabil',
+  { label: 'Fakir', value: 'Fakir' },
+  { label: 'Miskin', value: 'Miskin' },
+  { label: 'Amil', value: 'Amil' },
+  { label: 'Muallaf', value: 'Muallaf' },
+  { label: 'Riqab', value: 'Riqab' },
+  { label: 'Gharimin', value: 'Gharimin' },
+  { label: 'Fisabilillah', value: 'Fisabilillah' },
+  { label: 'Ibnu Sabil', value: 'Ibnu_Sabil' },
 ]
