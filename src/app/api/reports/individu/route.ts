@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
     const donatur = await prisma.dim_donatur.findUnique({
       where: { id_donatur: id },
       select: {
-        nama_donatur: true,
-        alamat_lengkap: true,
-        no_hp: true,
+        sk_donatur: true,
+        nama_lengkap: true,
+        alamat: true,
+        kontak_utama: true,
       }
     })
 
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
     // Ambil histori transaksi pada tahun yang dipilih
     const transactions = await prisma.fact_donasi.findMany({
       where: {
-        sk_donatur: id,
+        sk_donatur: donatur.sk_donatur,
         dim_date: {
           tahun: Number(year)
         }
@@ -39,16 +40,16 @@ export async function GET(req: NextRequest) {
         dim_program_donasi: true,
       },
       orderBy: {
-        dim_date: { date_actual: 'asc' }
+        dim_date: { tanggal: 'asc' }
       }
     })
 
     // Mapping dan agregasi transaksi
     const riwayat = transactions.map(trx => ({
-      tanggal: trx.dim_date.date_actual,
-      jenis_transaksi: trx.dim_program_donasi.program_induk,
-      sub_donasi: trx.dim_program_donasi.sub_program,
-      jumlah: Number(trx.nominal_valid)
+      tanggal: trx.dim_date?.tanggal || new Date(),
+      jenis_transaksi: trx.dim_program_donasi?.program_induk || '-',
+      sub_donasi: trx.dim_program_donasi?.sub_program || '-',
+      jumlah: Number(trx.nominal_valid || 0)
     }))
 
     const rekap = {
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
     }
 
     for (const item of riwayat) {
-      const jenis = item.jenis_transaksi.toUpperCase()
+      const jenis = String(item.jenis_transaksi).toUpperCase()
       if (jenis.includes('ZAKAT')) rekap.zakat += item.jumlah
       else if (jenis.includes('INFAK') || jenis.includes('INFAQ') || jenis.includes('SEDEKAH')) rekap.infak += item.jumlah
       else if (jenis.includes('WAKAF')) rekap.wakaf += item.jumlah
@@ -68,7 +69,11 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      donatur,
+      donatur: {
+        nama_donatur: donatur.nama_lengkap || 'Tanpa Nama',
+        alamat_lengkap: donatur.alamat || '-',
+        no_hp: donatur.kontak_utama || '-',
+      },
       periode: year,
       riwayat,
       rekap
