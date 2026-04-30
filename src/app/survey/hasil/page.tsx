@@ -6,8 +6,15 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from '@/components/ui/card'
-import { ClipboardCheck, Search, UserCheck, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
+import { ClipboardCheck, Search, UserCheck, AlertTriangle, CheckCircle2, XCircle, Eye, Edit3, Trash2, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import Link from 'next/link'
+import { toast } from 'sonner'
 
 interface SurveyData {
   sk_survey: number;
@@ -29,6 +36,11 @@ export default function SurveyMainPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
+  // Delete State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deletingItem, setDeletingItem] = useState<SurveyData | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   useEffect(() => {
     fetch('/api/survey/hasil')
       .then(res => res.json())
@@ -42,6 +54,31 @@ export default function SurveyMainPage() {
     s.dim_mustahik?.nama?.toLowerCase().includes(search.toLowerCase()) ||
     s.no_register?.toLowerCase().includes(search.toLowerCase())
   )
+
+  const confirmDelete = (item: SurveyData) => {
+    setDeletingItem(item)
+    setDeleteModalOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!deletingItem) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/survey/hasil?sk=${deletingItem.sk_survey}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success(`Data survey ${deletingItem.dim_mustahik?.nama} berhasil dihapus`)
+        setSurveys(prev => prev.filter(s => s.sk_survey !== deletingItem.sk_survey))
+      } else {
+        toast.error('Gagal menghapus data survey')
+      }
+    } catch (e) {
+      toast.error('Terjadi kesalahan saat menghapus')
+    } finally {
+      setIsDeleting(false)
+      setDeleteModalOpen(false)
+      setDeletingItem(null)
+    }
+  }
 
   // Hitung metrik
   const totalSurvey = surveys.length
@@ -118,13 +155,14 @@ export default function SurveyMainPage() {
                 <TableHead className="text-white font-black text-[10px] uppercase text-center">Skor Akhir</TableHead>
                 <TableHead className="text-white font-black text-[10px] uppercase text-center">Status Kelayakan</TableHead>
                 <TableHead className="text-white font-black text-[10px] uppercase pr-6">Rekomendasi Bantuan</TableHead>
+                <TableHead className="text-white font-black text-[10px] uppercase text-right pr-6">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-20 font-bold animate-pulse text-slate-400">Sinkronisasi Data...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-20 font-bold animate-pulse text-slate-400">Sinkronisasi Data...</TableCell></TableRow>
               ) : filteredSurveys.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-20 font-bold text-slate-400">Belum ada data survey.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-20 font-bold text-slate-400">Belum ada data survey.</TableCell></TableRow>
               ) : filteredSurveys.map((item) => (
                 <TableRow key={item.sk_survey} className="hover:bg-slate-50 transition-colors border-b border-slate-100">
                   <TableCell className="pl-6 py-4">
@@ -157,12 +195,48 @@ export default function SurveyMainPage() {
                       </p>
                     </div>
                   </TableCell>
+                  <TableCell className="text-right pr-6">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link href={`/survey/hasil/${item.sk_survey}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" title="Detail Survey">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/survey/baru?id=${item.sk_survey}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" title="Edit Survey">
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50" onClick={() => confirmDelete(item)} title="Hapus Survey">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <AlertDialogContent className="sm:max-w-[425px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-rose-600 font-black uppercase tracking-tight">
+              <AlertTriangle className="h-5 w-5" /> Konfirmasi Hapus
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-slate-600 pt-2">
+              Apakah Anda yakin ingin menghapus data survey kelayakan untuk <strong>{deletingItem?.dim_mustahik?.nama}</strong>? Tindakan ini akan menghapus data penilaian kelayakan dari warehouse.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel className="font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-rose-600 hover:bg-rose-700 font-bold uppercase text-[10px]">
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Ya, Hapus Data
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

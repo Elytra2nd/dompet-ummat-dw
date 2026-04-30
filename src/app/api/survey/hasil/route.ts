@@ -24,3 +24,22 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const sk = searchParams.get('sk')
+
+    if (!sk) {
+      return NextResponse.json({ error: 'Parameter sk diperlukan' }, { status: 400 })
+    }
+
+    await prisma.fact_survey.delete({
+      where: { sk_survey: parseInt(sk) }
+    })
+
+    return NextResponse.json({ success: true, message: 'Data survey berhasil dihapus' })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
