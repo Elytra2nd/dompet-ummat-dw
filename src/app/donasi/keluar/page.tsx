@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  ArrowUpRight, Search, Plus, Loader2, Pencil, Trash2, X, Save, ChevronLeft, ChevronRight,
+  ArrowUpRight, Search, Plus, Loader2, Pencil, Trash2, X, Save, ChevronLeft, ChevronRight, Eye, Receipt
 } from 'lucide-react'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -81,6 +81,9 @@ export default function DonasiKeluarPage() {
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<PenyaluranZiswaf | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Detail state
+  const [detailItem, setDetailItem] = useState<PenyaluranZiswaf | null>(null)
 
   // ─── Fetch ───────────────────────────────────────────────────────────────
 
@@ -323,6 +326,14 @@ export default function DonasiKeluarPage() {
                         <div className="flex items-center justify-center gap-1">
                           <Button
                             variant="ghost" size="icon"
+                            className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+                            onClick={() => setDetailItem(item)}
+                            title="Detail"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost" size="icon"
                             className="h-8 w-8 text-slate-400 hover:text-amber-600 hover:bg-amber-50"
                             onClick={() => openEdit(item)}
                             title="Edit"
@@ -363,6 +374,9 @@ export default function DonasiKeluarPage() {
                       <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
                     </div>
                     <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-500" onClick={() => setDetailItem(item)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500" onClick={() => openEdit(item)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -534,6 +548,69 @@ export default function DonasiKeluarPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ─── Modal Detail ─── */}
+      <Dialog open={!!detailItem} onOpenChange={(open) => { if (!open) setDetailItem(null) }}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-black uppercase text-amber-900 tracking-tight">
+              <Receipt className="h-5 w-5 text-amber-600" /> Detail Transaksi Keluar
+            </DialogTitle>
+          </DialogHeader>
+          {detailItem && (
+            <div className="space-y-6 py-4">
+              <div className="flex justify-between items-center bg-amber-50 p-4 rounded-xl border border-amber-100">
+                <div>
+                  <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">ID Transaksi</p>
+                  <p className="font-mono text-sm font-bold text-amber-900 mt-1">{detailItem.id_transaksi}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Dana Tersalur</p>
+                  <p className="font-black text-xl text-amber-700 mt-1">{formatIDR(detailItem.dana_tersalur)}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-4 gap-x-6 px-2">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Mustahik</p>
+                  <p className="font-semibold text-slate-800 mt-1">{detailItem.dim_mustahik?.nama || 'UMUM'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Kategori Mustahik</p>
+                  <p className="font-semibold text-amber-600 mt-1 uppercase">{toDisplay(detailItem.dim_mustahik?.kategori_pm || '-')}</p>
+                </div>
+
+                <div className="col-span-2 pt-4 border-t border-slate-100"></div>
+
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Domain Program</p>
+                  <p className="font-semibold text-slate-800 mt-1">{toDisplay(detailItem.domain_program)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Kategori Program</p>
+                  <p className="font-semibold text-slate-800 mt-1">{toDisplay(detailItem.kategori_program)}</p>
+                </div>
+
+                <div className="col-span-2 pt-4 border-t border-slate-100"></div>
+
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Jenis Bantuan</p>
+                  <p className="font-semibold text-slate-800 mt-1">{toDisplay(detailItem.jenis_bantuan)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Status Pengajuan</p>
+                  <p className="mt-1"><Badge variant="outline" className={`font-bold text-[9px] uppercase ${STATUS_COLOR[toDisplay(detailItem.status_pengajuan)] ?? 'bg-slate-50 text-slate-500'}`}>{toDisplay(detailItem.status_pengajuan)}</Badge></p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setDetailItem(null)} className="bg-amber-600 hover:bg-amber-700 font-bold w-full sm:w-auto">
+              Tutup Detail
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

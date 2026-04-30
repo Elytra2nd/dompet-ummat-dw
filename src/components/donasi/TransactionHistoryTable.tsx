@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle } from 'lucide-react'
+import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle, Eye, Receipt } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/utils-ambulan'
 
@@ -34,6 +34,15 @@ export default function TransactionHistoryTable() {
   const [editNominal, setEditNominal] = useState('')
   const [editKeterangan, setEditKeterangan] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+
+  // Modal Detail
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [detailData, setDetailData] = useState<Transaction | null>(null)
+
+  const openDetailModal = (item: Transaction) => {
+    setDetailData(item)
+    setDetailModalOpen(true)
+  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -172,10 +181,13 @@ export default function TransactionHistoryTable() {
                     <td className="px-6 py-4 text-xs hidden lg:table-cell">{item.no_ref || '-'}</td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)}>
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)} title="Detail Transaksi">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)} title="Edit Transaksi">
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)}>
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)} title="Hapus Transaksi">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -215,6 +227,9 @@ export default function TransactionHistoryTable() {
                       </p>
                     </div>
                     <div className="flex gap-1.5 shrink-0">
+                      <Button variant="outline" size="icon" className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -320,6 +335,68 @@ export default function TransactionHistoryTable() {
             <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>Batal</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting} className="font-bold shadow-md">
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Ya, Hapus Permanen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-black uppercase text-indigo-900 tracking-tight">
+              <Receipt className="h-5 w-5 text-indigo-600" /> Detail Transaksi Masuk
+            </DialogTitle>
+          </DialogHeader>
+          {detailData && (
+            <div className="space-y-6 py-4">
+              <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <div>
+                  <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">ID Transaksi</p>
+                  <p className="font-mono text-sm font-bold text-indigo-900 mt-1">{detailData.id_transaksi_donasi}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Nominal Donasi</p>
+                  <p className="font-black text-xl text-indigo-700 mt-1">{formatRupiah(Number(detailData.nominal_valid))}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-4 gap-x-6 px-2">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Donatur</p>
+                  <p className="font-semibold text-slate-800 mt-1">{detailData.dim_donatur?.nama_lengkap || 'Hamba Allah'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Keterangan / Referensi</p>
+                  <p className="font-semibold text-slate-800 mt-1">{detailData.no_ref || '-'}</p>
+                </div>
+
+                <div className="col-span-2 pt-4 border-t border-slate-100"></div>
+
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Program Induk</p>
+                  <p className="font-semibold text-emerald-600 mt-1">{detailData.dim_program_donasi?.program_induk || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Sub Program</p>
+                  <p className="font-semibold text-emerald-600 mt-1">{detailData.dim_program_donasi?.sub_program || '-'}</p>
+                </div>
+
+                <div className="col-span-2 pt-4 border-t border-slate-100"></div>
+
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Metode Pembayaran</p>
+                  <p className="font-semibold text-slate-800 mt-1">{detailData.dim_jalur_pembayaran?.metode_bayar || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Bank Asal</p>
+                  <p className="font-semibold text-slate-800 mt-1">{detailData.dim_jalur_pembayaran?.bank_asal || '-'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setDetailModalOpen(false)} className="bg-indigo-600 hover:bg-indigo-700 font-bold w-full sm:w-auto">
+              Tutup Detail
             </Button>
           </DialogFooter>
         </DialogContent>
