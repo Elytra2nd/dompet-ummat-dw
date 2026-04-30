@@ -13,6 +13,7 @@ import {
   FileBarChart,
   Shield,
   UserCircle2,
+  AlertTriangle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -38,6 +39,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 // Konfigurasi navigasi dengan penanda role
 const allNavItems = [
@@ -119,6 +131,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const { toggleSidebar } = useSidebar()
   const { data: session } = useSession()
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false)
 
   const userRole = (session?.user as any)?.role as string | undefined
   const userName = session?.user?.name || session?.user?.email || 'User'
@@ -250,16 +263,39 @@ export function AppSidebar() {
         
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={handleLogout}
-              className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3 group"
-            >
-              <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
-              <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden ml-2">
-                <span className="text-xs font-black text-slate-900 leading-none">Logout</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">End Session</span>
-              </div>
-            </SidebarMenuButton>
+            <AlertDialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
+              <AlertDialogTrigger asChild>
+                <SidebarMenuButton 
+                  className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3 group"
+                >
+                  <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
+                  <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden ml-2">
+                    <span className="text-xs font-black text-slate-900 leading-none">Logout</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">End Session</span>
+                  </div>
+                </SidebarMenuButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl border-2 sm:max-w-[400px]">
+                <AlertDialogHeader>
+                  <div className="flex items-center gap-3 text-rose-600 mb-2">
+                    <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
+                    <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Konfirmasi Logout</AlertDialogTitle>
+                  </div>
+                  <AlertDialogDescription className="font-medium text-slate-500 text-sm">
+                    Apakah Anda yakin ingin mengakhiri sesi ini dan keluar dari aplikasi BIDA Analytics?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-6 gap-2">
+                  <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px]">Batal</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleLogout}
+                    className="bg-rose-600 hover:bg-rose-700 rounded-xl font-black uppercase text-[10px]"
+                  >
+                    Ya, Keluar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
