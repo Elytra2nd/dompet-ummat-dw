@@ -41,6 +41,7 @@ export async function GET() {
           kategori: m.kategori_pm,
           wilayah: `${m.dim_lokasi?.kecamatan || ""}, ${m.dim_lokasi?.kabupaten_kota || ""}`,
           alamat: m.alamat,
+          provinsi: m.dim_lokasi?.provinsi || "Tidak Diketahui",
           kabupaten: m.dim_lokasi?.kabupaten_kota || "Tidak Diketahui",
           kecamatan: m.dim_lokasi?.kecamatan || "Tidak Diketahui",
           desa: m.dim_lokasi?.desa_kelurahan || "Tidak Diketahui",

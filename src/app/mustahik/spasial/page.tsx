@@ -16,6 +16,7 @@ interface SpatialPoint {
   kategori: string;
   wilayah: string;
   alamat: string;
+  provinsi: string;
   kabupaten: string;
   kecamatan: string;
   desa: string;
