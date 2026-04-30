@@ -56,7 +56,9 @@ const mockPrisma = {
     create: vi.fn(),
   },
   fact_survey: {
+    findMany: vi.fn(),
     create: vi.fn(),
+    delete: vi.fn(),
   },
   fact_survey_detail: {
     createMany: vi.fn(),
@@ -477,6 +479,57 @@ describe('Survey CRUD', () => {
 
       const res = await POST(req)
       expect(res.status).toBe(404)
+    })
+  })
+
+  describe('GET /api/survey/hasil — Read Survey Results', () => {
+    it('should return list of surveys', async () => {
+      const { GET } = await import('@/app/api/survey/hasil/route')
+
+      mockPrisma.fact_survey.findMany.mockResolvedValue([
+        {
+          sk_survey: 1,
+          no_register: 'REG-001',
+          dim_mustahik: { nama: 'Test Mustahik' },
+        },
+      ])
+
+      const res = await GET()
+      const data = await res.json()
+
+      expect(Array.isArray(data)).toBe(true)
+      expect(data[0].no_register).toBe('REG-001')
+    })
+  })
+
+  describe('DELETE /api/survey/hasil — Delete Survey', () => {
+    it('should delete survey record by sk', async () => {
+      const { DELETE } = await import('@/app/api/survey/hasil/route')
+
+      mockPrisma.fact_survey.delete.mockResolvedValue({})
+
+      const req = new NextRequest('http://localhost/api/survey/hasil?sk=1', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      const data = await res.json()
+
+      expect(data.success).toBe(true)
+      expect(mockPrisma.fact_survey.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { sk_survey: 1 } })
+      )
+    })
+
+    it('should return 400 when sk is missing', async () => {
+      const { DELETE } = await import('@/app/api/survey/hasil/route')
+
+      const req = new NextRequest('http://localhost/api/survey/hasil', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      expect(res.status).toBe(400)
     })
   })
 })
