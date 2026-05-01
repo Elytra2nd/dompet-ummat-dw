@@ -16,7 +16,11 @@ const prismaClientSingleton = () => {
   
   return new PrismaClient({ 
     adapter,
-    log: ['error', 'warn'] 
+    log: [
+      { emit: 'stdout', level: 'query' },
+      { emit: 'stdout', level: 'error' },
+      { emit: 'stdout', level: 'warn' },
+    ],
   })
 }
 
