@@ -75,8 +75,8 @@ beforeEach(() => {
 })
 
 // Helper: create a Request object with JSON body
-function createJsonRequest(url: string, body: any, method = 'POST'): Request {
-  return new Request(url, {
+function createJsonRequest(url: string, body: any, method = 'POST'): NextRequest {
+  return new NextRequest(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

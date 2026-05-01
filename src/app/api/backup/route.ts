@@ -1,7 +1,10 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import ExcelJS from 'exceljs'
 import JSZip from 'jszip'
+import { getToken } from 'next-auth/jwt'
+import { logActivity } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,8 +26,11 @@ function jsonToCSV(data: any[]): string {
   return [header, ...rows].join('\n')
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const userId = token?.sub || 'SYSTEM'
+
     const { searchParams } = new URL(req.url)
     const modules = searchParams.get('modules') || 'all' // 'all', 'dimensi', 'fakta'
     const format = searchParams.get('format') || 'xlsx' // 'xlsx', 'zip'
@@ -131,7 +137,13 @@ export async function GET(req: Request) {
       const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' })
       const filename = `backup_dompet_ummat_${timestamp}.zip`
 
-      return new NextResponse(zipBuffer, {
+      // Log the activity
+      const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+      if (userId !== 'SYSTEM') {
+        await logActivity(userId, 'EXPORT_BACKUP', 'backup', { modules, format, recordCount: activeTables.reduce((sum, t) => sum + t.data.length, 0) }, ip)
+      }
+
+      return new NextResponse(zipBuffer as unknown as BodyInit, {
         headers: {
           'Content-Type': 'application/zip',
           'Content-Disposition': `attachment; filename="${filename}"`,
@@ -205,7 +217,13 @@ export async function GET(req: Request) {
     const buffer = await workbook.xlsx.writeBuffer()
     const filename = `backup_dompet_ummat_${timestamp}.xlsx`
 
-    return new NextResponse(buffer as ArrayBuffer, {
+    // Log the activity
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+    if (userId !== 'SYSTEM') {
+      await logActivity(userId, 'EXPORT_BACKUP', 'backup', { modules, format, recordCount: activeTables.reduce((sum, t) => sum + t.data.length, 0) }, ip)
+    }
+
+    return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,

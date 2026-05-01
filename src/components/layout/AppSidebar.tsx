@@ -88,7 +88,7 @@ const allNavItems = [
     icon: ClipboardCheck,
     adminOnly: false, // Bisa diakses semua role
     items: [
-      { title: "Hasil Survey", url: "/survey/hasil", adminOnly: true },
+      { title: "Riwayat Survey", url: "/survey/hasil", adminOnly: false },
       { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan", adminOnly: true },
       { title: "Input Survey Baru", url: "/survey/baru" },
     ],

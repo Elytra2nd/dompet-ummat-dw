@@ -31,7 +31,12 @@ interface SurveyData {
   };
 }
 
+import { useSession } from 'next-auth/react'
+
 export default function SurveyMainPage() {
+  const { data: session } = useSession()
+  const isAdmin = (session?.user as any)?.role === 'ADMIN'
+
   const [surveys, setSurveys] = useState<SurveyData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -207,9 +212,11 @@ export default function SurveyMainPage() {
                           <Edit3 className="h-4 w-4" />
                         </Button>
                       </Link>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50" onClick={() => confirmDelete(item)} title="Hapus Survey">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {isAdmin && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50" onClick={() => confirmDelete(item)} title="Hapus Survey">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

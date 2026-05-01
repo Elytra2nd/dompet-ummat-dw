@@ -643,22 +643,36 @@ enum fact_skor_kelayakan_kategori_rekomendasi {
 // --- AUTH MODELS ---
 
 model User {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String?
-  email         String?   @unique
-  password      String?   // Simpan hash password di sini
+  email         String?     @unique
+  password      String?     // Simpan hash password di sini
   image         String?
-  role          UserRole  @default(STAFF)
+  role          UserRole    @default(STAFF)
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  auditLogs     AuditLog[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 enum UserRole {
   ADMIN
   STAFF
   SURVEYOR
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   @db.VarChar(100)
+  entity    String   @db.VarChar(100)
+  details   String?  @db.Text
+  ipAddress String?  @db.VarChar(45)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Account {
