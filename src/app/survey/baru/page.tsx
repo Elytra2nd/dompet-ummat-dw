@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, ClipboardCheck } from 'lucide-react'
 import Link from 'next/link'
 
-export default function BaruSurveyPage({ searchParams }: { searchParams: { id?: string } }) {
-  const surveyId = searchParams.id
+export default async function BaruSurveyPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+  const resolvedParams = await searchParams
+  const surveyId = resolvedParams.id
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">

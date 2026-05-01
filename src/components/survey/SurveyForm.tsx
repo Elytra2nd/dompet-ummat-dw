@@ -25,7 +25,7 @@ interface Pertanyaan {
   teks_pertanyaan: string
 }
 
-export default function SurveyForm() {
+export default function SurveyForm({ id_survey }: { id_survey?: string }) {
   const [loading, setLoading] = useState(false)
   const [questions, setQuestions] = useState<Pertanyaan[]>([])
   const [scores, setScores] = useState<{ [key: number]: number }>({})
@@ -41,20 +41,50 @@ export default function SurveyForm() {
     kategori_rekomendasi: KATEGORI_REKOMENDASI[0].value,
   })
 
-  // 1. Ambil daftar pertanyaan dari DB
+  // 1. Ambil daftar pertanyaan dari DB dan data survey jika edit
   useEffect(() => {
-    fetch('/api/survey/pertanyaan')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setQuestions(data)
+    async function loadData() {
+      try {
+        const resQ = await fetch('/api/survey/pertanyaan')
+        const dataQ = await resQ.json()
+        if (Array.isArray(dataQ)) {
+          setQuestions(dataQ)
           const initialScores: any = {}
-          data.forEach((q: Pertanyaan) => (initialScores[q.sk_pertanyaan] = 3))
-          setScores(initialScores)
+          dataQ.forEach((q: Pertanyaan) => (initialScores[q.sk_pertanyaan] = 3))
+          
+          if (id_survey) {
+            const resS = await fetch(`/api/survey/${id_survey}`)
+            const dataS = await resS.json()
+            if (resS.ok && dataS.survey) {
+               setFormData({
+                 id_mustahik: dataS.survey.dim_mustahik?.id_mustahik || '',
+                 sk_petugas: 1,
+                 pendapatan_bulanan: Number(dataS.skorData?.pendapatan_bulanan || 0),
+                 pengeluaran_bulanan: Number(dataS.skorData?.pengeluaran_bulanan || 0),
+                 jumlah_tanggungan: Number(dataS.skorData?.jumlah_tanggungan || 0),
+                 kondisi_tempat_tinggal: dataS.skorData?.kondisi_tempat_tinggal || KONDISI_TEMPAT_TINGGAL[2].value,
+                 kategori_asnaf: dataS.survey.golongan_penerima || GOLONGAN_ASNAF[0].value,
+                 kategori_rekomendasi: dataS.survey.kategori_rekomendasi || KATEGORI_REKOMENDASI[0].value,
+               })
+               if (dataS.detail_skor) {
+                 setScores({ ...initialScores, ...dataS.detail_skor })
+               } else {
+                 setScores(initialScores)
+               }
+            } else {
+              toast.error('Gagal memuat data survey untuk diedit')
+              setScores(initialScores)
+            }
+          } else {
+            setScores(initialScores)
+          }
         }
-      })
-      .catch(() => toast.error('Gagal memuat kriteria survey'))
-  }, [])
+      } catch (err) {
+        toast.error('Terjadi kesalahan saat memuat kriteria survey')
+      }
+    }
+    loadData()
+  }, [id_survey])
 
   const totalSkorAngka = calculateAverage(scores)
   const statusObj = determineKelayakan(totalSkorAngka)
@@ -73,15 +103,21 @@ export default function SurveyForm() {
         detail_skor: scores,
       }
 
-      const res = await fetch('/api/survey/baru', {
-        method: 'POST',
+      const endpoint = id_survey ? `/api/survey/${id_survey}` : '/api/survey/baru'
+      const method = id_survey ? 'PUT' : 'POST'
+
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
       if (res.ok) {
-        toast.success('Hasil Survey Berhasil Disimpan')
-        // Reset form jika perlu
+        toast.success(`Data Survey Berhasil ${id_survey ? 'Diperbarui' : 'Disimpan'}`)
+        if (!id_survey) {
+           // Reset form only if creating new
+           setFormData({ ...formData, id_mustahik: '', pendapatan_bulanan: 0, pengeluaran_bulanan: 0, jumlah_tanggungan: 0 })
+        }
       } else {
         const err = await res.json()
         toast.error(err.error || 'Gagal menyimpan')

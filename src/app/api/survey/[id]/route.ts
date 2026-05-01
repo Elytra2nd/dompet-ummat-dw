@@ -6,9 +6,10 @@ import { logActivity } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const sk_survey = parseInt(params.id)
+    const { id } = await params
+    const sk_survey = parseInt(id)
     if (isNaN(sk_survey)) return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 })
 
     const survey = await prisma.fact_survey.findUnique({
@@ -44,12 +45,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
     const userId = token?.sub || 'SYSTEM'
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
-    const sk_survey = parseInt(params.id)
+    const { id } = await params
+    const sk_survey = parseInt(id)
     
     if (isNaN(sk_survey)) return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 })
 
