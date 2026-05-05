@@ -247,16 +247,16 @@ export default function DonationStats({
           </div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-wider">Total ZISWAF</p>
+              <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Total ZISWAF</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <Zap className="h-4 w-4 text-yellow-300 fill-yellow-300" />
               </div>
             </div>
             <div className="mt-3 overflow-hidden">
-              <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
+              <h3 className="text-sm sm:text-base md:text-lg font-extrabold leading-tight break-all">
                 {formatRupiah(totalDonasi)}
               </h3>
-              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${isPositive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase ${isPositive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
                 {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                 {Math.abs(pertumbuhan)}%
               </div>
@@ -268,14 +268,14 @@ export default function DonationStats({
           <div className="absolute top-[-10px] right-[-10px] opacity-10"><HandCoins size={100} /></div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Tersalurkan</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Tersalurkan</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <HandCoins className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3 overflow-hidden">
-              <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">{formatRupiah(danaTersalur)}</h3>
-              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">Realisasi Manfaat</div>
+              <h3 className="text-sm sm:text-base md:text-lg font-extrabold leading-tight break-all">{formatRupiah(danaTersalur)}</h3>
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">Realisasi Manfaat</div>
             </div>
           </CardContent>
         </Card>
@@ -284,15 +284,15 @@ export default function DonationStats({
           <div className="absolute top-[-10px] right-[-10px] opacity-10"><PieChart size={100} /></div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Absorpsi</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Absorpsi</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <PieChart className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3">
               <div className="mt-3 flex items-center gap-2">
-                <h3 className="text-sm sm:text-base md:text-lg font-black">{persentasePenyaluran.toFixed(1)}%</h3>
-                <div className="inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">Tingkat Penyaluran</div>
+                <h3 className="text-sm sm:text-base md:text-lg font-extrabold">{persentasePenyaluran.toFixed(1)}%</h3>
+                <div className="inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">Tingkat Penyaluran</div>
               </div>
               <div className="mt-2 h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
                 <div className="h-full bg-white rounded-full transition-all duration-1000" style={{ width: `${Math.min(persentasePenyaluran, 100)}%` }} />
@@ -305,17 +305,17 @@ export default function DonationStats({
           <div className="absolute top-[-10px] right-[-10px] opacity-10"><Users size={100} /></div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Muzakki</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Muzakki</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <Users className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3">
-              <h3 className="text-base sm:text-lg md:text-xl font-black truncate">
+              <h3 className="text-base sm:text-lg md:text-xl font-extrabold truncate">
                 {jumlahDonatur.toLocaleString()}
                 <span className="text-[10px] ml-1 text-white/70">Jiwa</span>
               </h3>
-              <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+              <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">
                 <span className="h-1 w-1 rounded-full bg-white animate-ping" />
                 Aktif
               </div>
@@ -327,17 +327,17 @@ export default function DonationStats({
           <div className="absolute top-[-10px] right-[-10px] opacity-10"><UserCheck size={100} /></div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Mustahik</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Mustahik</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <UserCheck className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3">
-              <h3 className="text-base sm:text-lg md:text-xl font-black truncate">
+              <h3 className="text-base sm:text-lg md:text-xl font-extrabold truncate">
                 {jumlahMustahik.toLocaleString()}
                 <span className="text-[10px] ml-1 text-white/70">Jiwa</span>
               </h3>
-              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">Penerima</div>
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">Penerima</div>
             </div>
           </CardContent>
         </Card>
@@ -345,16 +345,16 @@ export default function DonationStats({
 
       {/* Chart Card */}
       <Card className="border-none shadow-md">
-        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-7">
+        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-4 space-y-0 pb-7">
           <div>
-            <CardTitle className="text-xl font-black text-slate-800">Grafik Penghimpunan Dana</CardTitle>
+            <CardTitle className="text-lg sm:text-xl font-bold text-slate-800">Grafik Penghimpunan Dana</CardTitle>
             <CardDescription>Visualisasi pertumbuhan donasi Ziswaf dari waktu ke waktu</CardDescription>
             <div className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
               {activeFilterLabel}
             </div>
           </div>
 
-          <div className="relative flex items-center gap-2">
+          <div className="relative flex flex-wrap items-center gap-2">
             {/* Chart Type Toggle */}
             <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
               <button
@@ -411,7 +411,7 @@ export default function DonationStats({
               <div className="absolute right-0 top-12 z-20 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
                 <div className="mb-4 flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-slate-500" />
-                  <p className="text-sm font-black text-slate-800">Filter Waktu</p>
+                  <p className="text-sm font-bold text-slate-800">Filter Waktu</p>
                 </div>
 
                 <div className="space-y-3">
@@ -495,7 +495,7 @@ export default function DonationStats({
         </CardHeader>
 
         <CardContent>
-          <div className="h-[350px] w-full">
+          <div className="h-[250px] sm:h-[350px] w-full">
             {loadingChart ? (
               <div className="flex h-full items-center justify-center text-sm font-medium text-slate-500">Memuat grafik...</div>
             ) : chartError ? (
