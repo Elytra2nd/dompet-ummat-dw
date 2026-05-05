@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { getToken } from 'next-auth/jwt'
 
 export async function POST(req: Request) {
   try {
+    // --- FIX #1: Admin-only guard ---
+    const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET })
+    if (!token || token.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Hanya ADMIN yang dapat mendaftarkan user baru' },
+        { status: 403 }
+      )
+    }
+
     const { email, password, name, role } = await req.json()
 
     if (!email || !password || !name || !role) {
@@ -44,6 +54,6 @@ export async function POST(req: Request) {
     })
   } catch (error: any) {
     console.error('Create user error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan saat membuat user' }, { status: 500 })
   }
 }

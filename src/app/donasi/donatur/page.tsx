@@ -66,9 +66,9 @@ export default function ManajemenDonaturPage() {
   const fetchDonatur = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/donasi/donatur')
-      const data = await res.json()
-      if (Array.isArray(data)) setDonatur(data)
+      const res = await fetch('/api/donasi/donatur?limit=1000')
+      const json = await res.json()
+      if (json.data && Array.isArray(json.data)) setDonatur(json.data)
     } catch (e) {
       toast.error('Gagal memuat data dari warehouse')
     } finally {

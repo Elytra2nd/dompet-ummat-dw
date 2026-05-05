@@ -7,25 +7,43 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const query = searchParams.get('q')
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+  const limit = Math.min(1000, Math.max(1, parseInt(searchParams.get('limit') || '100')))
 
   try {
-    const donatur = await prisma.dim_donatur.findMany({
-      where: {
-        is_active: true, 
-        ...(query && {
-          OR: [
-            { nama_lengkap: { contains: query } },
-            { kontak_utama: { contains: query } },
-            { id_donatur: { contains: query } },
-            { perusahaan: { contains: query } },
-          ],
-        }),
-      },
-      // take: 100, // BARIS INI DIHAPUS agar mengambil semua data
-      orderBy: { nama_lengkap: 'asc' },
-    })
+    const [donatur, total] = await Promise.all([
+      prisma.dim_donatur.findMany({
+        where: {
+          is_active: true, 
+          ...(query && {
+            OR: [
+              { nama_lengkap: { contains: query } },
+              { kontak_utama: { contains: query } },
+              { id_donatur: { contains: query } },
+              { perusahaan: { contains: query } },
+            ],
+          }),
+        },
+        take: limit,
+        skip: (page - 1) * limit,
+        orderBy: { nama_lengkap: 'asc' },
+      }),
+      prisma.dim_donatur.count({
+        where: {
+          is_active: true,
+          ...(query && {
+            OR: [
+              { nama_lengkap: { contains: query } },
+              { kontak_utama: { contains: query } },
+              { id_donatur: { contains: query } },
+              { perusahaan: { contains: query } },
+            ],
+          }),
+        },
+      }),
+    ])
 
-    return NextResponse.json(donatur)
+    return NextResponse.json({ data: donatur, total, page, limit })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

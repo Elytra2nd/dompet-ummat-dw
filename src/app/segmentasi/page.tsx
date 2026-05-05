@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -80,6 +81,7 @@ function MetricTooltip({ metricKey, children }: { metricKey: string; children: R
 }
 export default function SegmentasiPage() {
   const { data, loading, error, runAnalysis } = useSegmentasi()
+  const router = useRouter()
 
   // Auto-run on mount (uses cache if available)
   useEffect(() => {
@@ -97,6 +99,7 @@ export default function SegmentasiPage() {
 
   // Pie chart data
   const pieData = data?.segments.map(s => ({
+    key: s.key,
     name: s.label,
     value: s.count,
     color: SEGMENT_COLORS[s.key] || '#94a3b8',
@@ -274,6 +277,11 @@ export default function SegmentasiPage() {
                           dataKey="value"
                           strokeWidth={2}
                           stroke="#fff"
+                          cursor="pointer"
+                          onClick={(entry: unknown) => {
+                            const key = (entry as { key?: string })?.key
+                            if (key) router.push(`/segmentasi/${key}`)
+                          }}
                         >
                           {pieData.map((entry, index) => (
                             <Cell key={index} fill={entry.color} />
@@ -281,7 +289,7 @@ export default function SegmentasiPage() {
                         </Pie>
                         <Tooltip
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px rgba(0,0,0,0.1)' }}
-                          formatter={(value: any, name: string | number | undefined) => [`${value} donatur`, String(name ?? '')]}
+                          formatter={(value: unknown, name: string | number | undefined) => [`${value} donatur`, String(name ?? '')]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
