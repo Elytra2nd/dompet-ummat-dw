@@ -4,7 +4,6 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -50,13 +49,11 @@ export default function LoginPage() {
         {/* Header / Logo */}
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center p-1 overflow-hidden shadow-lg shadow-emerald-500/20">
-            <Image 
+            {/* Fallback ke img biasa jika next/image bermasalah di Vercel */}
+            <img 
               src="/logo-du.png" 
               alt="Dompet Ummat" 
-              width={36} 
-              height={36} 
-              className="object-contain"
-              priority
+              className="w-8 h-8 object-contain"
             />
           </div>
           <div>
@@ -75,31 +72,31 @@ export default function LoginPage() {
             akun <span className="text-emerald-500 relative">Anda.<span className="absolute bottom-1 left-0 w-full h-2 bg-emerald-500/20 -z-10 rounded-full"></span></span>
           </h1>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Input Email */}
-            <div className="relative group">
-              <div className="absolute left-5 top-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-emerald-400">
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">
                 Email Address
-              </div>
+              </label>
               <input
                 type="email"
                 required
-                className="w-full bg-emerald-900/40 border border-transparent rounded-2xl pt-8 pb-3 px-5 text-sm font-semibold text-white transition-all focus:outline-none focus:border-emerald-500 focus:bg-emerald-950 hover:bg-emerald-900/60 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-600"
-                placeholder="nama@dompetummat.or.id"
+                className="w-full bg-emerald-900/40 border border-emerald-800/50 rounded-xl py-3.5 px-5 text-sm font-semibold text-white transition-all focus:outline-none focus:border-emerald-500 focus:bg-emerald-950 hover:bg-emerald-900/60 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-500/50"
+                placeholder="admin@dompetummat.id"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             {/* Input Password */}
-            <div className="relative group">
-              <div className="absolute left-5 top-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-emerald-400">
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">
                 Password
-              </div>
+              </label>
               <input
                 type="password"
                 required
-                className="w-full bg-emerald-900/40 border border-transparent rounded-2xl pt-8 pb-3 px-5 text-sm font-semibold text-white transition-all focus:outline-none focus:border-emerald-500 focus:bg-emerald-950 hover:bg-emerald-900/60 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-600"
+                className="w-full bg-emerald-900/40 border border-emerald-800/50 rounded-xl py-3.5 px-5 text-sm font-semibold text-white transition-all focus:outline-none focus:border-emerald-500 focus:bg-emerald-950 hover:bg-emerald-900/60 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-500/50"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -144,8 +141,9 @@ export default function LoginPage() {
       {/* ── Kanan: Background Area ── */}
       <div className="hidden lg:block lg:w-[55%] xl:w-[60%] relative bg-emerald-900">
         {/* Gambar background diletakkan di paling bawah (z-0) */}
+        {/* Tambahkan background-color cadangan jika gambar gagal load */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 bg-emerald-950"
           style={{ backgroundImage: 'url("/_DSC6959.webp")' }}
         />
 
@@ -166,12 +164,10 @@ export default function LoginPage() {
         {/* Watermark Logo Besar */}
         <div className="absolute bottom-12 right-12 z-20 opacity-20 flex items-center gap-3">
            <div className="h-16 w-16 bg-white/10 rounded-2xl flex items-center justify-center p-2 backdrop-blur-sm">
-             <Image 
+             <img 
                 src="/logo-du.png" 
                 alt="Logo" 
-                width={48} 
-                height={48} 
-                className="object-contain brightness-0 invert" 
+                className="w-12 h-12 object-contain brightness-0 invert" 
              />
            </div>
         </div>
