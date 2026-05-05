@@ -218,7 +218,7 @@ export default function LaporanIndividuPage() {
           <div id="print-area" className="mx-auto max-w-[210mm] bg-white p-10 shadow-2xl border border-slate-200 min-h-[297mm]">
             
             {/* Kop Laporan */}
-            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-6">
+            <div className="flex justify-between items-start border-b-2 border-slate-300 pb-6 mb-6">
               <div className="space-y-4">
                 <div className="bg-black text-white px-3 py-1 inline-block">
                   <p className="font-black text-xs">RAHASIA/PRIBADI</p>
@@ -255,29 +255,29 @@ export default function LaporanIndividuPage() {
             </div>
 
             {/* Tabel Riwayat */}
-            <table className="w-full border-collapse border border-black text-sm mb-12">
+            <table className="w-full border-collapse border border-slate-300 text-sm mb-12">
               <thead>
                 <tr className="bg-slate-50">
-                  <th className="border border-black py-2 px-3 text-center font-bold">Tgl. Transaksi</th>
-                  <th className="border border-black py-2 px-3 text-center font-bold">Jenis Transaksi</th>
-                  <th className="border border-black py-2 px-3 text-center font-bold">Sub Donasi</th>
-                  <th className="border border-black py-2 px-3 text-center font-bold">Jumlah</th>
+                  <th className="border border-slate-300 py-2 px-3 text-center font-bold">Tgl. Transaksi</th>
+                  <th className="border border-slate-300 py-2 px-3 text-center font-bold">Jenis Transaksi</th>
+                  <th className="border border-slate-300 py-2 px-3 text-center font-bold">Sub Donasi</th>
+                  <th className="border border-slate-300 py-2 px-3 text-center font-bold">Jumlah</th>
                 </tr>
               </thead>
               <tbody>
                 {laporan.riwayat.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="border border-black py-8 text-center italic text-slate-500">Tidak ada donasi pada periode ini.</td>
+                    <td colSpan={4} className="border border-slate-300 py-8 text-center italic text-slate-500">Tidak ada donasi pada periode ini.</td>
                   </tr>
                 ) : (
                   laporan.riwayat.map((item, idx) => (
                     <tr key={idx}>
-                      <td className="border border-black py-2 px-3 text-center text-red-700">
+                      <td className="border border-slate-300 py-2 px-3 text-center text-red-700">
                         {new Date(item.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-')}
                       </td>
-                      <td className="border border-black py-2 px-3 text-center text-red-700">{item.jenis_transaksi}</td>
-                      <td className="border border-black py-2 px-3 text-center text-red-700">{item.sub_donasi}</td>
-                      <td className="border border-black py-2 px-3 text-right text-red-700 font-medium">
+                      <td className="border border-slate-300 py-2 px-3 text-center text-red-700">{item.jenis_transaksi}</td>
+                      <td className="border border-slate-300 py-2 px-3 text-center text-red-700">{item.sub_donasi}</td>
+                      <td className="border border-slate-300 py-2 px-3 text-right text-red-700 font-medium">
                         {item.jumlah.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                       </td>
                     </tr>
@@ -291,27 +291,27 @@ export default function LaporanIndividuPage() {
               <p className="text-sm font-bold uppercase">REKAPITULASI PEMBAYARAN SEJAK JANUARI - DESEMBER {laporan.periode}</p>
             </div>
             
-            <table className="w-full border-collapse border border-black text-center text-sm mb-8">
+            <table className="w-full border-collapse border border-slate-300 text-center text-sm mb-8">
               <thead>
                 <tr className="bg-slate-50">
-                  <th className="border border-black py-2 font-bold w-1/4">ZAKAT</th>
-                  <th className="border border-black py-2 font-bold w-1/4">INFAK</th>
-                  <th className="border border-black py-2 font-bold w-1/4">WAKAF</th>
-                  <th className="border border-black py-2 font-bold w-1/4">CICILAN KURBAN/AKIKAH</th>
+                  <th className="border border-slate-300 py-2 font-bold w-1/4">ZAKAT</th>
+                  <th className="border border-slate-300 py-2 font-bold w-1/4">INFAK</th>
+                  <th className="border border-slate-300 py-2 font-bold w-1/4">WAKAF</th>
+                  <th className="border border-slate-300 py-2 font-bold w-1/4">CICILAN KURBAN/AKIKAH</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border border-black py-3 font-bold text-red-600">
+                  <td className="border border-slate-300 py-3 font-bold text-red-600">
                     {laporan.rekap.zakat.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </td>
-                  <td className="border border-black py-3 font-bold text-red-600">
+                  <td className="border border-slate-300 py-3 font-bold text-red-600">
                     {laporan.rekap.infak.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </td>
-                  <td className="border border-black py-3 font-bold text-red-600">
+                  <td className="border border-slate-300 py-3 font-bold text-red-600">
                     {laporan.rekap.wakaf.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </td>
-                  <td className="border border-black py-3 font-bold text-red-600">
+                  <td className="border border-slate-300 py-3 font-bold text-red-600">
                     {laporan.rekap.kurban.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </td>
                 </tr>
@@ -324,7 +324,7 @@ export default function LaporanIndividuPage() {
                 <p>
                   Laporan konsolidasi ini sebagai bukti pembayaran ziswaf (zakat, infak, wakaf) dan cicilan kurban. Jika ada donasi Bapak/Ibu yang tidak tercantum segera menghubungi call center kami.
                 </p>
-                <div className="border border-black p-4 rounded-xl relative mt-4">
+                <div className="border border-slate-300 p-4 rounded-xl relative mt-4">
                   <p>Terima kasih atas kepercayaan Bapak/Ibu kepada lembaga kami.</p>
                   <p className="font-bold">"Semoga Allah memberikan pahala atas segala pemberianmu dan menjadikan buatmu suci dan mensucikan serta Allah memberkahi hartamu yang tersisa"</p>
                 </div>

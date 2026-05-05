@@ -9,7 +9,8 @@ import {
   TrendingUp,
   ShieldCheck,
   Loader2,
-  PlusCircle
+  PlusCircle,
+  Clock
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
@@ -17,6 +18,36 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import DonationStats from '@/components/donasi/DonationStats'
 import ProgramStats from '@/components/donasi/ProgramStats'
 import DemografiStats from '@/components/mustahik/DemografiStats'
+
+interface AuditLog {
+  id: string
+  action: string
+  detail: string | null
+  createdAt: string
+  user?: { name: string | null; email: string; role: string }
+}
+
+function timeAgo(dateStr: string): string {
+  const now = new Date()
+  const d = new Date(dateStr)
+  const diffMs = now.getTime() - d.getTime()
+  const minutes = Math.floor(diffMs / 60000)
+  if (minutes < 1) return 'Baru saja'
+  if (minutes < 60) return `${minutes} menit lalu`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} jam lalu`
+  const days = Math.floor(hours / 24)
+  return `${days} hari lalu`
+}
+
+function actionBadge(action: string): { label: string; color: string } {
+  const a = action.toUpperCase()
+  if (a.includes('LOGIN')) return { label: 'AUTH', color: 'text-emerald-600 border-emerald-200 bg-emerald-50' }
+  if (a.includes('CREATE') || a.includes('INSERT')) return { label: 'CREATE', color: 'text-blue-600 border-blue-200 bg-blue-50' }
+  if (a.includes('UPDATE') || a.includes('EDIT')) return { label: 'UPDATE', color: 'text-amber-600 border-amber-200 bg-amber-50' }
+  if (a.includes('DELETE') || a.includes('HAPUS')) return { label: 'DELETE', color: 'text-rose-600 border-rose-200 bg-rose-50' }
+  return { label: 'SYS', color: 'text-indigo-500 border-indigo-200 bg-indigo-50' }
+}
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -28,6 +59,8 @@ export default function DashboardPage() {
     layananAmbulan: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
+  const [logsLoading, setLogsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchDashboardStats() {
@@ -52,7 +85,22 @@ export default function DashboardPage() {
       }
     }
 
+    async function fetchAuditLogs() {
+      try {
+        const res = await fetch('/api/users/audit')
+        if (res.ok) {
+          const data = await res.json()
+          setAuditLogs(Array.isArray(data) ? data.slice(0, 6) : [])
+        }
+      } catch (err) {
+        console.error('Gagal memuat audit logs:', err)
+      } finally {
+        setLogsLoading(false)
+      }
+    }
+
     fetchDashboardStats()
+    fetchAuditLogs()
   }, [])
 
   return (
@@ -171,33 +219,53 @@ export default function DashboardPage() {
           </div>
 
           {/* 4. AKTIVITAS TERKINI */}
-          <Card className="border-2 shadow-sm bg-white overflow-hidden flex flex-col h-full">
+          <Card className="border shadow-sm bg-white overflow-hidden flex flex-col h-full rounded-xl">
             <CardHeader className="bg-slate-50/50 border-b py-4">
               <CardTitle className="text-xs md:text-sm font-black flex items-center gap-2 text-slate-700 uppercase tracking-wider">
-                <TrendingUp className="h-4 w-4 text-emerald-500" /> Log Warehouse (SCD)
+                <TrendingUp className="h-4 w-4 text-emerald-500" /> Aktivitas Terkini
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-grow">
               <div className="divide-y">
-                {[
-                  { msg: "Data PM Sosial diperbarui via AI", time: "Baru saja", type: "AI" },
-                  { msg: "Batch ETL Donasi Berhasil", time: "1 jam lalu", type: "DW" },
-                  { msg: "Mapping Wilayah: Kubu Raya", time: "3 jam lalu", type: "GIS" },
-                  { msg: "SCD Type 2: Update Alamat", time: "5 jam lalu", type: "SCD" },
-                ].map((log, i) => (
-                  <div key={i} className="p-4 hover:bg-slate-50 transition-colors">
-                    <p className="text-[11px] font-bold text-slate-800 leading-tight">{log.msg}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[9px] font-black text-indigo-500 border border-indigo-200 px-1.5 rounded uppercase">{log.type}</span>
-                      <span className="text-[9px] text-slate-400 font-bold">{log.time}</span>
-                    </div>
+                {logsLoading ? (
+                  <div className="p-8 flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Memuat log...</p>
                   </div>
-                ))}
+                ) : auditLogs.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <p className="text-xs text-slate-400 font-medium">Belum ada aktivitas tercatat</p>
+                  </div>
+                ) : (
+                  auditLogs.map((log) => {
+                    const badge = actionBadge(log.action)
+                    return (
+                      <div key={log.id} className="p-4 hover:bg-slate-50 transition-colors">
+                        <p className="text-[11px] font-bold text-slate-800 leading-tight">
+                          {log.detail || log.action}
+                        </p>
+                        {log.user && (
+                          <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                            oleh {log.user.name || log.user.email}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className={`text-[9px] font-black border px-1.5 py-0.5 rounded-md uppercase ${badge.color}`}>
+                            {badge.label}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-bold flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> {timeAgo(log.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
               </div>
             </CardContent>
             <div className="p-3 bg-slate-50/30 border-t text-center mt-auto">
-              <Button variant="ghost" className="w-full text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-all">
-                Audit Full Logs
+              <Button variant="ghost" asChild className="w-full text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-all">
+                <Link href="/users">Audit Full Logs</Link>
               </Button>
             </div>
           </Card>

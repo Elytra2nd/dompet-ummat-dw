@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +37,8 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  Eye
+  Eye,
+  Filter
 } from 'lucide-react'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
@@ -56,6 +57,7 @@ export default function ManajemenDonaturPage() {
   const [donatur, setDonatur] = useState<Donatur[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [filterTipe, setFilterTipe] = useState('')
 
   // --- STATE PAGINASI ---
   const [currentPage, setCurrentPage] = useState(1)
@@ -86,11 +88,18 @@ export default function ManajemenDonaturPage() {
     } catch (e) { toast.error('Gagal menonaktifkan data') }
   }
 
+  const tipeOptions = useMemo(() => {
+    const set = new Set(donatur.map(d => d.tipe).filter(Boolean))
+    return Array.from(set).sort()
+  }, [donatur])
+
   const filteredDonatur = donatur.filter((d) => {
     const nama = (d.nama_lengkap || '').toLowerCase()
     const kontak = d.kontak_utama || ''
     const perusahaan = (d.perusahaan || '').toLowerCase()
-    return nama.includes(search.toLowerCase()) || kontak.includes(search) || perusahaan.includes(search.toLowerCase())
+    const matchSearch = nama.includes(search.toLowerCase()) || kontak.includes(search) || perusahaan.includes(search.toLowerCase())
+    const matchTipe = !filterTipe || d.tipe === filterTipe
+    return matchSearch && matchTipe
   })
 
   const totalPages = Math.ceil(filteredDonatur.length / itemsPerPage)
@@ -125,17 +134,32 @@ export default function ManajemenDonaturPage() {
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
         <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
           <CardHeader className="border-b py-4 bg-slate-50/50">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="Cari nama, kontak, atau perusahaan..." 
-                className="pl-10 font-bold w-full" 
-                value={search} 
-                onChange={(e) => {
-                  setSearch(e.target.value)
-                  setCurrentPage(1)
-                }} 
-              />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Cari nama, kontak, atau perusahaan..." 
+                  className="pl-10 font-bold w-full" 
+                  value={search} 
+                  onChange={(e) => {
+                    setSearch(e.target.value)
+                    setCurrentPage(1)
+                  }} 
+                />
+              </div>
+              <div className="relative">
+                <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <select
+                  value={filterTipe}
+                  onChange={(e) => { setFilterTipe(e.target.value); setCurrentPage(1) }}
+                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]"
+                >
+                  <option value="">Semua Tipe</option>
+                  {tipeOptions.map((t) => (
+                    <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">

@@ -30,7 +30,7 @@ export default function DetailMustahikPage() {
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <div className="text-center space-y-4">
-        <div className="h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div className="h-10 w-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Profiling Mustahik...</p>
       </div>
     </div>
@@ -49,16 +49,16 @@ export default function DetailMustahikPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* KIRI: BIODATA & SKORING */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="border-4 border-slate-900 rounded-none shadow-[8px_8px_0px_0px_rgba(37,99,235,1)] bg-white">
+          <Card className="border border-slate-200 rounded-2xl shadow-lg bg-white">
             <CardContent className="pt-8 flex flex-col items-center">
-              <div className="h-24 w-24 bg-blue-100 rounded-none border-2 border-blue-600 flex items-center justify-center mb-4 rotate-3">
-                <User size={48} className="text-blue-600 -rotate-3" />
+              <div className="h-24 w-24 bg-blue-100 rounded-2xl border border-blue-200 flex items-center justify-center mb-4">
+                <User size={48} className="text-blue-600" />
               </div>
               <h2 className="text-2xl font-black uppercase text-slate-900 text-center leading-tight">{mustahik.nama}</h2>
-              <Badge className="mt-2 bg-slate-900 text-white rounded-none">{mustahik.id_mustahik}</Badge>
+              <Badge className="mt-2 bg-slate-800 text-white rounded-lg">{mustahik.id_mustahik}</Badge>
 
               <div className="w-full mt-8 space-y-4">
-                <div className="p-4 bg-slate-900 text-white rounded-none flex justify-between items-center">
+                <div className="p-4 bg-slate-800 text-white rounded-xl flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <ShieldAlert size={18} className="text-yellow-400" />
                     <span className="text-[10px] font-black uppercase tracking-wider">Vulnerability Score</span>
@@ -87,7 +87,7 @@ export default function DetailMustahikPage() {
           </Card>
 
           {/* ASPEK SCD TYPE 2 */}
-          <Card className="border-2 border-slate-900 bg-blue-50 rounded-none">
+          <Card className="border border-blue-200 bg-blue-50 rounded-2xl shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-[10px] font-black uppercase flex items-center gap-2 text-blue-800">
                 <History size={14} /> Data Lineage Detail
@@ -104,8 +104,8 @@ export default function DetailMustahikPage() {
         {/* KANAN: TRACKING & HISTORY */}
         <div className="lg:col-span-2 space-y-6">
           {/* ANALISIS KONDISI SAAT INI */}
-          <Card className="border-4 border-slate-900 rounded-none bg-white">
-            <CardHeader className="border-b-2 border-slate-900 bg-slate-50">
+          <Card className="border border-slate-200 rounded-2xl shadow-sm bg-white">
+            <CardHeader className="border-b border-slate-200 bg-slate-50 rounded-t-2xl">
               <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                 <LineChart size={16} /> Parameter Kelayakan Terkini
               </CardTitle>
@@ -119,7 +119,7 @@ export default function DetailMustahikPage() {
                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Jenis Kelamin</p>
                  <p className="font-bold text-slate-800 uppercase">{mustahik.gender || '-'}</p>
                </div>
-               <div className="md:col-span-2 p-4 bg-slate-50 border-2 border-dashed border-slate-200">
+               <div className="md:col-span-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
                   <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Alamat Lengkap Records</p>
                   <p className="text-sm font-medium text-slate-700 leading-relaxed">{mustahik.alamat || 'Alamat tidak tersedia dalam metadata.'}</p>
                </div>
@@ -133,11 +133,11 @@ export default function DetailMustahikPage() {
                 <History size={14} /> Historical Changes (SCD Type 2)
               </h4>
               {history.map((h: any, i: number) => (
-                <div key={i} className="bg-white border-2 border-slate-900 p-4 flex justify-between items-center group hover:bg-slate-50 transition-all">
+                <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center group hover:bg-slate-50 transition-all shadow-sm">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <p className="text-xs font-black text-slate-800 uppercase">{h.nama}</p>
-                      <Badge className="h-4 text-[8px] bg-slate-200 text-slate-600 rounded-none">ARSIP</Badge>
+                      <Badge className="h-4 text-[8px] bg-slate-200 text-slate-600 rounded-md">ARSIP</Badge>
                     </div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                       Skor: {h.skoring} • {h.kecamatan}

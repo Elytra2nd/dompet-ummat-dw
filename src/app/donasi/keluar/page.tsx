@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  ArrowUpRight, Search, Plus, Loader2, Pencil, Trash2, X, Save, ChevronLeft, ChevronRight, Eye, Receipt
+  ArrowUpRight, Search, Plus, Loader2, Pencil, Trash2, X, Save, ChevronLeft, ChevronRight, Eye, Receipt, Filter
 } from 'lucide-react'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -22,6 +22,7 @@ import {
 import { toast } from 'sonner'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
+import PenyaluranStats from '@/components/donasi/PenyaluranStats'
 import {
   DOMAIN_PROGRAM, KATEGORI_PROGRAM, JENIS_BANTUAN, STATUS_PENGAJUAN, KATEGORI_PENYAKIT,
 } from '@/lib/constants-penyaluran'
@@ -65,6 +66,7 @@ export default function DonasiKeluarPage() {
   const [mounted, setMounted] = useState(false)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [filterDomain, setFilterDomain] = useState('')
 
   // Edit state
   const [editItem, setEditItem] = useState<PenyaluranZiswaf | null>(null)
@@ -107,15 +109,24 @@ export default function DonasiKeluarPage() {
 
   // ─── Filter & Pagination ─────────────────────────────────────────────────
 
+  const domainOptions = useMemo(() => {
+    const set = new Set(data.map(d => d.domain_program).filter(Boolean))
+    return Array.from(set).sort()
+  }, [data])
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
     return data.filter(
-      (d) =>
-        d.id_transaksi?.toLowerCase().includes(q) ||
-        d.dim_mustahik?.nama?.toLowerCase().includes(q) ||
-        toDisplay(d.domain_program).toLowerCase().includes(q),
+      (d) => {
+        const matchSearch =
+          d.id_transaksi?.toLowerCase().includes(q) ||
+          d.dim_mustahik?.nama?.toLowerCase().includes(q) ||
+          toDisplay(d.domain_program).toLowerCase().includes(q)
+        const matchDomain = !filterDomain || d.domain_program === filterDomain
+        return matchSearch && matchDomain
+      }
     )
-  }, [data, search])
+  }, [data, search, filterDomain])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -250,18 +261,38 @@ export default function DonasiKeluarPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Stats & Chart */}
+        {!loading && (
+          <PenyaluranStats totalDana={totalDana} totalTransaksi={filtered.length} />
+        )}
+
         {/* Toolbar */}
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="py-4 border-b">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Cari transaksi, mustahik, atau domain..."
-                className="pl-10 w-full"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-              />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Cari transaksi, mustahik, atau domain..."
+                  className="pl-10 w-full"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                />
+              </div>
+              <div className="relative">
+                <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <select
+                  value={filterDomain}
+                  onChange={(e) => { setFilterDomain(e.target.value); setPage(1) }}
+                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 appearance-none cursor-pointer min-w-[180px]"
+                >
+                  <option value="">Semua Domain</option>
+                  {domainOptions.map((d) => (
+                    <option key={d} value={d}>{toDisplay(d)}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </CardHeader>
 
