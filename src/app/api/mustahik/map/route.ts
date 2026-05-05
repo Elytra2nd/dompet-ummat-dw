@@ -14,6 +14,7 @@ export async function GET() {
           longitude: { not: null },
         },
       },
+      take: 5000, // Safety limit — prevent OOM on large datasets
       include: {
         dim_lokasi: true,
       },

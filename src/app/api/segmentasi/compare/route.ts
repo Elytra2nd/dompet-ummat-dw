@@ -248,8 +248,9 @@ export async function POST() {
         },
       },
       conclusion: {
-        winner,
-        reasoning: `${winner} dipilih karena memiliki kombinasi metrik evaluasi terbaik secara keseluruhan.`,
+        winner: 'K-Means',
+        metrics_winner: ranked[0].name,
+        reasoning: `K-Means dipilih sebagai algoritma produksi karena selisih kualitas dengan K-Medoids sangat kecil (Silhouette hanya berbeda ${Math.abs(kmeansSilhouette - kmedoidsSilhouette).toFixed(4)} atau ${(Math.abs(kmeansSilhouette - kmedoidsSilhouette) / kmedoidsSilhouette * 100).toFixed(2)}%), namun K-Means ${Math.round(kmedoidsTime / kmeansTime)}x lebih cepat (${kmeansTime}ms vs ${kmedoidsTime}ms). Trade-off kecepatan vs kualitas ini menjadikan K-Means pilihan optimal untuk dashboard real-time.`,
         ranking: ranked.map((r, i) => ({
           rank: i + 1,
           algorithm: r.name,

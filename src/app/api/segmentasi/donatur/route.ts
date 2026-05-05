@@ -32,12 +32,15 @@ type SortKey = 'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengka
  * GET /api/segmentasi/donatur
  * ===========================
  * Query params:
- *   - segment   : filter segmen (e.g. "champions")
- *   - page      : halaman (default 1)
- *   - limit     : per halaman (default 20, max 10000)
- *   - search    : cari nama donatur (server-side, semua data)
- *   - sort      : kolom sorting (recency|frequency|monetary|rfm_score|nama_lengkap)
- *   - order     : asc | desc (default: desc untuk numerik, asc untuk nama)
+ *   - segment      : filter segmen (e.g. "champions")
+ *   - page         : halaman (default 1)
+ *   - limit        : per halaman (default 20, max 10000)
+ *   - search       : cari nama donatur
+ *   - sort         : recency|frequency|monetary|rfm_score|nama_lengkap
+ *   - order        : asc | desc
+ *   - min_monetary : filter donasi minimum (Rp)
+ *   - max_monetary : filter donasi maksimum (Rp)
+ *   - max_recency  : filter max hari sejak donasi terakhir
  */
 export async function GET(request: NextRequest) {
   let conn
@@ -49,6 +52,9 @@ export async function GET(request: NextRequest) {
     const search = (searchParams.get('search') || '').trim().toLowerCase()
     const sortKey = (searchParams.get('sort') || '') as SortKey
     const sortOrder = searchParams.get('order') === 'asc' ? 'asc' : 'desc'
+    const minMonetary = searchParams.get('min_monetary') ? parseFloat(searchParams.get('min_monetary')!) : null
+    const maxMonetary = searchParams.get('max_monetary') ? parseFloat(searchParams.get('max_monetary')!) : null
+    const maxRecency = searchParams.get('max_recency') ? parseInt(searchParams.get('max_recency')!) : null
 
     // Gunakan cache jika masih valid
     let enriched: EnrichedDonatur[]
@@ -99,7 +105,7 @@ export async function GET(request: NextRequest) {
       ? enriched.filter(d => d.segment_key === segmentFilter)
       : enriched
 
-    // Server-side search (across ALL data, not just current page)
+    // Server-side search
     if (search) {
       filtered = filtered.filter(d =>
         d.nama_lengkap.toLowerCase().includes(search) ||
@@ -107,6 +113,11 @@ export async function GET(request: NextRequest) {
         (d.tipe && d.tipe.toLowerCase().includes(search))
       )
     }
+
+    // Advanced filters
+    if (minMonetary !== null) filtered = filtered.filter(d => d.monetary >= minMonetary)
+    if (maxMonetary !== null) filtered = filtered.filter(d => d.monetary <= maxMonetary)
+    if (maxRecency !== null) filtered = filtered.filter(d => d.recency <= maxRecency)
 
     // Server-side sort
     if (sortKey && ['recency', 'frequency', 'monetary', 'rfm_score', 'nama_lengkap'].includes(sortKey)) {

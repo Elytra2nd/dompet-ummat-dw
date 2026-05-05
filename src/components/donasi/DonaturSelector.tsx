@@ -63,8 +63,8 @@ export default function DonaturSelector({
           `/api/donasi/donatur?q=${encodeURIComponent(query)}`,
         )
         if (res.ok) {
-          const data = await res.json()
-          setResults(data)
+          const json = await res.json()
+          setResults(json.data || [])
           setIsOpen(true)
         }
       } catch (e) {

@@ -65,7 +65,12 @@ export async function middleware(request: NextRequest) {
 
     // Izinkan rute survey dan API yang diperlukan
     const isAllowed = SURVEYOR_ROUTES.some(route => pathname.startsWith(route))
-    
+
+    // Izinkan juga API umum yang dibutuhkan
+    if (pathname.startsWith('/api/') && !ADMIN_ONLY_ROUTES.some(r => pathname.startsWith(`/api${r}`))) {
+      return NextResponse.next()
+    }
+
     if (isAllowed) {
       return NextResponse.next()
     }

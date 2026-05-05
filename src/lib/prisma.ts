@@ -9,7 +9,7 @@ const prismaClientSingleton = () => {
     password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
     ssl: { rejectUnauthorized: true },
-    connectionLimit: 1, 
+    connectionLimit: 10, 
     connectTimeout: 30000, 
     acquireTimeout: 30000,
   })
