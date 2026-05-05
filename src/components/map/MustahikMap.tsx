@@ -66,7 +66,8 @@ export default function MustahikMap({ points }: MapProps) {
     const [selectedKategori, setSelectedKategori] = useState("Semua");
     
     // --- STATE DRILL DOWN OLAP ---
-    const [drillLevel, setDrillLevel] = useState<'provinsi' | 'kabupaten' | 'kecamatan'>('provinsi');
+    const [drillLevel, setDrillLevel] = useState<'nasional' | 'provinsi' | 'kabupaten' | 'kecamatan'>('nasional');
+    const [selectedProv, setSelectedProv] = useState<string | null>(null);
     const [selectedKab, setSelectedKab] = useState<string | null>(null);
     const [selectedKec, setSelectedKec] = useState<string | null>(null);
 
@@ -78,14 +79,16 @@ export default function MustahikMap({ points }: MapProps) {
         }
         
         // Filter spasial berdasarkan drill down
-        if (drillLevel === 'kabupaten' && selectedKab) {
-            p = p.filter(x => x.kabupaten === selectedKab);
-        } else if (drillLevel === 'kecamatan' && selectedKab && selectedKec) {
-            p = p.filter(x => x.kabupaten === selectedKab && x.kecamatan === selectedKec);
+        if (drillLevel === 'provinsi' && selectedProv) {
+            p = p.filter(x => x.provinsi === selectedProv);
+        } else if (drillLevel === 'kabupaten' && selectedProv && selectedKab) {
+            p = p.filter(x => x.provinsi === selectedProv && x.kabupaten === selectedKab);
+        } else if (drillLevel === 'kecamatan' && selectedProv && selectedKab && selectedKec) {
+            p = p.filter(x => x.provinsi === selectedProv && x.kabupaten === selectedKab && x.kecamatan === selectedKec);
         }
         
         return p;
-    }, [points, selectedKategori, drillLevel, selectedKab, selectedKec]);
+    }, [points, selectedKategori, drillLevel, selectedProv, selectedKab, selectedKec]);
 
     // --- PROSES DATA UNTUK CHART ---
     const chartData = useMemo(() => {
@@ -93,7 +96,9 @@ export default function MustahikMap({ points }: MapProps) {
         
         filteredPoints.forEach((p) => {
             let label = "";
-            if (drillLevel === 'provinsi') {
+            if (drillLevel === 'nasional') {
+                label = p.provinsi;
+            } else if (drillLevel === 'provinsi') {
                 label = p.kabupaten;
             } else if (drillLevel === 'kabupaten') {
                 label = p.kecamatan;
@@ -124,7 +129,10 @@ export default function MustahikMap({ points }: MapProps) {
         
         if (!clickedWilayah || clickedWilayah === "Lainnya") return; // Hindari drill down jika nilainya 'Lainnya'
 
-        if (drillLevel === 'provinsi') {
+        if (drillLevel === 'nasional') {
+            setSelectedProv(clickedWilayah);
+            setDrillLevel('provinsi');
+        } else if (drillLevel === 'provinsi') {
             setSelectedKab(clickedWilayah);
             setDrillLevel('kabupaten');
         } else if (drillLevel === 'kabupaten') {
@@ -134,10 +142,19 @@ export default function MustahikMap({ points }: MapProps) {
     };
 
     // Breadcrumb Actions
-    const handleCrumbProvinsi = () => {
-        setDrillLevel('provinsi');
+    const handleCrumbNasional = () => {
+        setDrillLevel('nasional');
+        setSelectedProv(null);
         setSelectedKab(null);
         setSelectedKec(null);
+    }
+
+    const handleCrumbProvinsi = () => {
+        if (selectedProv) {
+            setDrillLevel('provinsi');
+            setSelectedKab(null);
+            setSelectedKec(null);
+        }
     }
     
     const handleCrumbKabupaten = () => {
@@ -156,12 +173,24 @@ export default function MustahikMap({ points }: MapProps) {
                 {/* BREADCRUMBS OLAP */}
                 <div className="flex items-center flex-wrap gap-2 text-xs font-bold text-slate-500">
                     <button 
-                        onClick={handleCrumbProvinsi}
-                        className={`flex items-center gap-1 hover:text-indigo-600 transition-colors ${drillLevel === 'provinsi' ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md' : ''}`}
+                        onClick={handleCrumbNasional}
+                        className={`flex items-center gap-1 hover:text-indigo-600 transition-colors ${drillLevel === 'nasional' ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md' : ''}`}
                     >
-                        <MapPin className="h-3 w-3" /> Prov. Kalimantan Barat
+                        <MapPin className="h-3 w-3" /> Indonesia
                     </button>
                     
+                    {(drillLevel === 'provinsi' || drillLevel === 'kabupaten' || drillLevel === 'kecamatan') && selectedProv && (
+                        <>
+                            <ChevronRight className="h-3 w-3 text-slate-300" />
+                            <button 
+                                onClick={handleCrumbProvinsi}
+                                className={`hover:text-indigo-600 transition-colors ${drillLevel === 'provinsi' ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md' : ''}`}
+                            >
+                                Prov. {selectedProv}
+                            </button>
+                        </>
+                    )}
+
                     {(drillLevel === 'kabupaten' || drillLevel === 'kecamatan') && selectedKab && (
                         <>
                             <ChevronRight className="h-3 w-3 text-slate-300" />
@@ -205,7 +234,7 @@ export default function MustahikMap({ points }: MapProps) {
                 <div className="lg:col-span-2 relative bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden" style={{ minHeight: '500px' }}>
                     <MapContainer
                         center={defaultCenter}
-                        zoom={drillLevel === 'provinsi' ? 7 : drillLevel === 'kabupaten' ? 9 : 11}
+                        zoom={drillLevel === 'nasional' ? 5 : drillLevel === 'provinsi' ? 7 : drillLevel === 'kabupaten' ? 9 : 11}
                         style={{ height: '100%', width: '100%' }}
                         scrollWheelZoom={true}
                     >
@@ -245,9 +274,9 @@ export default function MustahikMap({ points }: MapProps) {
                     <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter flex items-center justify-between">
                         <div>Statistik <span className="text-emerald-600">Wilayah</span></div>
                         
-                        {drillLevel !== 'provinsi' && (
+                        {drillLevel !== 'nasional' && (
                             <button 
-                                onClick={drillLevel === 'kecamatan' ? handleCrumbKabupaten : handleCrumbProvinsi}
+                                onClick={drillLevel === 'kecamatan' ? handleCrumbKabupaten : drillLevel === 'kabupaten' ? handleCrumbProvinsi : handleCrumbNasional}
                                 className="flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 hover:text-indigo-600 px-2 py-1 rounded transition-colors"
                             >
                                 <CornerLeftUp className="h-3 w-3" /> Roll Up
@@ -255,7 +284,7 @@ export default function MustahikMap({ points }: MapProps) {
                         )}
                     </h3>
                     <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Tingkat: {drillLevel === 'provinsi' ? 'Kabupaten/Kota' : drillLevel === 'kabupaten' ? 'Kecamatan' : 'Desa/Kelurahan'}
+                        Tingkat: {drillLevel === 'nasional' ? 'Provinsi' : drillLevel === 'provinsi' ? 'Kabupaten/Kota' : drillLevel === 'kabupaten' ? 'Kecamatan' : 'Desa/Kelurahan'}
                     </p>
                     <p className="mb-6 text-[10px] font-bold text-indigo-500 italic">
                         *Klik pada grafik untuk mempersempit wilayah (Drill Down)

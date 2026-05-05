@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs'
 import {
   DONASI_IMPORT_HEADERS,
+  DONATUR_IMPORT_HEADERS,
   IMPORT_ENUM_TIPE_DONATUR,
   IMPORT_ENUM_METODE_BAYAR,
   IMPORT_ENUM_PROGRAM_INDUK,
@@ -159,6 +160,82 @@ function buildDonasiWorkbook(): ExcelJS.Workbook {
     [`Tipe Donatur:  ${IMPORT_ENUM_TIPE_DONATUR.join(' | ')}`],
     [`Metode Bayar:  ${IMPORT_ENUM_METODE_BAYAR.join(' | ')}`],
     [`Program Induk: ${IMPORT_ENUM_PROGRAM_INDUK.join(' | ')}`],
+  ]
+  instructions.forEach((row, i) => {
+    const cell = guide.getCell(i + 1, 1)
+    cell.value = row[0]
+    if (i === 0) cell.font = { bold: true, size: 12, color: { argb: 'FF1E3A5F' } }
+  })
+
+  return wb
+}
+
+// ─── Builder: Donatur ───────────────────────────────────────────────────────────────
+function buildDonaturWorkbook(): ExcelJS.Workbook {
+  const wb = new ExcelJS.Workbook()
+  wb.creator = 'Dompet Ummat Kalbar'
+  wb.created = new Date()
+
+  // Sheet Referensi tersembunyi (sumber dropdown)
+  const ref = wb.addWorksheet('Referensi')
+  ref.state = 'veryHidden'
+  IMPORT_ENUM_TIPE_DONATUR.forEach((v, i) => ref.getCell(`A${i + 1}`).value = v)
+
+  // Sheet Data
+  const data = wb.addWorksheet('Data')
+  data.views = [{ state: 'frozen', ySplit: 1 }]
+
+  const headers = DONATUR_IMPORT_HEADERS
+  headers.forEach((h, i) => {
+    const col = i + 1
+    const cell = data.getCell(1, col)
+    cell.value = h.label
+    applyHeaderStyle(cell, h.required)
+    data.getColumn(col).width = 28
+  })
+  data.getRow(1).height = 40
+
+  // Contoh baris 2
+  const examples: Record<string, unknown> = {
+    nama_lengkap:  'Ahmad Fauzi Rahmat',
+    kontak_utama:  '081234567890',
+    tipe:          'Individu',
+    alamat:        'Jl. Melati No. 5, RT 03, Pontianak',
+    perusahaan:    '-',
+  }
+  headers.forEach((h, i) => {
+    const cell = data.getCell(2, i + 1)
+    cell.value = examples[h.key] as ExcelJS.CellValue
+    applyExampleStyle(cell)
+  })
+
+  // Dropdown Tipe Donatur (baris 3–5000)
+  const tipeColIdx = headers.findIndex(h => h.key === 'tipe') + 1
+  for (let row = 3; row <= 5000; row++) {
+    data.getCell(row, tipeColIdx).dataValidation = {
+      type: 'list',
+      allowBlank: false,
+      formulae: [`Referensi!$A$1:$A${IMPORT_ENUM_TIPE_DONATUR.length}`],
+      showErrorMessage: true,
+      errorTitle: 'Nilai Tidak Valid',
+      error: `Pilih dari dropdown: ${IMPORT_ENUM_TIPE_DONATUR.join(', ')}`,
+    }
+  }
+
+  // Sheet Petunjuk
+  const guide = wb.addWorksheet('Petunjuk')
+  guide.getColumn(1).width = 80
+  const instructions = [
+    ['PETUNJUK PENGISIAN TEMPLATE IMPORT DATABASE DONATUR'],
+    [''],
+    ['1. Isi data mulai dari baris ke-3 (baris ke-2 adalah contoh, bisa dihapus)'],
+    ['2. Kolom berlatar MERAH MUDA adalah WAJIB diisi'],
+    ['3. Kolom berlatar KUNING adalah opsional'],
+    ['4. Gunakan dropdown untuk kolom Tipe Donatur'],
+    ['5. Donatur yang sudah terdaftar (berdasarkan No. HP) akan dilewati otomatis'],
+    [''],
+    ['NILAI YANG DIIZINKAN:'],
+    [`Tipe Donatur: ${IMPORT_ENUM_TIPE_DONATUR.join(' | ')}`],
   ]
   instructions.forEach((row, i) => {
     const cell = guide.getCell(i + 1, 1)
@@ -417,6 +494,10 @@ export async function GET(req: Request) {
   let filename: string
 
   switch (modul) {
+    case 'donatur':
+      workbook = buildDonaturWorkbook()
+      filename = 'template_donatur.xlsx'
+      break
     case 'penyaluran':
       workbook = buildPenyaluranWorkbook()
       filename = 'template_penyaluran.xlsx'

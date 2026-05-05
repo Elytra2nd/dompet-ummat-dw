@@ -38,6 +38,8 @@ const mockPrisma = {
   fact_penyaluran: {
     findMany: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
   fact_layanan_ambulan: {
     create: vi.fn(),
@@ -54,7 +56,9 @@ const mockPrisma = {
     create: vi.fn(),
   },
   fact_survey: {
+    findMany: vi.fn(),
     create: vi.fn(),
+    delete: vi.fn(),
   },
   fact_survey_detail: {
     createMany: vi.fn(),
@@ -71,8 +75,8 @@ beforeEach(() => {
 })
 
 // Helper: create a Request object with JSON body
-function createJsonRequest(url: string, body: any, method = 'POST'): Request {
-  return new Request(url, {
+function createJsonRequest(url: string, body: any, method = 'POST'): NextRequest {
+  return new NextRequest(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -167,11 +171,12 @@ describe('Mustahik CRUD', () => {
         is_active: true,
       }
       mockPrisma.dim_mustahik.findUnique.mockResolvedValue(oldData)
+      mockPrisma.dim_mustahik.findMany.mockResolvedValue([{ id_mustahik: 'MST-KES-0001' }]) // Mock existing versions
       mockPrisma.dim_mustahik.update.mockResolvedValue({ ...oldData, is_active: false })
       mockPrisma.dim_lokasi.create.mockResolvedValue({ sk_lokasi: 20 })
       mockPrisma.dim_mustahik.create.mockResolvedValue({
         sk_mustahik: 2,
-        id_mustahik: 'MST-KES-0001', // Same business ID
+        id_mustahik: 'MST-KES-0001-v2', // Versioned ID
         nama: 'New Name',
         is_active: true,
       })
@@ -197,8 +202,8 @@ describe('Mustahik CRUD', () => {
           data: expect.objectContaining({ is_active: false }),
         })
       )
-      // New record should keep same business ID
-      expect(data.id_mustahik).toBe('MST-KES-0001')
+      // New record should have versioned ID
+      expect(data.id_mustahik).toBe('MST-KES-0001-v2')
       expect(data.is_active).toBe(true)
     })
 
@@ -339,6 +344,86 @@ describe('Penyaluran CRUD', () => {
       expect(data.success).toBe(true)
     })
   })
+
+  describe('PUT /api/donasi/keluar — Update Penyaluran', () => {
+    it('should update penyaluran record', async () => {
+      const { PUT } = await import('@/app/api/donasi/keluar/route')
+
+      mockPrisma.fact_penyaluran.update.mockResolvedValue({
+        sk_fakta_penyaluran: 1,
+        dana_tersalur: 400000,
+        status_pengajuan: 'Disetujui',
+      })
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sk_fakta_penyaluran: 1,
+          dana_tersalur: 400000,
+          status_pengajuan: 'Disetujui',
+        }),
+      })
+
+      const res = await PUT(req)
+      const data = await res.json()
+
+      expect(data.success).toBe(true)
+      expect(mockPrisma.fact_penyaluran.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { sk_fakta_penyaluran: 1 },
+          data: expect.objectContaining({
+            dana_tersalur: 400000,
+            status_pengajuan: 'Disetujui',
+          }),
+        })
+      )
+    })
+
+    it('should return error if no sk is provided', async () => {
+      const { PUT } = await import('@/app/api/donasi/keluar/route')
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      const res = await PUT(req)
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('DELETE /api/donasi/keluar — Delete Penyaluran', () => {
+    it('should delete penyaluran record', async () => {
+      const { DELETE } = await import('@/app/api/donasi/keluar/route')
+
+      mockPrisma.fact_penyaluran.delete.mockResolvedValue({})
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar?sk=1', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      const data = await res.json()
+
+      expect(data.success).toBe(true)
+      expect(mockPrisma.fact_penyaluran.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { sk_fakta_penyaluran: 1 } })
+      )
+    })
+
+    it('should return error if no sk is provided', async () => {
+      const { DELETE } = await import('@/app/api/donasi/keluar/route')
+
+      const req = new NextRequest('http://localhost/api/donasi/keluar', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      expect(res.status).toBe(400)
+    })
+  })
 })
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -394,6 +479,57 @@ describe('Survey CRUD', () => {
 
       const res = await POST(req)
       expect(res.status).toBe(404)
+    })
+  })
+
+  describe('GET /api/survey/hasil — Read Survey Results', () => {
+    it('should return list of surveys', async () => {
+      const { GET } = await import('@/app/api/survey/hasil/route')
+
+      mockPrisma.fact_survey.findMany.mockResolvedValue([
+        {
+          sk_survey: 1,
+          no_register: 'REG-001',
+          dim_mustahik: { nama: 'Test Mustahik' },
+        },
+      ])
+
+      const res = await GET()
+      const data = await res.json()
+
+      expect(Array.isArray(data)).toBe(true)
+      expect(data[0].no_register).toBe('REG-001')
+    })
+  })
+
+  describe('DELETE /api/survey/hasil — Delete Survey', () => {
+    it('should delete survey record by sk', async () => {
+      const { DELETE } = await import('@/app/api/survey/hasil/route')
+
+      mockPrisma.fact_survey.delete.mockResolvedValue({})
+
+      const req = new NextRequest('http://localhost/api/survey/hasil?sk=1', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      const data = await res.json()
+
+      expect(data.success).toBe(true)
+      expect(mockPrisma.fact_survey.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { sk_survey: 1 } })
+      )
+    })
+
+    it('should return 400 when sk is missing', async () => {
+      const { DELETE } = await import('@/app/api/survey/hasil/route')
+
+      const req = new NextRequest('http://localhost/api/survey/hasil', {
+        method: 'DELETE',
+      })
+
+      const res = await DELETE(req)
+      expect(res.status).toBe(400)
     })
   })
 })

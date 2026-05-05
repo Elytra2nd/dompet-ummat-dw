@@ -40,6 +40,7 @@ import {
   Eye
 } from 'lucide-react'
 import Link from 'next/link'
+import ImportButton from '@/components/import/ImportButton'
 
 interface Donatur {
   sk_donatur: number
@@ -109,11 +110,14 @@ export default function ManajemenDonaturPage() {
             <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
               <Users className="h-7 w-7 text-indigo-600 shrink-0" /> Database <span className="text-indigo-600">Donatur</span>
             </h1>
-            <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 w-full sm:w-auto">
-              <Link href="/donasi/donatur/baru">
-                <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
-              </Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <ImportButton modul="donatur" onImportSuccess={fetchDonatur} />
+              <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 w-full sm:w-auto">
+                <Link href="/donasi/donatur/baru">
+                  <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

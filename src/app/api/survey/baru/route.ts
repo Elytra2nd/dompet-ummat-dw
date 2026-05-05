@@ -1,9 +1,16 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { generateSkDate } from '@/lib/utils-ambulan' // Kita gunakan helper yang sudah dibuat
+import { getToken } from 'next-auth/jwt'
+import { logActivity } from '@/lib/audit'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const userId = token?.sub || 'SYSTEM'
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+
     const body = await req.json()
     const {
       id_mustahik,
@@ -82,6 +89,10 @@ export async function POST(req: Request) {
 
       return { id_survey: id_survey_gen }
     })
+
+    if (userId !== 'SYSTEM') {
+      await logActivity(userId, 'CREATE_SURVEY', 'fact_survey', { id_survey: result.id_survey, mustahik: id_mustahik }, ip)
+    }
 
     return NextResponse.json({
       success: true,

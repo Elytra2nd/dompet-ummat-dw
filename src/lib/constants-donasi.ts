@@ -49,3 +49,13 @@ export const DONASI_IMPORT_HEADERS = [
   { key: 'nama_petugas',        label: 'Nama Petugas *',          required: true,  isNumber: false },
   { key: 'no_ref',              label: 'No. Referensi',           required: false, isNumber: false },
 ] as const
+
+// ─── IMPORT DONATUR CONSTANTS ─────────────────────────────────────────────────
+
+export const DONATUR_IMPORT_HEADERS = [
+  { key: 'nama_lengkap',   label: 'Nama Lengkap *',           required: true,  isNumber: false },
+  { key: 'kontak_utama',   label: 'No. HP / Kontak *',        required: true,  isNumber: false },
+  { key: 'tipe',           label: 'Tipe Donatur *',           required: true,  isNumber: false },
+  { key: 'alamat',         label: 'Alamat',                   required: false, isNumber: false },
+  { key: 'perusahaan',     label: 'Nama Perusahaan',          required: false, isNumber: false },
+] as const

@@ -13,6 +13,7 @@ import {
   FileBarChart,
   Shield,
   UserCircle2,
+  AlertTriangle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -38,6 +39,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 // Konfigurasi navigasi dengan penanda role
 const allNavItems = [
@@ -76,7 +88,7 @@ const allNavItems = [
     icon: ClipboardCheck,
     adminOnly: false, // Bisa diakses semua role
     items: [
-      { title: "Hasil Survey", url: "/survey/hasil", adminOnly: true },
+      { title: "Riwayat Survey", url: "/survey/hasil", adminOnly: false },
       { title: "Manajemen Pertanyaan", url: "/survey/pertanyaan", adminOnly: true },
       { title: "Input Survey Baru", url: "/survey/baru" },
     ],
@@ -119,6 +131,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const { toggleSidebar } = useSidebar()
   const { data: session } = useSession()
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false)
 
   const userRole = (session?.user as any)?.role as string | undefined
   const userName = session?.user?.name || session?.user?.email || 'User'
@@ -191,9 +204,9 @@ export function AppSidebar() {
                             tooltip={item.title} 
                             className={`h-10 font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-all ${isChildActive ? 'bg-emerald-50/50 text-emerald-700' : ''}`}
                           >
-                            {item.icon && <item.icon className={`h-5 w-5 ${isChildActive ? 'text-emerald-600' : ''}`} />}
-                            <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                            <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                            {item.icon && <item.icon className={`h-5 w-5 shrink-0 ${isChildActive ? 'text-emerald-600' : ''}`} />}
+                            <span className="truncate group-data-[collapsible=icon]:hidden min-w-0 flex-1">{item.title}</span>
+                            <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="transition-all duration-300">
@@ -202,7 +215,7 @@ export function AppSidebar() {
                               <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
                                   <Link href={subItem.url} className="text-[13px] font-semibold py-2 transition-all">
-                                    {subItem.title}
+                                    <span className="truncate">{subItem.title}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
@@ -220,8 +233,8 @@ export function AppSidebar() {
                         className={`h-10 font-bold transition-all hover:bg-emerald-50 ${isParentActive ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'text-slate-600'}`}
                       >
                         <Link href={item.url}>
-                          {item.icon && <item.icon className="h-5 w-5" />}
-                          <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                          {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
+                          <span className="truncate group-data-[collapsible=icon]:hidden min-w-0 flex-1">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -250,16 +263,39 @@ export function AppSidebar() {
         
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={handleLogout}
-              className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3 group"
-            >
-              <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
-              <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden ml-2">
-                <span className="text-xs font-black text-slate-900 leading-none">Logout</span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">End Session</span>
-              </div>
-            </SidebarMenuButton>
+            <AlertDialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
+              <AlertDialogTrigger asChild>
+                <SidebarMenuButton 
+                  className="h-12 hover:bg-rose-50 hover:text-rose-600 transition-all rounded-xl px-3 group"
+                >
+                  <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
+                  <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden ml-2">
+                    <span className="text-xs font-black text-slate-900 leading-none">Logout</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">End Session</span>
+                  </div>
+                </SidebarMenuButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl border-2 sm:max-w-[400px]">
+                <AlertDialogHeader>
+                  <div className="flex items-center gap-3 text-rose-600 mb-2">
+                    <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
+                    <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Konfirmasi Logout</AlertDialogTitle>
+                  </div>
+                  <AlertDialogDescription className="font-medium text-slate-500 text-sm">
+                    Apakah Anda yakin ingin mengakhiri sesi ini dan keluar dari aplikasi BIDA Analytics?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-6 gap-2">
+                  <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px]">Batal</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleLogout}
+                    className="bg-rose-600 hover:bg-rose-700 rounded-xl font-black uppercase text-[10px]"
+                  >
+                    Ya, Keluar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

@@ -113,6 +113,7 @@ export default function ImportButton({ modul, onImportSuccess, className = '', f
 
   const labelMap: Record<ImportModul, string> = {
     donasi: 'Donasi',
+    donatur: 'Donatur',
     penyaluran: 'Penyaluran',
     mustahik: 'Mustahik',
     ambulan_layanan: 'Layanan Ambulan',
