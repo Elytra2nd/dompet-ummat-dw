@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { HandCoins, UserCheck, Stethoscope, Loader2, Save } from 'lucide-react'
+import { HandCoins, UserCheck, Stethoscope, Loader2, Save, UserPlus } from 'lucide-react'
+import Link from 'next/link'
 
 // IMPORT KOMPONEN PENDUKUNG BARU
 import MustahikSelector from './MustahikSelector'
@@ -94,6 +95,15 @@ export default function AddPenyaluranForm() {
                 selectedId={formData.id_mustahik}
                 onSelect={(id) => setFormData({ ...formData, id_mustahik: id })}
               />
+              <Link
+                href="/mustahik/baru"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors mt-1"
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Mustahik belum terdaftar? Daftarkan sekarang
+              </Link>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
