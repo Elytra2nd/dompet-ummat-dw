@@ -1,21 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import {
-  ClipboardCheck, Wallet, Home, Loader2, Save, Star,
-  ChevronRight, User, TrendingUp, CheckCircle2,
+  ClipboardCheck, Wallet, Home, Loader2, Save,
+  Star, User, ChevronRight, ChevronLeft, Check, UserPlus,
 } from 'lucide-react'
-import Link from 'next/link'
 
 import QuestionItem from './QuestionItem'
 import SurveySummary from './SurveySummary'
-import MustahikSelector from '@/components/penyaluran/MustahikSelector'
 
 import {
   GOLONGAN_ASNAF,
@@ -24,8 +21,6 @@ import {
 } from '@/lib/constants-survey'
 import { calculateAverage, determineKelayakan } from '@/lib/calc-survey'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface Pertanyaan {
   sk_pertanyaan: number
   kode_pertanyaan: string
@@ -33,131 +28,170 @@ interface Pertanyaan {
   grup_pertanyaan?: string
 }
 
-// ─── Section Header ───────────────────────────────────────────────────────────
-
-const SECTION_ICONS: Record<string, React.ReactNode> = {
-  'Profil Ekonomi': <Wallet className="h-5 w-5 text-indigo-600" />,
-  'Kondisi Sosial': <Home className="h-5 w-5 text-amber-600" />,
-  'Aset & Kepemilikan': <TrendingUp className="h-5 w-5 text-emerald-600" />,
+interface MustahikBaru {
+  nama: string
+  nik: string
+  no_hp: string
+  gender: string
+  kategori_pm: string
+  jumlah_jiwa: number
+  kabupaten_kota: string
+  alamat: string
+  program_induk: string
 }
 
-const SECTION_COLORS: Record<string, string> = {
-  'Profil Ekonomi': 'border-indigo-200 bg-indigo-50/40',
-  'Kondisi Sosial': 'border-amber-200 bg-amber-50/40',
-  'Aset & Kepemilikan': 'border-emerald-200 bg-emerald-50/40',
+const DEFAULT_MUSTAHIK: MustahikBaru = {
+  nama: '',
+  nik: '',
+  no_hp: '',
+  gender: 'L',
+  kategori_pm: 'Fakir',
+  jumlah_jiwa: 1,
+  kabupaten_kota: '',
+  alamat: '',
+  program_induk: 'Sosial Kemanusiaan',
 }
-
-const SECTION_BADGE_COLORS: Record<string, string> = {
-  'Profil Ekonomi': 'bg-indigo-100 text-indigo-700',
-  'Kondisi Sosial': 'bg-amber-100 text-amber-700',
-  'Aset & Kepemilikan': 'bg-emerald-100 text-emerald-700',
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SurveyForm({ id_survey }: { id_survey?: string }) {
-  const [loading, setLoading] = useState(false)
-  const [questions, setQuestions] = useState<Pertanyaan[]>([])
-  const [scores, setScores] = useState<{ [key: number]: number }>({})
+  const [currentStep, setCurrentStep]   = useState(0)
+  const [loading, setLoading]           = useState(false)
+  const [loadingData, setLoadingData]   = useState(true)
+  const [creatingMustahik, setCreating] = useState(false)
+  const [questions, setQuestions]       = useState<Pertanyaan[]>([])
+  const [scores, setScores]             = useState<Record<number, number>>({})
+  const [generatedId, setGeneratedId]   = useState('')    // id_mustahik hasil generate
+  const [skMustahik, setSkMustahik]     = useState(0)    // sk internal setelah create
 
-  const [formData, setFormData] = useState({
-    id_mustahik: '',
-    sk_petugas: 1,
-    pendapatan_bulanan: 0,
-    pengeluaran_bulanan: 0,
-    jumlah_tanggungan: 0,
+  // Form mustahik baru (Step 1)
+  const [mustahikForm, setMustahikForm] = useState<MustahikBaru>(DEFAULT_MUSTAHIK)
+
+  // Form survey
+  const [surveyData, setSurveyData] = useState({
+    sk_petugas:             1,
+    pendapatan_bulanan:     0,
+    pengeluaran_bulanan:    0,
+    jumlah_tanggungan:      0,
     kondisi_tempat_tinggal: KONDISI_TEMPAT_TINGGAL[2].value,
-    kategori_asnaf: GOLONGAN_ASNAF[0].value,
-    kategori_rekomendasi: KATEGORI_REKOMENDASI[0].value,
+    kategori_asnaf:         GOLONGAN_ASNAF[0].value,
+    kategori_rekomendasi:   KATEGORI_REKOMENDASI[0].value,
   })
 
-  // ─── Load Data ─────────────────────────────────────────────────────────────
-
+  // ── Load pertanyaan ────────────────────────────────────────────────────────
   useEffect(() => {
-    async function loadData() {
+    async function load() {
+      setLoadingData(true)
       try {
-        const resQ = await fetch('/api/survey/pertanyaan')
+        const resQ  = await fetch('/api/survey/pertanyaan')
         const dataQ = await resQ.json()
-        if (Array.isArray(dataQ)) {
-          setQuestions(dataQ)
-          const initialScores: Record<number, number> = {}
-          dataQ.forEach((q: Pertanyaan) => (initialScores[q.sk_pertanyaan] = 3))
-
-          if (id_survey) {
-            const resS = await fetch(`/api/survey/${id_survey}`)
-            const dataS = await resS.json()
-            if (resS.ok && dataS.survey) {
-              setFormData({
-                id_mustahik: dataS.survey.dim_mustahik?.id_mustahik || '',
-                sk_petugas: 1,
-                pendapatan_bulanan: Number(dataS.skorData?.pendapatan_bulanan || 0),
-                pengeluaran_bulanan: Number(dataS.skorData?.pengeluaran_bulanan || 0),
-                jumlah_tanggungan: Number(dataS.skorData?.jumlah_tanggungan || 0),
-                kondisi_tempat_tinggal: dataS.skorData?.kondisi_tempat_tinggal || KONDISI_TEMPAT_TINGGAL[2].value,
-                kategori_asnaf: dataS.survey.golongan_penerima || GOLONGAN_ASNAF[0].value,
-                kategori_rekomendasi: dataS.survey.kategori_rekomendasi || KATEGORI_REKOMENDASI[0].value,
-              })
-              setScores(dataS.detail_skor ? { ...initialScores, ...dataS.detail_skor } : initialScores)
-            } else {
-              toast.error('Gagal memuat data survey untuk diedit')
-              setScores(initialScores)
-            }
-          } else {
-            setScores(initialScores)
-          }
-        }
+        if (!Array.isArray(dataQ)) return
+        setQuestions(dataQ)
+        const init: Record<number, number> = {}
+        dataQ.forEach((q: Pertanyaan) => (init[q.sk_pertanyaan] = 3))
+        setScores(init)
       } catch {
-        toast.error('Terjadi kesalahan saat memuat kriteria survey')
+        toast.error('Gagal memuat kriteria survey')
+      } finally {
+        setLoadingData(false)
       }
     }
-    loadData()
-  }, [id_survey])
+    load()
+  }, [])
 
-  // ─── Group questions by grup_pertanyaan ────────────────────────────────────
-
-  const groupedQuestions = questions.reduce<Record<string, Pertanyaan[]>>((acc, q) => {
-    const group = q.grup_pertanyaan || 'Penilaian Umum'
-    if (!acc[group]) acc[group] = []
-    acc[group].push(q)
+  // ── Grup pertanyaan ────────────────────────────────────────────────────────
+  const groupedQuestions = useMemo(() => {
+    const acc: Record<string, Pertanyaan[]> = {}
+    questions.forEach((q) => {
+      const g = q.grup_pertanyaan || 'Penilaian Umum'
+      ;(acc[g] = acc[g] || []).push(q)
+    })
     return acc
-  }, {})
+  }, [questions])
 
-  // ─── Scoring ───────────────────────────────────────────────────────────────
+  const dynamicGroups = Object.keys(groupedQuestions)
+  const TOTAL_STEPS   = 3 + dynamicGroups.length + 1
+  const FINAL_STEP    = TOTAL_STEPS - 1
 
-  const totalSkorAngka = calculateAverage(scores)
-  const statusObj = determineKelayakan(totalSkorAngka)
-  const answeredCount = Object.values(scores).filter(v => v > 0).length
-  const totalQuestions = questions.length + 1 // +1 for kondisi_tempat_tinggal
+  // ── Scoring ────────────────────────────────────────────────────────────────
+  const totalSkor = calculateAverage(scores)
+  const statusObj = determineKelayakan(totalSkor)
 
-  // ─── Submit ────────────────────────────────────────────────────────────────
+  // ── Step labels ────────────────────────────────────────────────────────────
+  const allStepTitles = [
+    'Data Mustahik',
+    'Profil Ekonomi',
+    'Kondisi Hunian',
+    ...dynamicGroups,
+    'Rekomendasi',
+  ]
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.id_mustahik) return toast.error('Pilih Mustahik terlebih dahulu')
+  // ── Validasi lanjut ────────────────────────────────────────────────────────
+  const canProceed = useMemo(() => {
+    if (currentStep === 0) return mustahikForm.nama.trim().length >= 3
+    return true
+  }, [currentStep, mustahikForm.nama])
 
+  // ── Buat mustahik baru sebelum masuk Step 1 ────────────────────────────────
+  const handleNextFromStep0 = async () => {
+    if (generatedId) { setCurrentStep(1); return } // Sudah dibuat sebelumnya
+
+    setCreating(true)
+    try {
+      const payload = {
+        ...mustahikForm,
+        latitude:  0,
+        longitude: 0,
+        sub_program: 'To Be Determined',
+        dana_tersalur: 0,
+      }
+      const res    = await fetch('/api/mustahik/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Gagal membuat mustahik')
+
+      setGeneratedId(result.id_generated)
+      toast.success(`Mustahik terdaftar: ${result.id_generated}`)
+      setCurrentStep(1)
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mendaftarkan mustahik')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentStep === 0) { handleNextFromStep0(); return }
+    setCurrentStep(s => s + 1)
+  }
+
+  // ── Submit survey ──────────────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    if (!generatedId) return toast.error('Mustahik belum terdaftar')
     setLoading(true)
     try {
       const payload = {
-        ...formData,
-        skor_akhir: totalSkorAngka,
+        ...surveyData,
+        id_mustahik:     generatedId,
+        jumlah_tanggungan: mustahikForm.jumlah_jiwa,
+        skor_akhir:      totalSkor,
         status_kelayakan: statusObj.value,
-        detail_skor: scores,
+        detail_skor:     scores,
       }
-      const endpoint = id_survey ? `/api/survey/${id_survey}` : '/api/survey/baru'
-      const method = id_survey ? 'PUT' : 'POST'
-      const res = await fetch(endpoint, {
-        method,
+      const res = await fetch('/api/survey/baru', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       if (res.ok) {
-        toast.success(`Survey berhasil ${id_survey ? 'diperbarui' : 'disimpan'}`)
-        if (!id_survey) {
-          setFormData({ ...formData, id_mustahik: '', pendapatan_bulanan: 0, pengeluaran_bulanan: 0, jumlah_tanggungan: 0 })
-        }
+        toast.success('Survey berhasil disimpan!')
+        setMustahikForm(DEFAULT_MUSTAHIK)
+        setGeneratedId('')
+        setCurrentStep(0)
       } else {
         const err = await res.json()
-        toast.error(err.error || 'Gagal menyimpan')
+        toast.error(err.error || 'Gagal menyimpan survey')
       }
     } catch {
       toast.error('Terjadi kesalahan koneksi')
@@ -166,343 +200,362 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
     }
   }
 
-  // ─── Render ────────────────────────────────────────────────────────────────
-
-  return (
-    <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl flex-col gap-0 pb-20 pt-2">
-
-      {/* ── Header Card ── */}
-      <div className="mb-6 overflow-hidden rounded-2xl border-none bg-gradient-to-br from-indigo-600 to-indigo-800 shadow-lg shadow-indigo-200 text-white px-8 py-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-2">
-              {id_survey ? 'Mode Edit' : 'Formulir Baru'}
-            </p>
-            <h2 className="text-2xl font-black tracking-tight">Survey Kelayakan Mustahik</h2>
-            <p className="mt-1.5 text-sm text-indigo-200 font-medium leading-relaxed">
-              Isi semua seksi dengan cermat. Skor akan dihitung otomatis.
-            </p>
-          </div>
-          <ClipboardCheck className="h-10 w-10 text-indigo-300 shrink-0 opacity-70" />
-        </div>
-
-        {/* Progress bar */}
-        {questions.length > 0 && (
-          <div className="mt-5">
-            <div className="flex justify-between text-[11px] font-bold text-indigo-200 mb-1.5">
-              <span>Progress Pengisian</span>
-              <span>{answeredCount}/{totalQuestions} pertanyaan</span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-indigo-900/50">
-              <div
-                className="h-2 rounded-full bg-white transition-all duration-500"
-                style={{ width: `${Math.min((answeredCount / totalQuestions) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-        )}
+  // ── Loading state ──────────────────────────────────────────────────────────
+  if (loadingData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
+        <p className="text-sm text-slate-400 font-medium">Memuat formulir...</p>
       </div>
+    )
+  }
 
-      {/* ════════════════════════════════════════════════════════
-          SEKSI 1 — IDENTITAS MUSTAHIK
-      ════════════════════════════════════════════════════════ */}
-      <SectionWrapper
-        number={1}
-        icon={<User className="h-5 w-5 text-violet-600" />}
-        title="Identitas Mustahik"
-        subtitle="Pilih mustahik yang akan disurvei"
-        colorClass="border-violet-200 bg-violet-50/40"
-        badgeClass="bg-violet-100 text-violet-700"
-      >
-        <div className="space-y-2">
-          <Label className="text-sm font-bold text-slate-700">
-            Mustahik <span className="text-rose-500">*</span>
-          </Label>
-          <MustahikSelector
-            selectedId={formData.id_mustahik}
-            onSelect={(id) => setFormData({ ...formData, id_mustahik: id })}
-          />
-          <Link
-            href="/mustahik/baru"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors mt-1"
-          >
-            <User className="h-3.5 w-3.5" />
-            Mustahik belum terdaftar? Daftarkan sekarang
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">Golongan Asnaf <span className="text-rose-500">*</span></Label>
-            <select
-              className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium focus:ring-2 focus:ring-violet-500 outline-none transition-all"
-              value={formData.kategori_asnaf}
-              onChange={(e) => setFormData({ ...formData, kategori_asnaf: e.target.value })}
-            >
-              {GOLONGAN_ASNAF.map((a) => (
-                <option key={a.value} value={a.value}>{a.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">Jumlah Tanggungan (Jiwa)</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              min={0}
-              className="h-11"
-              value={formData.jumlah_tanggungan || ''}
-              onChange={(e) => setFormData({ ...formData, jumlah_tanggungan: parseInt(e.target.value) || 0 })}
-            />
-          </div>
-        </div>
-      </SectionWrapper>
-
-      <SectionDivider />
-
-      {/* ════════════════════════════════════════════════════════
-          SEKSI 2 — PROFIL EKONOMI
-      ════════════════════════════════════════════════════════ */}
-      <SectionWrapper
-        number={2}
-        icon={<Wallet className="h-5 w-5 text-indigo-600" />}
-        title="Profil Ekonomi"
-        subtitle="Data keuangan bulanan mustahik"
-        colorClass="border-indigo-200 bg-indigo-50/40"
-        badgeClass="bg-indigo-100 text-indigo-700"
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">Pendapatan Bulanan</Label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
-              <Input
-                type="number"
-                placeholder="0"
-                className="pl-12 h-11"
-                value={formData.pendapatan_bulanan || ''}
-                onChange={(e) => setFormData({ ...formData, pendapatan_bulanan: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">Pengeluaran Bulanan</Label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
-              <Input
-                type="number"
-                placeholder="0"
-                className="pl-12 h-11"
-                value={formData.pengeluaran_bulanan || ''}
-                onChange={(e) => setFormData({ ...formData, pengeluaran_bulanan: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Defisit indicator */}
-        {(formData.pendapatan_bulanan > 0 || formData.pengeluaran_bulanan > 0) && (
-          <div className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold mt-1 ${
-            formData.pengeluaran_bulanan > formData.pendapatan_bulanan
-              ? 'border-rose-200 bg-rose-50 text-rose-700'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          }`}>
-            {formData.pengeluaran_bulanan > formData.pendapatan_bulanan
-              ? '⚠ Defisit: pengeluaran melebihi pendapatan'
-              : '✓ Surplus keuangan positif'}
-            <span className="ml-auto font-black text-base">
-              {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })
-                .format(Math.abs(formData.pendapatan_bulanan - formData.pengeluaran_bulanan))}
-            </span>
-          </div>
-        )}
-      </SectionWrapper>
-
-      <SectionDivider />
-
-      {/* ════════════════════════════════════════════════════════
-          SEKSI 3 — KONDISI TEMPAT TINGGAL
-      ════════════════════════════════════════════════════════ */}
-      <SectionWrapper
-        number={3}
-        icon={<Home className="h-5 w-5 text-amber-600" />}
-        title="Kondisi Tempat Tinggal"
-        subtitle="Penilaian visual kondisi hunian mustahik"
-        colorClass="border-amber-200 bg-amber-50/40"
-        badgeClass="bg-amber-100 text-amber-700"
-      >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {KONDISI_TEMPAT_TINGGAL.map((k) => {
-            const isActive = formData.kondisi_tempat_tinggal === k.value
-            return (
-              <button
-                key={k.value}
-                type="button"
-                onClick={() => setFormData({ ...formData, kondisi_tempat_tinggal: k.value })}
-                className={`flex min-h-[64px] items-center justify-center rounded-xl border-2 p-3 text-center text-xs font-bold transition-all duration-200 ${
-                  isActive
-                    ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm scale-[1.02]'
-                    : 'border-slate-200 bg-white text-slate-500 hover:border-amber-200 hover:bg-amber-50/30'
-                }`}
-              >
-                {k.label}
-              </button>
-            )
-          })}
-        </div>
-      </SectionWrapper>
-
-      <SectionDivider />
-
-      {/* ════════════════════════════════════════════════════════
-          SEKSI 4+ — PERTANYAAN PER GRUP
-      ════════════════════════════════════════════════════════ */}
-      {questions.length === 0 ? (
-        <div className="py-16 text-center bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-indigo-400" />
-          <p className="text-sm text-slate-400 font-medium">Memuat daftar kriteria penilaian...</p>
-        </div>
-      ) : (
-        Object.entries(groupedQuestions).map(([group, qs], idx) => {
-          const sectionNumber = idx + 4
-          const icon = SECTION_ICONS[group] ?? <ClipboardCheck className="h-5 w-5 text-slate-500" />
-          const colorClass = SECTION_COLORS[group] ?? 'border-slate-200 bg-slate-50/40'
-          const badgeClass = SECTION_BADGE_COLORS[group] ?? 'bg-slate-100 text-slate-600'
-
-          return (
-            <div key={group}>
-              <SectionWrapper
-                number={sectionNumber}
-                icon={icon}
-                title={group}
-                subtitle={`${qs.length} pertanyaan penilaian lapangan`}
-                colorClass={colorClass}
-                badgeClass={badgeClass}
-              >
-                <div className="space-y-4">
-                  {qs.map((q) => (
-                    <QuestionItem
-                      key={q.sk_pertanyaan}
-                      sk_pertanyaan={q.sk_pertanyaan}
-                      kode_pertanyaan={q.kode_pertanyaan}
-                      teks_pertanyaan={q.teks_pertanyaan}
-                      currentScore={scores[q.sk_pertanyaan]}
-                      onScoreChange={(sk, val) => setScores({ ...scores, [sk]: val })}
-                    />
-                  ))}
-                </div>
-              </SectionWrapper>
-              <SectionDivider />
-            </div>
-          )
-        })
-      )}
-
-      {/* ════════════════════════════════════════════════════════
-          SEKSI AKHIR — KESIMPULAN & REKOMENDASI
-      ════════════════════════════════════════════════════════ */}
-      <SectionWrapper
-        number={Object.keys(groupedQuestions).length + 4}
-        icon={<Star className="h-5 w-5 text-emerald-600" />}
-        title="Kesimpulan & Rekomendasi"
-        subtitle="Penilaian akhir oleh surveyor"
-        colorClass="border-emerald-200 bg-emerald-50/40"
-        badgeClass="bg-emerald-100 text-emerald-700"
-        isFinal
-      >
-        <div className="space-y-2">
-          <Label className="text-sm font-bold text-slate-700">
-            Rekomendasi Akhir Surveyor <span className="text-rose-500">*</span>
-          </Label>
-          <select
-            className="flex h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-sm font-bold text-emerald-700 transition-all outline-none focus:border-emerald-500"
-            value={formData.kategori_rekomendasi}
-            onChange={(e) => setFormData({ ...formData, kategori_rekomendasi: e.target.value })}
-          >
-            {KATEGORI_REKOMENDASI.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="border-t border-slate-100 pt-4">
-          <SurveySummary score={totalSkorAngka} status={statusObj.label} />
-        </div>
-
-        <Button
-          type="submit"
-          disabled={loading || !formData.id_mustahik}
-          className="h-14 w-full gap-3 rounded-xl bg-slate-900 text-base font-bold text-white shadow-lg transition-all hover:bg-black hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
-        >
-          {loading
-            ? <Loader2 className="h-5 w-5 animate-spin" />
-            : <Save className="h-5 w-5" />
-          }
-          {loading ? 'Menyimpan...' : `${id_survey ? 'Perbarui' : 'Simpan'} Survey`}
-        </Button>
-
-        {!formData.id_mustahik && (
-          <p className="text-center text-xs text-rose-500 font-medium -mt-2">
-            ⚠ Pilih mustahik di Seksi 1 untuk mengaktifkan tombol simpan
-          </p>
-        )}
-      </SectionWrapper>
-    </form>
-  )
-}
-
-// ─── Helper Components ────────────────────────────────────────────────────────
-
-function SectionWrapper({
-  number, icon, title, subtitle, colorClass, badgeClass, isFinal, children,
-}: {
-  number: number
-  icon: React.ReactNode
-  title: string
-  subtitle?: string
-  colorClass: string
-  badgeClass: string
-  isFinal?: boolean
-  children: React.ReactNode
-}) {
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className={`rounded-2xl border-2 ${colorClass} overflow-hidden shadow-sm`}>
-      {/* Section header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200/70">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-slate-200">
-          <span className="text-xs font-black text-slate-600">{number}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            {icon}
-            <h2 className="font-black text-slate-800 text-base truncate">{title}</h2>
-            {isFinal && (
-              <Badge className={`ml-1 text-[9px] font-black uppercase tracking-wider ${badgeClass} border-0`}>
-                Final
+    <div className="mx-auto max-w-2xl pb-16">
+      <StepProgress current={currentStep} total={TOTAL_STEPS} titles={allStepTitles} />
+
+      <div className="mt-6 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b bg-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100">
+              {currentStep === 0 ? <UserPlus className="h-5 w-5 text-indigo-700" />
+               : currentStep === FINAL_STEP ? <Star className="h-5 w-5 text-emerald-700" />
+               : <ClipboardCheck className="h-5 w-5 text-indigo-600" />}
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Langkah {currentStep + 1} dari {TOTAL_STEPS}
+              </p>
+              <h2 className="text-lg font-black text-slate-900">{allStepTitles[currentStep]}</h2>
+            </div>
+            {/* Tampilkan ID yang sudah di-generate */}
+            {generatedId && (
+              <Badge className="ml-auto bg-emerald-100 text-emerald-700 border-0 font-mono text-xs">
+                {generatedId}
               </Badge>
             )}
           </div>
-          {subtitle && <p className="text-[11px] text-slate-500 font-medium mt-0.5">{subtitle}</p>}
         </div>
-        <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
-      </div>
 
-      {/* Section body */}
-      <div className="bg-white px-6 py-6 space-y-4">
-        {children}
+        {/* Body */}
+        <div className="px-6 py-6 space-y-5">
+
+          {/* STEP 0 — Data Mustahik Baru */}
+          {currentStep === 0 && (
+            <div className="space-y-4">
+              {generatedId ? (
+                <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <Check className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-emerald-800">Mustahik berhasil terdaftar</p>
+                    <p className="text-xs font-mono text-emerald-600">{generatedId}</p>
+                  </div>
+                  <Button
+                    variant="ghost" size="sm"
+                    className="ml-auto text-xs text-slate-500 hover:text-rose-600"
+                    onClick={() => setGeneratedId('')}
+                  >
+                    Ubah
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 font-medium bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
+                  Isi data mustahik berikut. ID akan di-generate otomatis saat Anda menekan <strong>Lanjut</strong>.
+                </p>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">Nama Lengkap <span className="text-rose-500">*</span></Label>
+                  <Input
+                    placeholder="Nama lengkap mustahik"
+                    className="h-11 font-semibold"
+                    value={mustahikForm.nama}
+                    onChange={e => setMustahikForm(f => ({ ...f, nama: e.target.value }))}
+                    disabled={!!generatedId}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">NIK (KTP)</Label>
+                  <Input
+                    placeholder="16 digit NIK"
+                    className="h-11 font-mono"
+                    maxLength={16}
+                    value={mustahikForm.nik}
+                    onChange={e => setMustahikForm(f => ({ ...f, nik: e.target.value }))}
+                    disabled={!!generatedId}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">No. WhatsApp</Label>
+                  <Input
+                    placeholder="08..."
+                    className="h-11"
+                    value={mustahikForm.no_hp}
+                    onChange={e => setMustahikForm(f => ({ ...f, no_hp: e.target.value }))}
+                    disabled={!!generatedId}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">Gender</Label>
+                  <select
+                    className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={mustahikForm.gender}
+                    onChange={e => setMustahikForm(f => ({ ...f, gender: e.target.value }))}
+                    disabled={!!generatedId}
+                  >
+                    <option value="L">Laki-Laki</option>
+                    <option value="P">Perempuan</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">Kategori PM (Asnaf)</Label>
+                  <select
+                    className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={mustahikForm.kategori_pm}
+                    onChange={e => setMustahikForm(f => ({ ...f, kategori_pm: e.target.value }))}
+                    disabled={!!generatedId}
+                  >
+                    {['Fakir','Miskin','Amil','Muallaf','Riqab','Gharimin','Fisabilillah','Ibnu Sabil']
+                      .map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">Jumlah Jiwa dalam KK</Label>
+                  <Input
+                    type="number" min={1} placeholder="1"
+                    className="h-11"
+                    value={mustahikForm.jumlah_jiwa}
+                    onChange={e => setMustahikForm(f => ({ ...f, jumlah_jiwa: parseInt(e.target.value) || 1 }))}
+                    disabled={!!generatedId}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">Program</Label>
+                  <select
+                    className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={mustahikForm.program_induk}
+                    onChange={e => setMustahikForm(f => ({ ...f, program_induk: e.target.value }))}
+                    disabled={!!generatedId}
+                  >
+                    {['Kesehatan','Pendidikan','Ekonomi','Sosial Kemanusiaan','Dakwah & Advokasi']
+                      .map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-xs font-bold text-slate-600 uppercase">Kabupaten / Kota</Label>
+                  <Input
+                    placeholder="Contoh: Kota Pontianak"
+                    className="h-11"
+                    value={mustahikForm.kabupaten_kota}
+                    onChange={e => setMustahikForm(f => ({ ...f, kabupaten_kota: e.target.value }))}
+                    disabled={!!generatedId}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 1 — Profil Ekonomi */}
+          {currentStep === 1 && (
+            <StepEkonomi data={surveyData} setData={setSurveyData} />
+          )}
+
+          {/* STEP 2 — Kondisi Hunian */}
+          {currentStep === 2 && (
+            <StepHunian data={surveyData} setData={setSurveyData} />
+          )}
+
+          {/* STEP 3+ — Pertanyaan per grup */}
+          {currentStep >= 3 && currentStep < FINAL_STEP && (() => {
+            const group = dynamicGroups[currentStep - 3]
+            const qs    = groupedQuestions[group] || []
+            return (
+              <div className="space-y-4">
+                <p className="text-xs text-slate-400 font-semibold">
+                  {qs.length} pertanyaan — nilai 1 (sangat buruk) hingga 5 (sangat baik)
+                </p>
+                {qs.map(q => (
+                  <QuestionItem
+                    key={q.sk_pertanyaan}
+                    sk_pertanyaan={q.sk_pertanyaan}
+                    kode_pertanyaan={q.kode_pertanyaan}
+                    teks_pertanyaan={q.teks_pertanyaan}
+                    currentScore={scores[q.sk_pertanyaan]}
+                    onScoreChange={(sk, val) => setScores(s => ({ ...s, [sk]: val }))}
+                  />
+                ))}
+              </div>
+            )
+          })()}
+
+          {/* FINAL — Rekomendasi */}
+          {currentStep === FINAL_STEP && (
+            <div className="space-y-5">
+              <SurveySummary score={totalSkor} status={statusObj.label} />
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-slate-700">
+                  Rekomendasi Akhir <span className="text-rose-500">*</span>
+                </Label>
+                <select
+                  className="flex h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-sm font-bold text-emerald-700 outline-none focus:border-emerald-500"
+                  value={surveyData.kategori_rekomendasi}
+                  onChange={e => setSurveyData(d => ({ ...d, kategori_rekomendasi: e.target.value }))}
+                >
+                  {KATEGORI_REKOMENDASI.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer nav */}
+        <div className="flex items-center justify-between gap-3 border-t bg-slate-50 px-6 py-4">
+          <Button
+            type="button" variant="outline"
+            onClick={() => setCurrentStep(s => s - 1)}
+            disabled={currentStep === 0}
+            className="gap-2 font-bold"
+          >
+            <ChevronLeft className="h-4 w-4" /> Kembali
+          </Button>
+
+          {currentStep < FINAL_STEP ? (
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={!canProceed || creatingMustahik}
+              className="gap-2 bg-indigo-600 hover:bg-indigo-700 font-bold min-w-[120px]"
+            >
+              {creatingMustahik
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> Mendaftarkan...</>
+                : <>Lanjut <ChevronRight className="h-4 w-4" /></>
+              }
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading || !generatedId}
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700 font-bold min-w-[160px]"
+            >
+              {loading
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> Menyimpan...</>
+                : <><Save className="h-4 w-4" /> Simpan Survey</>
+              }
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function SectionDivider() {
+// ── Progress ──────────────────────────────────────────────────────────────────
+
+function StepProgress({ current, total, titles }: { current: number; total: number; titles: string[] }) {
+  const pct = Math.round(((current + 1) / total) * 100)
   return (
-    <div className="flex items-center gap-3 my-1 px-4">
-      <div className="flex-1 h-px bg-slate-200" />
-      <CheckCircle2 className="h-4 w-4 text-slate-300" />
-      <div className="flex-1 h-px bg-slate-200" />
+    <div className="space-y-2">
+      <p className="text-xs text-slate-500 font-semibold sm:hidden">{current + 1}/{total} — {titles[current]}</p>
+      <div className="hidden sm:flex items-center gap-1">
+        {titles.map((_, i) => {
+          const done   = i < current
+          const active = i === current
+          return (
+            <div key={i} className="flex items-center gap-1 flex-1 min-w-0">
+              <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-black transition-all
+                ${done ? 'bg-indigo-600 text-white' : active ? 'bg-slate-900 text-white scale-110' : 'bg-slate-100 text-slate-400'}`}>
+                {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+              </div>
+              {i < titles.length - 1 && (
+                <div className={`h-0.5 flex-1 rounded-full ${done ? 'bg-indigo-400' : 'bg-slate-200'}`} />
+              )}
+            </div>
+          )
+        })}
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-slate-200">
+        <div className="h-1.5 rounded-full bg-indigo-600 transition-all duration-500" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
+
+// ── Step Ekonomi ──────────────────────────────────────────────────────────────
+
+function StepEkonomi({ data, setData }: { data: any; setData: any }) {
+  const selisih  = data.pendapatan_bulanan - data.pengeluaran_bulanan
+  const hasInput = data.pendapatan_bulanan > 0 || data.pengeluaran_bulanan > 0
+  const defisit  = selisih < 0
+  const fmt      = (n: number) =>
+    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
+
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {[
+          { label: 'Pendapatan Bulanan', key: 'pendapatan_bulanan' },
+          { label: 'Pengeluaran Bulanan', key: 'pengeluaran_bulanan' },
+        ].map(({ label, key }) => (
+          <div key={key} className="space-y-1.5">
+            <Label className="text-xs font-bold text-slate-600 uppercase">{label}</Label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+              <Input
+                type="number" placeholder="0"
+                className="pl-12 h-11"
+                value={data[key] || ''}
+                onChange={e => setData((d: any) => ({ ...d, [key]: parseFloat(e.target.value) || 0 }))}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      {hasInput && (
+        <div className={`flex items-center justify-between gap-2 rounded-xl border px-4 py-3 text-sm font-bold ${
+          defisit ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+        }`}>
+          <span>{defisit ? '⚠ Defisit' : '✓ Surplus'}</span>
+          <span className="font-black">{fmt(Math.abs(selisih))}</span>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ── Step Hunian ───────────────────────────────────────────────────────────────
+
+function StepHunian({ data, setData }: { data: any; setData: any }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-slate-500 font-medium">Pilih kondisi berdasarkan pengamatan langsung.</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        {KONDISI_TEMPAT_TINGGAL.map(k => {
+          const active = data.kondisi_tempat_tinggal === k.value
+          return (
+            <button
+              key={k.value} type="button"
+              onClick={() => setData((d: any) => ({ ...d, kondisi_tempat_tinggal: k.value }))}
+              className={`flex min-h-[72px] flex-col items-center justify-center rounded-xl border-2 p-3 text-center text-xs font-bold transition-all duration-200
+                ${active ? 'border-amber-500 bg-amber-50 text-amber-800 shadow-md scale-[1.03]'
+                         : 'border-slate-200 bg-white text-slate-500 hover:border-amber-200 hover:bg-amber-50/30'}`}
+            >
+              {active && <Check className="h-4 w-4 mb-1 text-amber-600" />}
+              {k.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
