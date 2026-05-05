@@ -3,7 +3,8 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { HeartHandshake, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,7 +28,6 @@ export default function LoginPage() {
       setError("Email atau Password salah!");
       setLoading(false);
     } else {
-      // Ambil data session untuk mengetahui role user
       const sessionRes = await fetch('/api/auth/session');
       const session = await sessionRes.json();
       const role = session?.user?.role;
@@ -35,90 +35,146 @@ export default function LoginPage() {
       router.refresh();
       
       if (role === 'ADMIN') {
-        router.push("/"); // Admin → Dashboard
+        router.push("/");
       } else {
-        router.push("/survey/baru"); // Relawan → Input Survey
+        router.push("/survey/baru");
       }
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl border border-slate-100">
+    <div className="flex min-h-screen w-full bg-emerald-950 text-white overflow-hidden font-sans">
+      {/* ── Kiri: Form Area ── */}
+      <div className="w-full lg:w-[45%] xl:w-[40%] flex flex-col justify-between p-8 sm:p-12 md:p-16 relative z-20">
         
-        {/* LOGO */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-200">
-              <HeartHandshake className="h-7 w-7" />
-            </div>
+        {/* Header / Logo */}
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center p-1 overflow-hidden shadow-lg shadow-emerald-500/20">
+            <Image 
+              src="/logo-du.png" 
+              alt="Dompet Ummat" 
+              width={36} 
+              height={36} 
+              className="object-contain"
+              priority
+            />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">
-              DOMPET <span className="text-emerald-600">UMMAT</span>
-            </h2>
-            <p className="mt-1 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-              Business Intelligence & Data Analytics
-            </p>
+            <h2 className="font-bold text-lg tracking-tight leading-none text-white">DOMPET UMMAT</h2>
+            <p className="text-[9px] font-black tracking-[0.2em] text-emerald-500 uppercase mt-1">BIDA Platform</p>
           </div>
-          <p className="text-sm text-slate-500 font-medium">
-            Silakan masuk untuk mengakses platform
-          </p>
         </div>
-        
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-700 font-bold text-center">
-              {error}
-            </div>
-          )}
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Email</label>
+
+        {/* Form Container */}
+        <div className="w-full max-w-[400px] mx-auto mt-16 sm:mt-24 mb-12">
+          <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.25em] mb-4">
+            BIDA ANALYTICS PORTAL
+          </p>
+          <h1 className="text-4xl sm:text-5xl font-black mb-10 leading-[1.1] tracking-tight">
+            Masuk ke <br />
+            akun <span className="text-emerald-500 relative">Anda.<span className="absolute bottom-1 left-0 w-full h-2 bg-emerald-500/20 -z-10 rounded-full"></span></span>
+          </h1>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Input Email */}
+            <div className="relative group">
+              <div className="absolute left-5 top-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-emerald-400">
+                Email Address
+              </div>
               <input
                 type="email"
                 required
-                className="block w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-sm font-bold text-slate-800 shadow-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 placeholder:text-slate-300"
+                className="w-full bg-emerald-900/40 border border-transparent rounded-2xl pt-8 pb-3 px-5 text-sm font-semibold text-white transition-all focus:outline-none focus:border-emerald-500 focus:bg-emerald-950 hover:bg-emerald-900/60 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-600"
                 placeholder="nama@dompetummat.or.id"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Password</label>
+
+            {/* Input Password */}
+            <div className="relative group">
+              <div className="absolute left-5 top-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-emerald-400">
+                Password
+              </div>
               <input
                 type="password"
                 required
-                className="block w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-sm font-bold text-slate-800 shadow-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 placeholder:text-slate-300"
+                className="w-full bg-emerald-900/40 border border-transparent rounded-2xl pt-8 pb-3 px-5 text-sm font-semibold text-white transition-all focus:outline-none focus:border-emerald-500 focus:bg-emerald-950 hover:bg-emerald-900/60 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-slate-600"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex w-full justify-center items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-200 transition-all hover:bg-emerald-700 hover:shadow-emerald-300 focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Memverifikasi...
-                </>
-              ) : (
-                'Masuk ke Platform'
-              )}
-            </button>
-          </div>
+            {error && (
+              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 mt-2">
+                <p className="text-xs text-rose-400 font-bold text-center">
+                  {error}
+                </p>
+              </div>
+            )}
 
-          <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-6">
-            Hak akses diatur oleh Administrator
+            {/* Actions */}
+            <div className="pt-6 flex flex-col sm:flex-row items-center gap-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto rounded-full bg-emerald-600 px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/30 transition-all hover:bg-emerald-500 hover:-translate-y-0.5 hover:shadow-emerald-500/40 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {loading ? 'Memverifikasi...' : 'Login Sekarang'}
+              </button>
+              
+              <button type="button" className="text-xs font-bold text-slate-400 hover:text-white transition-colors py-2 px-4 rounded-full hover:bg-white/5">
+                Lupa Password?
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-auto">
+          <p className="text-[11px] text-slate-500 font-medium">
+            Hak akses diatur oleh Administrator.
+            <br />&copy; 2026 Dompet Ummat Kalimantan Barat.
           </p>
-        </form>
+        </div>
+      </div>
+
+      {/* ── Kanan: Background Area ── */}
+      <div className="hidden lg:block lg:w-[55%] xl:w-[60%] relative bg-[#011a14]">
+        {/* Overlay gradient untuk transisi dari background gambar ke konten form */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950 via-emerald-950/70 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-transparent to-transparent z-10" />
+        
+        {/* Curved shape divider yang meniru referensi UI */}
+        <svg 
+          className="absolute left-0 top-0 h-full text-emerald-950 w-32 z-20" 
+          preserveAspectRatio="none" 
+          viewBox="0 0 100 100" 
+          fill="currentColor"
+        >
+          <path d="M0,0 Q100,25 50,50 T100,100 L0,100 Z" />
+        </svg>
+
+        {/* Gambar background (Mountain/Forest theme mirip referensi) */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50 mix-blend-luminosity grayscale-[30%]"
+          style={{ backgroundImage: 'url("/_DSC6959.webp")' }}
+        />
+
+        {/* Watermark Logo Besar */}
+        <div className="absolute bottom-12 right-12 z-20 opacity-20 flex items-center gap-3">
+           <div className="h-16 w-16 bg-white/10 rounded-2xl flex items-center justify-center p-2 backdrop-blur-sm">
+             <Image 
+                src="/logo-du.png" 
+                alt="Logo" 
+                width={48} 
+                height={48} 
+                className="object-contain brightness-0 invert" 
+             />
+           </div>
+        </div>
       </div>
     </div>
   );
