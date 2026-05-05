@@ -133,23 +133,24 @@ export default function SurveyDetailPage() {
     <div className="min-h-screen bg-slate-50/50 pb-16 font-sans">
       {/* ── Top Bar ── */}
       <div className="border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-4xl px-4 sm:px-8 py-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild className="text-slate-500 font-bold">
-              <Link href="/survey/hasil"><ArrowLeft className="mr-1 h-4 w-4" /> Kembali</Link>
+        <div className="mx-auto max-w-4xl px-4 sm:px-8 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Button variant="ghost" size="sm" asChild className="text-slate-500 font-bold shrink-0 px-2">
+              <Link href="/survey/hasil"><ArrowLeft className="h-4 w-4" /></Link>
             </Button>
-            <div className="h-6 w-px bg-slate-200" />
-            <div>
-              <h1 className="flex items-center gap-2 text-lg font-black text-slate-900">
-                <ClipboardCheck className="h-5 w-5 text-indigo-600" />
-                Detail Survey Kelayakan
+            <div className="hidden sm:block h-6 w-px bg-slate-200 shrink-0" />
+            <div className="min-w-0">
+              <h1 className="flex items-center gap-2 text-base sm:text-lg font-black text-slate-900 truncate">
+                <ClipboardCheck className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 shrink-0" />
+                <span className="truncate">Detail Survey Kelayakan</span>
               </h1>
-              <p className="text-[11px] font-mono text-slate-400 mt-0.5">{survey.no_register}</p>
+              <p className="text-[10px] font-mono text-slate-400 truncate">{survey.no_register}</p>
             </div>
           </div>
           <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 font-bold shrink-0">
             <Link href={`/survey/baru?id=${survey.sk_survey}`}>
-              <Edit3 className="mr-2 h-4 w-4" /> Edit Survey
+              <Edit3 className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Edit Survey</span>
             </Link>
           </Button>
         </div>
@@ -158,25 +159,27 @@ export default function SurveyDetailPage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-8 py-8 space-y-6">
 
         {/* ── Verdict Banner ── */}
-        <div className={`rounded-2xl border-2 p-6 flex flex-col sm:flex-row items-center gap-5 ${kelayakan.bg}`}>
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
-            {kelayakan.icon}
-          </div>
-          <div className="flex-1 text-center sm:text-left">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-400">Hasil Penilaian</p>
-            <p className={`text-3xl font-black ${kelayakan.color}`}>{kelayakan.label}</p>
-            <p className="text-sm text-slate-500 font-medium mt-1">
-              {toLabel(survey.kategori_rekomendasi?.replace(/__/g, ' (').replace(/_/g, ' ').replace(/ \(/g, '('))}
-            </p>
-          </div>
-          <div className="text-center shrink-0">
-            <div className="text-5xl font-black text-slate-800">{skor.toFixed(1)}</div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Skor Akhir</div>
-            <div className="mt-2 h-2 w-32 rounded-full bg-slate-200 mx-auto">
-              <div
-                className="h-2 rounded-full bg-indigo-500 transition-all"
-                style={{ width: `${(skor / 5) * 100}%` }}
-              />
+        <div className={`rounded-2xl border-2 p-5 sm:p-6 ${kelayakan.bg}`}>
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+              {kelayakan.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hasil Penilaian</p>
+              <p className={`text-2xl sm:text-3xl font-black leading-tight ${kelayakan.color}`}>{kelayakan.label}</p>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 line-clamp-2">
+                {toLabel(survey.kategori_rekomendasi?.replace(/__/g, ' (').replace(/_/g, ' ').replace(/ \(/g, '('))}
+              </p>
+            </div>
+            <div className="text-center shrink-0">
+              <div className="text-4xl sm:text-5xl font-black text-slate-800">{skor.toFixed(1)}</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">/ 5.0</div>
+              <div className="mt-1.5 h-1.5 w-20 sm:w-28 rounded-full bg-white/60 mx-auto">
+                <div
+                  className="h-1.5 rounded-full bg-indigo-500 transition-all"
+                  style={{ width: `${(skor / 5) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -266,27 +269,30 @@ export default function SurveyDetailPage() {
                   {qs.map((q) => {
                     const s = detail_skor[q.sk_pertanyaan] ?? 0
                     return (
-                      <div key={q.sk_pertanyaan} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50">
-                        <div className="flex-1 min-w-0">
-                          <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-black text-slate-500 uppercase mb-1">
+                      <div key={q.sk_pertanyaan} className="px-4 sm:px-5 py-3 sm:py-4 hover:bg-slate-50">
+                        {/* Baris atas: kode + pertanyaan */}
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-black text-slate-500 uppercase">
                             {q.kode_pertanyaan}
                           </span>
                           <p className="text-sm font-medium text-slate-700 leading-snug">{q.teks_pertanyaan}</p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="flex gap-1">
+                        {/* Baris bawah: bar + angka */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1 flex-nowrap">
                             {[1, 2, 3, 4, 5].map(v => (
                               <div
                                 key={v}
-                                className={`h-2 w-5 rounded-full transition-colors ${v <= s ? SKOR_COLOR(s) : 'bg-slate-200'}`}
+                                className={`h-2 w-8 sm:w-10 rounded-full transition-colors ${v <= s ? SKOR_COLOR(s) : 'bg-slate-200'}`}
                               />
                             ))}
                           </div>
-                          <span className={`text-base font-black w-6 text-center ${
+                          <span className={`ml-1 text-sm font-black w-5 text-center ${
                             s >= 4 ? 'text-emerald-600' : s === 3 ? 'text-amber-600' : 'text-rose-600'
                           }`}>
                             {s || '-'}
                           </span>
+                          <span className="text-[10px] text-slate-400 font-medium">/ 5</span>
                         </div>
                       </div>
                     )
@@ -315,9 +321,13 @@ export default function SurveyDetailPage() {
 
 function InfoRow({ label, value, bold, mono }: { label: string; value: string; bold?: boolean; mono?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-2">
-      <span className="text-xs font-bold text-slate-400 uppercase shrink-0 pt-0.5">{label}</span>
-      <span className={`text-right text-sm ${bold ? 'font-black text-slate-900' : 'font-medium text-slate-700'} ${mono ? 'font-mono' : ''}`}>
+    <div className="flex items-start justify-between gap-3">
+      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide shrink-0 pt-0.5 leading-tight w-28">
+        {label}
+      </span>
+      <span className={`text-right text-sm flex-1 min-w-0 break-words ${
+        bold ? 'font-black text-slate-900' : 'font-medium text-slate-700'
+      } ${mono ? 'font-mono text-xs' : ''}`}>
         {value}
       </span>
     </div>
