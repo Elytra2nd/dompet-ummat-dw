@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse, NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getToken } from 'next-auth/jwt'
+import { BCRYPT_ROUNDS, handleApiError } from '@/lib/auth'
 
 // PUT: Update user (termasuk ganti password)
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -15,7 +16,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
     // Jika password diisi, hash password baru
     if (password && password.trim() !== '') {
-      updateData.password = await bcrypt.hash(password, 10)
+      updateData.password = await bcrypt.hash(password, BCRYPT_ROUNDS)
     }
 
     const updatedUser = await prisma.user.update({
@@ -31,12 +32,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
     })
 
     return NextResponse.json({ success: true, data: updatedUser })
-  } catch (error: any) {
-    // Tangani error unik constraint untuk email
-    if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Email sudah digunakan oleh user lain' }, { status: 400 })
-    }
-    return NextResponse.json({ error: 'Gagal mengupdate user', details: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const { message, status } = handleApiError(error, 'PUT /api/users/[id]')
+    if (status === 400) return NextResponse.json({ error: 'Email sudah digunakan oleh user lain' }, { status: 400 })
+    return NextResponse.json({ error: message }, { status })
   }
 }
 
@@ -57,7 +56,8 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     })
 
     return NextResponse.json({ success: true, message: 'User berhasil dihapus' })
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Gagal menghapus user', details: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const { message, status } = handleApiError(error, 'DELETE /api/users/[id]')
+    return NextResponse.json({ error: message }, { status })
   }
 }
