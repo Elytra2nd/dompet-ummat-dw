@@ -42,10 +42,10 @@ function AddDonaturFormContent() {
     if (editId) {
       setIsEditing(true)
       // Fetch data donatur untuk edit
-      fetch(`/api/donasi/donatur`)
+      fetch(`/api/donasi/donatur?limit=1000`)
         .then(res => res.json())
-        .then(data => {
-          const donatur = data.find((d: any) => d.id_donatur === editId)
+        .then(json => {
+          const donatur = (json.data || []).find((d: any) => d.id_donatur === editId)
           if (donatur) {
             setFormData({
               sk_donatur: donatur.sk_donatur,
