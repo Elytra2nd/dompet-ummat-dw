@@ -145,6 +145,7 @@ describe('API Route: GET /api/backup', () => {
   })
 
   it('should handle internal server errors gracefully', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     mockPrisma.dim_date.findMany.mockRejectedValue(new Error('DB Timeout'))
 
     const req = buildReq('/api/backup?modules=all')
@@ -154,5 +155,7 @@ describe('API Route: GET /api/backup', () => {
     const json = await res.json()
     expect(json.error).toBe('Gagal membuat backup')
     expect(json.details).toBe('DB Timeout')
+    
+    consoleSpy.mockRestore()
   })
 })

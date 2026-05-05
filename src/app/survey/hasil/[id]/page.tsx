@@ -133,26 +133,28 @@ export default function SurveyDetailPage() {
     <div className="min-h-screen bg-slate-50/50 pb-16 font-sans">
       {/* ── Top Bar ── */}
       <div className="border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-4xl px-4 sm:px-8 py-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <Button variant="ghost" size="sm" asChild className="text-slate-500 font-bold shrink-0 px-2">
-              <Link href="/survey/hasil"><ArrowLeft className="h-4 w-4" /></Link>
-            </Button>
-            <div className="hidden sm:block h-6 w-px bg-slate-200 shrink-0" />
-            <div className="min-w-0">
-              <h1 className="flex items-center gap-2 text-base sm:text-lg font-black text-slate-900 truncate">
-                <ClipboardCheck className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 shrink-0" />
-                <span className="truncate">Detail Survey Kelayakan</span>
-              </h1>
-              <p className="text-[10px] font-mono text-slate-400 truncate">{survey.no_register}</p>
-            </div>
-          </div>
-          <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 font-bold shrink-0">
-            <Link href={`/survey/baru?id=${survey.sk_survey}`}>
-              <Edit3 className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Edit Survey</span>
+        <div className="mx-auto max-w-4xl px-4 sm:px-8 py-5">
+          <Button variant="ghost" size="sm" asChild className="text-slate-500 font-bold px-0 hover:bg-transparent hover:text-slate-800 mb-3 -ml-1">
+            <Link href="/survey/hasil">
+              <ArrowLeft className="mr-1.5 h-4 w-4" /> Kembali ke Riwayat
             </Link>
           </Button>
+          
+          <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+            <div className="min-w-0">
+              <h1 className="flex items-center gap-2 text-xl sm:text-2xl font-black text-slate-900 truncate">
+                <ClipboardCheck className="h-6 w-6 text-indigo-600 shrink-0" />
+                <span className="truncate">Detail Survey Kelayakan</span>
+              </h1>
+              <p className="text-xs font-mono text-slate-400 mt-1 sm:mt-1.5">{survey.no_register}</p>
+            </div>
+            
+            <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 font-bold shrink-0 w-full sm:w-auto">
+              <Link href={`/survey/baru?id=${survey.sk_survey}`}>
+                <Edit3 className="mr-2 h-4 w-4" /> Edit Survey
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -173,11 +175,11 @@ export default function SurveyDetailPage() {
             </div>
             <div className="text-center shrink-0">
               <div className="text-4xl sm:text-5xl font-black text-slate-800">{skor.toFixed(1)}</div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">/ 5.0</div>
-              <div className="mt-1.5 h-1.5 w-20 sm:w-28 rounded-full bg-white/60 mx-auto">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">/ 100</div>
+              <div className="mt-1.5 h-1.5 w-20 sm:w-28 rounded-full bg-white/60 mx-auto overflow-hidden">
                 <div
                   className="h-1.5 rounded-full bg-indigo-500 transition-all"
-                  style={{ width: `${(skor / 5) * 100}%` }}
+                  style={{ width: `${Math.min(skor, 100)}%` }}
                 />
               </div>
             </div>
