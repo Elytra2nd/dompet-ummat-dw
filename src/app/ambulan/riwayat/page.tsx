@@ -22,7 +22,11 @@ import {
   Save,
   AlertCircle,
   HandHeart,
-  Eye
+  Eye,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign
 } from 'lucide-react'
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
@@ -39,7 +43,10 @@ export default function RiwayatAktivitasPage() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [mounted, setMounted] = useState(false) // State untuk cegah Hydration Error
+  const [filterKategori, setFilterKategori] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 15
+  const [mounted, setMounted] = useState(false)
   
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -124,68 +131,91 @@ export default function RiwayatAktivitasPage() {
     setIsFormOpen(true)
   }
 
+  const kategoriOptions = useMemo(() => {
+    if (!data?.recentLogs) return []
+    const set = new Set(data.recentLogs.map((l: any) => l.kategori_aktivitas).filter(Boolean))
+    return Array.from(set).sort() as string[]
+  }, [data])
+
   const filteredLogs = useMemo(() => {
     if (!data?.recentLogs) return []
-    return data.recentLogs.filter((log: any) => 
-      log.id_transaksi?.toLowerCase().includes(search.toLowerCase()) ||
-      log.kategori_aktivitas?.toLowerCase().includes(search.toLowerCase())
-    )
-  }, [data, search])
+    return data.recentLogs.filter((log: any) => {
+      const matchSearch = 
+        log.id_transaksi?.toLowerCase().includes(search.toLowerCase()) ||
+        log.kategori_aktivitas?.toLowerCase().includes(search.toLowerCase())
+      const matchKategori = !filterKategori || log.kategori_aktivitas === filterKategori
+      return matchSearch && matchKategori
+    })
+  }, [data, search, filterKategori])
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage))
+  const currentLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   // Cegah render sebelum mounted di client (Solusi Error #418)
   if (!mounted) return null
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-slate-50/50 min-h-screen font-sans text-slate-900">
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full">
-               <Link href="/ambulan"><ArrowLeft size={18}/></Link>
-            </Button>
-            <h1 className="text-2xl font-bold tracking-tight uppercase">Log Aktivitas & <span className="text-rose-600">Biaya</span></h1>
+    <div className="min-h-screen bg-slate-50/50 pb-12 font-sans text-slate-900">
+      {/* HEADER BAR */}
+      <div className="mb-6 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-semibold hover:bg-slate-50">
+            <Link href="/ambulan"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard Ambulan</Link>
+          </Button>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
+                <History className="h-7 w-7 text-rose-600 shrink-0" />
+                Log Aktivitas & <span className="text-rose-600">Biaya</span>
+              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
+                Internal Operational Tracking • BIDA Warehouse
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <ImportButton modul="ambulan_aktivitas" onImportSuccess={fetchAktivitas} />
+              <Link href="/ambulan/aktivitas">
+                <Button className="bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-semibold w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" /> Catat Biaya Baru
+                </Button>
+              </Link>
+            </div>
           </div>
-          <p className="text-slate-500 text-sm pl-10 italic font-medium">Internal Operational Tracking • BIDA Warehouse</p>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 w-full md:w-auto">
-          <Link href="/ambulan/layanan" className="flex-1 md:flex-initial">
-            <Button variant="outline" className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-bold shadow-sm uppercase text-[10px] tracking-widest h-10 px-6">
-              <HandHeart className="mr-2 h-4 w-4" /> Layanan Pasien
-            </Button>
-          </Link>
-          <ImportButton modul="ambulan_aktivitas" onImportSuccess={fetchAktivitas} />
-          <Link href="/ambulan/aktivitas" className="flex-1 md:flex-initial">
-            <Button className="w-full bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-bold uppercase text-[10px] tracking-widest h-10 px-6">
-              <Plus className="mr-2 h-4 w-4" /> Catat Biaya Baru
-            </Button>
-          </Link>
         </div>
       </div>
 
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="border-none shadow-sm bg-white overflow-hidden rounded-2xl">
-          <div className="h-1.5 bg-rose-500 w-full" />
-          <CardContent className="pt-6 flex justify-between items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="border-none shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardContent className="p-5 flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Akumulasi Biaya</p>
-              <h3 className="text-3xl font-black mt-1 text-slate-900 tracking-tighter">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Biaya</p>
+              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-rose-600">
                 {loading ? <Loader2 className="animate-spin h-5 w-5 text-slate-200" /> : formatIDR(data?.totalExp || 0)}
               </h3>
             </div>
-            <div className="p-3 bg-rose-50 rounded-xl text-rose-500"><TrendingUp size={24} /></div>
+            <div className="p-3 bg-rose-50 rounded-xl text-rose-500 shrink-0"><DollarSign size={22} /></div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-white overflow-hidden rounded-2xl">
-          <div className="h-1.5 bg-slate-900 w-full" />
-          <CardContent className="pt-6 flex justify-between items-center">
+        <Card className="border-none shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardContent className="p-5 flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Frekuensi Aktivitas</p>
-              <h3 className="text-3xl font-black mt-1 text-slate-900 tracking-tighter">{loading ? "..." : data?.totalCount || 0} <span className="text-sm font-bold text-slate-400 uppercase">Record</span></h3>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Aktivitas</p>
+              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-slate-900">{loading ? '...' : data?.totalCount || 0} <span className="text-xs font-normal text-slate-400">record</span></h3>
             </div>
-            <div className="p-3 bg-slate-100 rounded-xl text-slate-900"><History size={24} /></div>
+            <div className="p-3 bg-slate-100 rounded-xl text-slate-600 shrink-0"><History size={22} /></div>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardContent className="p-5 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Rerata / Aktivitas</p>
+              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-amber-600">
+                {loading ? '...' : data?.totalCount ? formatIDR(Math.round((data?.totalExp || 0) / data.totalCount)) : 'Rp 0'}
+              </h3>
+            </div>
+            <div className="p-3 bg-amber-50 rounded-xl text-amber-500 shrink-0"><TrendingUp size={22} /></div>
           </CardContent>
         </Card>
       </div>
@@ -233,18 +263,33 @@ export default function RiwayatAktivitasPage() {
       )}
 
       {/* TABLE SECTION */}
-      <Card className="border-none shadow-sm overflow-hidden bg-white rounded-2xl">
-        <div className="p-4 border-b bg-slate-50/50 flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <input 
-              placeholder="Cari ID transaksi atau kategori..." 
-              className="pl-10 w-full h-10 bg-white border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none transition-all" 
-              value={search} 
-              onChange={(e) => setSearch(e.target.value)} 
-            />
+      <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-xl">
+        <CardHeader className="border-b py-4 bg-slate-50/50">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <Input 
+                placeholder="Cari ID transaksi atau kategori..." 
+                className="pl-10 font-medium w-full" 
+                value={search} 
+                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }} 
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+              <select
+                value={filterKategori}
+                onChange={(e) => { setFilterKategori(e.target.value); setCurrentPage(1) }}
+                className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 appearance-none cursor-pointer min-w-[180px]"
+              >
+                <option value="">Semua Kategori</option>
+                {kategoriOptions.map((k) => (
+                  <option key={k} value={k}>{k.replace(/_/g, ' ')}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
+        </CardHeader>
         <CardContent className="p-0">
           {/* Desktop Table */}
           <div className="hidden sm:block overflow-x-auto">
@@ -259,10 +304,10 @@ export default function RiwayatAktivitasPage() {
               </TableHeader>
               <TableBody>
                 {loading && !data ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 animate-pulse uppercase text-[10px] font-black tracking-[0.2em]">Synchronizing Warehouse...</TableCell></TableRow>
-                ) : filteredLogs.length > 0 ? (
-                  filteredLogs.map((log: any) => (
-                    <TableRow key={log.sk_fakta_aktivitas_ambulan} className="hover:bg-slate-50 transition-colors border-b last:border-0 group">
+                  <TableRow><TableCell colSpan={4} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-rose-400" /></TableCell></TableRow>
+                ) : currentLogs.length > 0 ? (
+                  currentLogs.map((log: any) => (
+                    <TableRow key={log.sk_fakta_aktivitas_ambulan} className="group hover:bg-rose-50/30 transition-colors">
                       <TableCell className="px-6 py-4">
                         <p className="font-bold text-xs text-slate-900 uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ') || 'Umum'}</p>
                         <p className="text-[10px] font-mono font-semibold text-slate-400 mt-0.5 tracking-tighter uppercase">{log.id_transaksi}</p>
@@ -289,7 +334,7 @@ export default function RiwayatAktivitasPage() {
                             </AlertDialogTrigger>
                             <AlertDialogContent className="rounded-2xl border-2">
                               <AlertDialogHeader>
-                                <AlertDialogTitle className="font-black uppercase text-lg">Hapus Record Biaya?</AlertDialogTitle>
+                                <AlertDialogTitle className="font-bold text-lg">Hapus Record Biaya?</AlertDialogTitle>
                                 <AlertDialogDescription className="text-sm text-slate-500 font-medium leading-relaxed">
                                   Data dengan ID <strong>{log.id_transaksi}</strong> akan dihapus permanen dari tabel fakta aktivitas warehouse.
                                 </AlertDialogDescription>
@@ -318,13 +363,13 @@ export default function RiwayatAktivitasPage() {
             ) : filteredLogs.length === 0 ? (
               <div className="py-10 text-center text-slate-400 italic text-sm">Tidak ada log aktivitas ditemukan.</div>
             ) : (
-              filteredLogs.map((log: any) => (
+              currentLogs.map((log: any) => (
                 <div key={log.sk_fakta_aktivitas_ambulan} className="p-4 hover:bg-slate-50">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-slate-900 text-sm uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ')}</p>
                       <p className="text-[10px] font-mono text-slate-400 mt-0.5">{log.id_transaksi}</p>
-                      <p className="text-base font-black text-rose-600 mt-2">{formatIDR(log.biaya_operasional || 0)}</p>
+                      <p className="text-base font-bold text-rose-600 mt-2">{formatIDR(log.biaya_operasional || 0)}</p>
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
@@ -337,7 +382,7 @@ export default function RiwayatAktivitasPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="font-black text-rose-600">Hapus Record?</AlertDialogTitle>
+                            <AlertDialogTitle className="font-bold text-rose-600">Hapus Record?</AlertDialogTitle>
                             <AlertDialogDescription>Data <strong>{log.id_transaksi}</strong> akan dihapus permanen.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -352,8 +397,26 @@ export default function RiwayatAktivitasPage() {
               ))
             )}
           </div>
+          {/* PAGINATION */}
+          {!loading && filteredLogs.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
+              <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest">
+                {Math.min((currentPage - 1) * itemsPerPage + 1, filteredLogs.length)} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-lg">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-xs font-semibold text-slate-900 mx-1">{currentPage} / {totalPages}</span>
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="h-8 w-8 p-0 rounded-lg">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
