@@ -142,12 +142,18 @@ export default function LoginPage() {
       </div>
 
       {/* ── Kanan: Background Area ── */}
-      <div className="hidden lg:block lg:w-[55%] xl:w-[60%] relative bg-[#011a14]">
-        {/* Overlay gradient untuk transisi dari background gambar ke konten form */}
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950 via-emerald-950/70 to-transparent z-10" />
+      <div className="hidden lg:block lg:w-[55%] xl:w-[60%] relative bg-emerald-900">
+        {/* Gambar background diletakkan di paling bawah (z-0) */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+          style={{ backgroundImage: 'url("/_DSC6959.webp")' }}
+        />
+
+        {/* Overlay gradient di atas gambar (z-10) untuk transisi dari gambar ke konten form */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950 via-emerald-950/80 to-transparent z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-transparent to-transparent z-10" />
         
-        {/* Curved shape divider yang meniru referensi UI */}
+        {/* Curved shape divider yang meniru referensi UI (z-20) */}
         <svg 
           className="absolute left-0 top-0 h-full text-emerald-950 w-32 z-20" 
           preserveAspectRatio="none" 
@@ -156,12 +162,6 @@ export default function LoginPage() {
         >
           <path d="M0,0 Q100,25 50,50 T100,100 L0,100 Z" />
         </svg>
-
-        {/* Gambar background (Mountain/Forest theme mirip referensi) */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50 mix-blend-luminosity grayscale-[30%]"
-          style={{ backgroundImage: 'url("/_DSC6959.webp")' }}
-        />
 
         {/* Watermark Logo Besar */}
         <div className="absolute bottom-12 right-12 z-20 opacity-20 flex items-center gap-3">
