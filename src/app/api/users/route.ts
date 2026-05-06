@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse, NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { BCRYPT_ROUNDS, handleApiError } from '@/lib/auth'
+import { validateBody, CreateUserSchema } from '@/lib/validations'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,12 +30,9 @@ export async function GET() {
 // POST: Buat user baru
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { name, email, password, role } = body
-
-    if (!email || !password || !role) {
-      return NextResponse.json({ error: 'Email, password, dan role harus diisi' }, { status: 400 })
-    }
+    const { data, error } = validateBody(await req.json(), CreateUserSchema)
+    if (error) return error
+    const { name, email, password, role } = data
 
     // Cek apakah email sudah terdaftar
     const existingUser = await prisma.user.findUnique({

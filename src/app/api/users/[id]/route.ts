@@ -3,13 +3,15 @@ import { NextResponse, NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getToken } from 'next-auth/jwt'
 import { BCRYPT_ROUNDS, handleApiError } from '@/lib/auth'
+import { validateBody, UpdateUserSchema } from '@/lib/validations'
 
 // PUT: Update user (termasuk ganti password)
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params
-    const body = await req.json()
-    const { name, email, password, role } = body
+    const { data, error } = validateBody(await req.json(), UpdateUserSchema)
+    if (error) return error
+    const { name, email, password, role } = data
 
     // Data yang akan diupdate
     const updateData: any = { name, email, role }

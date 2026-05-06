@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getToken } from 'next-auth/jwt'
+import { BCRYPT_ROUNDS } from '@/lib/auth'
+import { validateBody, RegisterSchema } from '@/lib/validations'
 
 export async function POST(req: Request) {
   try {
@@ -13,15 +15,9 @@ export async function POST(req: Request) {
       )
     }
 
-    const { email, password, name, role } = await req.json()
-
-    if (!email || !password || !name || !role) {
-      return NextResponse.json({ error: 'Semua field wajib diisi (email, password, name, role)' }, { status: 400 })
-    }
-
-    if (!['ADMIN', 'STAFF', 'SURVEYOR'].includes(role)) {
-      return NextResponse.json({ error: 'Role harus ADMIN, STAFF, atau SURVEYOR' }, { status: 400 })
-    }
+    const { data, error } = validateBody(await req.json(), RegisterSchema)
+    if (error) return error
+    const { email, password, name, role } = data
 
     const { prisma } = await import("@/lib/prisma")
 
@@ -31,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 })
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS)
 
     const user = await prisma.user.create({
       data: {
