@@ -30,6 +30,42 @@ export async function POST(req: Request) {
       )
     }
 
+    const DOMAIN_MAP: Record<string, any> = {
+      'Pendidikan': 'Pendidikan',
+      'Kesehatan': 'Kesehatan',
+      'Ekonomi': 'Ekonomi',
+      'Sosial Kemanusiaan': 'Sosial_Kemanusiaan',
+      'Dakwah & Advokasi': 'Dakwah___Advokasi',
+      'Operasional': 'Operasional',
+    }
+    const KATEGORI_MAP: Record<string, any> = {
+      'Beasiswa': 'Beasiswa',
+      'Bantuan Biaya Pengobatan': 'Bantuan_Biaya_Pengobatan',
+      'Modal Usaha': 'Modal_Usaha',
+      'Sembako': 'Sembako',
+      'Santunan Tunai': 'Santunan_Tunai',
+      'Lainnya': 'Lainnya',
+    }
+    const JENIS_MAP: Record<string, any> = {
+      'Tunai': 'Tunai',
+      'Barang/Logistik': 'Barang_Logistik',
+      'Jasa/Layanan': 'Jasa_Layanan',
+      'Lainnya': 'Lainnya',
+    }
+    const STATUS_MAP: Record<string, any> = {
+      'Proses': 'Proses',
+      'Disetujui': 'Disetujui',
+      'Ditolak': 'Ditolak',
+      'Batal': 'Batal',
+    }
+    const PENYAKIT_MAP: Record<string, any> = {
+      'Penyakit Kronis': 'Penyakit_Kronis',
+      'Penyakit Menular': 'Penyakit_Menular',
+      'Penyakit Ringan': 'Penyakit_Ringan',
+      'Gawat Darurat/Kecelakaan': 'Gawat_Darurat_Kecelakaan',
+      'Tidak Ada/Not Applicable': 'Tidak_Ada_Not_Applicable',
+    }
+
     // 2. Generate Smart Date Key
     const sk_tgl = generateSkDate()
 
@@ -41,11 +77,11 @@ export async function POST(req: Request) {
         no_referensi_lama: no_referensi_lama?.trim() ? no_referensi_lama.trim() : `REF-${idTransaksi}`,
         sk_mustahik: mustahik.sk_mustahik,
         sk_penyalur: parseInt(sk_penyalur) || 1,
-        domain_program: domain_program as any,
-        kategori_program: kategori_program as any,
-        jenis_bantuan: jenis_bantuan as any,
-        status_pengajuan: status_pengajuan as any,
-        kategori_penyakit: kategori_penyakit as any,
+        domain_program: DOMAIN_MAP[domain_program] || 'To_Be_Determined',
+        kategori_program: KATEGORI_MAP[kategori_program] || 'To_Be_Determined',
+        jenis_bantuan: JENIS_MAP[jenis_bantuan] || 'To_Be_Determined',
+        status_pengajuan: STATUS_MAP[status_pengajuan] || 'To_Be_Determined',
+        kategori_penyakit: PENYAKIT_MAP[kategori_penyakit] || 'Tidak_Ada_Not_Applicable',
         dana_tersalur: parseFloat(dana_tersalur),
         sk_tgl_berkas: sk_tgl,
         sk_tgl_disalurkan: sk_tgl,
