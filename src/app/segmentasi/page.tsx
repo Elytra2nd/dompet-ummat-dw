@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Info,
   SearchX,
+  ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
