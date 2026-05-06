@@ -374,13 +374,13 @@ export default function DonasiKeluarPage() {
                       <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-500" onClick={() => setDetailItem(item)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-500" onClick={() => setDetailItem(item)} aria-label="Detail">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500" onClick={() => openEdit(item)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500" onClick={() => openEdit(item)} aria-label="Edit">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => setDeleteTarget(item)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => setDeleteTarget(item)} aria-label="Hapus">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

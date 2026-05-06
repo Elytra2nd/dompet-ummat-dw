@@ -141,7 +141,7 @@ export default function RiwayatAktivitasPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full">
+            <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full" aria-label="Kembali">
                <Link href="/ambulan"><ArrowLeft size={18}/></Link>
             </Button>
             <h1 className="text-2xl font-bold tracking-tight uppercase">Log Aktivitas & <span className="text-rose-600">Biaya</span></h1>
@@ -197,7 +197,7 @@ export default function RiwayatAktivitasPage() {
             <CardTitle className="text-sm font-bold flex items-center gap-2 uppercase tracking-tight">
               <Settings2 className="h-4 w-4 text-rose-500" /> Koreksi Log Aktivitas
             </CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full text-slate-400"><X className="h-4 w-4"/></Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full text-slate-400" aria-label="Tutup form"><X className="h-4 w-4"/></Button>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -280,12 +280,12 @@ export default function RiwayatAktivitasPage() {
                       <TableCell className="text-right pr-6">
                         <div className="flex justify-end gap-1 items-center">
                           <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" aria-label="Lihat detail"><Eye size={16} /></Button>
                           </Link>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(log)}><Edit3 size={16}/></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" aria-label="Edit data" onClick={() => startEdit(log)}><Edit3 size={16}/></Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16}/></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50" aria-label="Hapus data"><Trash2 size={16}/></Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent className="rounded-2xl border-2">
                               <AlertDialogHeader>
@@ -328,12 +328,12 @@ export default function RiwayatAktivitasPage() {
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600"><Eye size={15} /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail"><Eye size={15} /></Button>
                       </Link>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(log)}><Edit3 size={15}/></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600"><Trash2 size={15}/></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus data"><Trash2 size={15}/></Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>

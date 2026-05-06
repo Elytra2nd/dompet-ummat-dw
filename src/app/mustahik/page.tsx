@@ -187,7 +187,7 @@ export default function ManajemenMustahikPage() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Nonaktifkan mustahik">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -219,13 +219,13 @@ export default function ManajemenMustahikPage() {
                 Records {Math.min((currentPage - 1) * itemsPerPage + 1, filteredMustahik.length)} - {Math.min(currentPage * itemsPerPage, filteredMustahik.length)} of {filteredMustahik.length}
               </p>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-none border-2">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-none border-2" aria-label="Halaman sebelumnya">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-xs font-black text-slate-900 mx-2 tracking-tighter">
                   {currentPage} / {totalPages || 1}
                 </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="h-8 w-8 p-0 rounded-none border-2">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="h-8 w-8 p-0 rounded-none border-2" aria-label="Halaman selanjutnya">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>

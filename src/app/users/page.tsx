@@ -273,6 +273,7 @@ export default function UserManagementPage() {
                             size="icon" 
                             className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                             onClick={() => handleOpenEdit(user)}
+                            aria-label="Edit pengguna"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -282,6 +283,7 @@ export default function UserManagementPage() {
                               size="icon" 
                               className="h-8 w-8 text-red-600 border-red-200 hover:bg-red-50"
                               onClick={() => handleOpenDelete(user.id)}
+                              aria-label="Hapus pengguna"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
