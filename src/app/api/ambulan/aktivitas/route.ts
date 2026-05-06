@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, id: aktivitas.id_transaksi })
   } catch (error: any) {
-    return NextResponse.json({ error: 'Gagal mencatat ke warehouse', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal mencatat ke warehouse' }, { status: 500 })
   }
 }
 
@@ -78,7 +78,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(updated)
   } catch (error: any) {
-    return NextResponse.json({ error: 'Gagal update data', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal update data' }, { status: 500 })
   }
 }
 
@@ -96,6 +96,6 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    return NextResponse.json({ error: 'Gagal menghapus data', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal menghapus data' }, { status: 500 })
   }
 }

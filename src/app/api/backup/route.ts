@@ -231,6 +231,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (error: any) {
     console.error('BACKUP_ERROR:', error)
-    return NextResponse.json({ error: 'Gagal membuat backup', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal membuat backup' }, { status: 500 })
   }
 }

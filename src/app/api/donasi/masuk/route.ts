@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('DATABASE_ERROR_DONASI:', error)
     return NextResponse.json(
-      { error: 'Gagal menyimpan transaksi donasi', details: error.message },
+      { error: 'Gagal menyimpan transaksi donasi' },
       { status: 500 },
     )
   }

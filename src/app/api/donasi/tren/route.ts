@@ -151,10 +151,7 @@ export async function GET(req: Request) {
   } catch (error: any) {
     console.error('TREN_DONASI_ERROR:', error)
     return NextResponse.json(
-      {
-        error: 'Gagal memuat tren donasi',
-        details: error?.message ?? String(error),
-      },
+      { error: 'Gagal memuat tren donasi' },
       { status: 500 }
     )
   }

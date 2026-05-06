@@ -7,13 +7,13 @@ interface RawYearRow {
 
 export async function GET() {
   try {
-    const rows = await prisma.$queryRawUnsafe<RawYearRow[]>(`
+    const rows = await prisma.$queryRaw<RawYearRow[]>`
       SELECT DISTINCT
         SUBSTRING(CAST(sk_tgl_bersih AS CHAR), 1, 4) AS tahun
       FROM fact_donasi
       WHERE sk_tgl_bersih IS NOT NULL
       ORDER BY tahun ASC
-    `)
+    `
 
     const years = rows
       .map((row) => String(row.tahun))
@@ -28,10 +28,7 @@ export async function GET() {
     console.error('TAHUN_DONASI_ERROR:', error)
 
     return NextResponse.json(
-      {
-        error: 'Gagal memuat daftar tahun donasi',
-        details: error?.message ?? String(error),
-      },
+      { error: 'Gagal memuat daftar tahun donasi' },
       { status: 500 }
     )
   }

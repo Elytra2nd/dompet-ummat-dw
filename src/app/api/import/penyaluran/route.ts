@@ -129,6 +129,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: 'success', imported, skipped: existingSet.size })
   } catch (error: any) {
     console.error('IMPORT_PENYALURAN_ERROR:', error)
-    return NextResponse.json({ error: 'Terjadi kesalahan server', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 })
   }
 }

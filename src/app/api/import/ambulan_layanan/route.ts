@@ -198,7 +198,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('IMPORT_AMBULAN_LAYANAN_ERROR:', error)
     return NextResponse.json(
-      { error: 'Terjadi kesalahan server saat memproses import', details: error.message },
+      { error: 'Terjadi kesalahan server saat memproses import' },
       { status: 500 },
     )
   }
