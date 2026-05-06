@@ -246,10 +246,10 @@ export default function AddPenyaluranForm() {
 
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-slate-500 uppercase">
-              Nomor Referensi (Arsip Berkas)
+              Nomor Referensi (Opsional)
             </Label>
             <Input
-              placeholder="Misal: NO-REF-2026-001"
+              placeholder="Biarkan kosong untuk generate otomatis"
               value={formData.no_referensi_lama}
               onChange={(e) =>
                 setFormData({ ...formData, no_referensi_lama: e.target.value })

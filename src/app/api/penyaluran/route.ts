@@ -34,10 +34,11 @@ export async function POST(req: Request) {
     const sk_tgl = generateSkDate()
 
     // 3. Simpan ke fact_penyaluran
+    const idTransaksi = `TRX-OUT-${Date.now()}`
     const transaksi = await prisma.fact_penyaluran.create({
       data: {
-        id_transaksi: `TRX-OUT-${Date.now()}`,
-        no_referensi_lama: no_referensi_lama || null,
+        id_transaksi: idTransaksi,
+        no_referensi_lama: no_referensi_lama?.trim() ? no_referensi_lama.trim() : `REF-${idTransaksi}`,
         sk_mustahik: mustahik.sk_mustahik,
         sk_penyalur: parseInt(sk_penyalur) || 1,
         domain_program: domain_program as any,
