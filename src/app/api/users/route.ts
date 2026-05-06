@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse, NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { BCRYPT_ROUNDS, handleApiError } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,8 +20,9 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     })
     return NextResponse.json(users)
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Gagal mengambil data user', details: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const { message, status } = handleApiError(error, 'GET /api/users')
+    return NextResponse.json({ error: message }, { status })
   }
 }
 
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS)
 
     // Buat user
     const newUser = await prisma.user.create({
@@ -64,7 +66,8 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ success: true, data: newUser })
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Gagal membuat user', details: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const { message, status } = handleApiError(error, 'POST /api/users')
+    return NextResponse.json({ error: message }, { status })
   }
 }

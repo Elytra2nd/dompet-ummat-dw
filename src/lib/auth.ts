@@ -70,3 +70,24 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   }
 }
+
+/**
+ * Standardized bcrypt rounds — use this constant everywhere instead of magic numbers.
+ */
+export const BCRYPT_ROUNDS = 12
+
+/**
+ * Sanitize error for client response.
+ * Logs full error server-side, returns generic message to client.
+ */
+export function handleApiError(error: unknown, context: string): { message: string; status: number } {
+  const msg = error instanceof Error ? error.message : String(error)
+  console.error(`[API Error] ${context}:`, msg)
+
+  // Prisma unique constraint violation — safe to expose
+  if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'P2002') {
+    return { message: 'Data sudah ada (duplikat)', status: 400 }
+  }
+
+  return { message: 'Terjadi kesalahan server', status: 500 }
+}
