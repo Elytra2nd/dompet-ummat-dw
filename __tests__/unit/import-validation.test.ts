@@ -124,7 +124,6 @@ describe('chunk', () => {
 
 describe('validateDonasiRow', () => {
   const validRow = {
-    id_transaksi_donasi: 'TRX-001',
     tanggal: '15/04/2024',
     nama_donatur: 'Ahmad Fauzi',
     tipe_donatur: 'Individu',
@@ -140,12 +139,7 @@ describe('validateDonasiRow', () => {
     const { errors, parsed } = validateDonasiRow(validRow, 1)
     expect(errors).toHaveLength(0)
     expect(parsed).not.toBeNull()
-    expect(parsed!.id_transaksi_donasi).toBe('TRX-001')
-  })
-
-  it('should reject missing ID transaksi', () => {
-    const { errors } = validateDonasiRow({ ...validRow, id_transaksi_donasi: '' }, 1)
-    expect(errors.some(e => e.field === 'id_transaksi_donasi')).toBe(true)
+    expect(parsed!.nama_donatur).toBe('Ahmad Fauzi')
   })
 
   it('should reject invalid date format', () => {
@@ -200,7 +194,6 @@ describe('validateDonasiRow', () => {
 
 describe('validatePenyaluranRow', () => {
   const validRow = {
-    id_transaksi: 'PNY-001',
     tanggal_berkas: '10/01/2024',
     tanggal_disalurkan: '15/01/2024',
     id_mustahik: 'MST-001',

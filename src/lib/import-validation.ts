@@ -31,7 +31,6 @@ export interface ImportValidationResult {
 
 // Parsed row types
 export interface DonasiRowParsed {
-  id_transaksi_donasi: string
   tanggal: string
   nama_donatur: string
   tipe_donatur: string
@@ -44,7 +43,6 @@ export interface DonasiRowParsed {
 }
 
 export interface PenyaluranRowParsed {
-  id_transaksi: string
   tanggal_berkas: string
   tanggal_disalurkan: string
   id_mustahik: string
@@ -164,12 +162,7 @@ export function validateDonasiRow(
   rowNumber: number,
 ): { errors: RowError[]; parsed: DonasiRowParsed | null } {
   const errors: RowError[] = []
-  const id = raw['id_transaksi_donasi'] as string | undefined
-
-  // id_transaksi_donasi
-  if (!raw['id_transaksi_donasi'] || String(raw['id_transaksi_donasi']).trim() === '') {
-    errors.push(err(rowNumber, id, 'id_transaksi_donasi', raw['id_transaksi_donasi'], 'required', 'ID Transaksi wajib diisi'))
-  }
+  const id = undefined
 
   // tanggal
   const tgl = parseDate(String(raw['tanggal'] ?? ''))
@@ -222,7 +215,6 @@ export function validateDonasiRow(
   return {
     errors: [],
     parsed: {
-      id_transaksi_donasi: String(raw['id_transaksi_donasi']).trim(),
       tanggal: String(raw['tanggal']),
       nama_donatur: nama,
       tipe_donatur: String(raw['tipe_donatur']),
@@ -249,11 +241,7 @@ export function validatePenyaluranRow(
   rowNumber: number,
 ): { errors: RowError[]; parsed: PenyaluranRowParsed | null } {
   const errors: RowError[] = []
-  const id = raw['id_transaksi'] as string | undefined
-
-  if (!raw['id_transaksi'] || String(raw['id_transaksi']).trim() === '') {
-    errors.push(err(rowNumber, id, 'id_transaksi', raw['id_transaksi'], 'required', 'ID Transaksi wajib diisi'))
-  }
+  const id = undefined
 
   const tglBerkas = parseDate(String(raw['tanggal_berkas'] ?? ''))
   if (!tglBerkas) {
@@ -302,7 +290,6 @@ export function validatePenyaluranRow(
   return {
     errors: [],
     parsed: {
-      id_transaksi: String(raw['id_transaksi']).trim(),
       tanggal_berkas: String(raw['tanggal_berkas']),
       tanggal_disalurkan: String(raw['tanggal_disalurkan']),
       id_mustahik: String(raw['id_mustahik']).trim(),
