@@ -117,7 +117,7 @@ export default function BackupPage() {
           <div className="p-2.5 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-xl shadow-lg shadow-sky-200">
             <HardDriveDownload className="h-7 w-7 text-white" />
           </div>
-          Backup Data Warehouse (Enterprise)
+          Backup Data Warehouse Dompet Ummat
         </h1>
         <p className="text-slate-500 mt-2 ml-14">
           Modul ekskavasi data mentah yang mendukung partisi tabel dan filtering rentang tanggal transaksi untuk performa ekstraksi yang optimal.

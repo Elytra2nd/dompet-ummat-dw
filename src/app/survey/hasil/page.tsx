@@ -134,7 +134,7 @@ export default function SurveyMainPage() {
           </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-semibold text-slate-900">
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
                 <ClipboardCheck className="h-7 w-7 text-indigo-600 shrink-0" />
                 Hasil <span className="text-indigo-600">Survey Kelayakan</span>
               </h1>

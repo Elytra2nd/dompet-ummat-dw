@@ -57,18 +57,18 @@ export default function SurveyEditForm({ id_survey }: { id_survey: string }) {
         // 2. Fetch existing survey detail
         const resSurvey = await fetch(`/api/survey/${id_survey}`)
         if (resSurvey.ok) {
-          const { survey, detail_skor } = await resSurvey.json()
+          const { survey, skorData, detail_skor } = await resSurvey.json()
           
-          setMustahikId(survey.id_mustahik || '')
+          setMustahikId(survey.dim_mustahik?.id_mustahik || '')
           setMustahikName(survey.dim_mustahik?.nama || '')
           
           setSurveyData({
             sk_petugas: survey.sk_petugas || 1,
-            pendapatan_bulanan: Number(survey.pendapatan_bulanan) || 0,
-            pengeluaran_bulanan: Number(survey.pengeluaran_bulanan) || 0,
-            jumlah_tanggungan: Number(survey.jumlah_tanggungan) || 0,
-            kondisi_tempat_tinggal: survey.kondisi_tempat_tinggal || KONDISI_TEMPAT_TINGGAL[2].value,
-            kategori_asnaf: survey.kategori_asnaf || GOLONGAN_ASNAF[0].value,
+            pendapatan_bulanan: Number(skorData?.pendapatan_bulanan) || 0,
+            pengeluaran_bulanan: Number(skorData?.pengeluaran_bulanan) || 0,
+            jumlah_tanggungan: Number(skorData?.jumlah_tanggungan) || 0,
+            kondisi_tempat_tinggal: skorData?.kondisi_tempat_tinggal || KONDISI_TEMPAT_TINGGAL[2].value,
+            kategori_asnaf: skorData?.kategori_asnaf || survey.golongan_penerima || GOLONGAN_ASNAF[0].value,
             kategori_rekomendasi: survey.kategori_rekomendasi || KATEGORI_REKOMENDASI[0].value,
           })
           
