@@ -72,7 +72,6 @@ export interface MustahikRowParsed {
 }
 
 export interface AmbulanLayananRowParsed {
-  id_transaksi: string
   tanggal_layanan: string
   nama_pasien: string
   no_hp?: string
@@ -90,7 +89,6 @@ export interface AmbulanLayananRowParsed {
 }
 
 export interface AmbulanAktivitasRowParsed {
-  id_transaksi: string
   tanggal_aktivitas: string
   jam: string
   armada: string
@@ -409,11 +407,7 @@ export function validateAmbulanLayananRow(
   rowNumber: number,
 ): { errors: RowError[]; parsed: AmbulanLayananRowParsed | null } {
   const errors: RowError[] = []
-  const id = raw['id_transaksi'] as string | undefined
-
-  if (!raw['id_transaksi'] || String(raw['id_transaksi']).trim() === '') {
-    errors.push(err(rowNumber, id, 'id_transaksi', raw['id_transaksi'], 'required', 'ID Transaksi wajib diisi'))
-  }
+  const id = undefined
 
   const tgl = parseDate(String(raw['tanggal_layanan'] ?? ''))
   if (!tgl) {
@@ -470,7 +464,6 @@ export function validateAmbulanLayananRow(
   return {
     errors,
     parsed: {
-      id_transaksi: String(raw['id_transaksi']).trim(),
       tanggal_layanan: String(raw['tanggal_layanan']),
       nama_pasien: String(raw['nama_pasien']).trim(),
       no_hp: raw['no_hp'] ? String(raw['no_hp']).trim() : undefined,
@@ -498,11 +491,7 @@ export function validateAmbulanAktivitasRow(
   rowNumber: number,
 ): { errors: RowError[]; parsed: AmbulanAktivitasRowParsed | null } {
   const errors: RowError[] = []
-  const id = raw['id_transaksi'] as string | undefined
-
-  if (!raw['id_transaksi'] || String(raw['id_transaksi']).trim() === '') {
-    errors.push(err(rowNumber, id, 'id_transaksi', raw['id_transaksi'], 'required', 'ID Transaksi wajib diisi'))
-  }
+  const id = undefined
 
   const tgl = parseDate(String(raw['tanggal_aktivitas'] ?? ''))
   if (!tgl) {
@@ -533,7 +522,6 @@ export function validateAmbulanAktivitasRow(
   return {
     errors: [],
     parsed: {
-      id_transaksi: String(raw['id_transaksi']).trim(),
       tanggal_aktivitas: String(raw['tanggal_aktivitas']),
       jam: String(raw['jam']),
       armada: String(raw['armada']),

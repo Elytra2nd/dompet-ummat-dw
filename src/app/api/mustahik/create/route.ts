@@ -24,6 +24,18 @@ export async function POST(req: Request) {
       dana_tersalur,
     } = body
 
+    // --- MAP ENUM: human-readable → Prisma enum name ---
+    const KATEGORI_PM_MAP: Record<string, string> = {
+      'Fakir': 'Fakir', 'Miskin': 'Miskin', 'Amil': 'Amil',
+      'Muallaf': 'Muallaf', 'Riqab': 'Riqab', 'Gharimin': 'Gharimin',
+      'Fisabilillah': 'Fisabilillah', 'Ibnu Sabil': 'Ibnu_Sabil',
+    }
+    const DOMAIN_PROGRAM_MAP: Record<string, string> = {
+      'Pendidikan': 'Pendidikan', 'Kesehatan': 'Kesehatan', 'Ekonomi': 'Ekonomi',
+      'Sosial Kemanusiaan': 'Sosial_Kemanusiaan', 'Dakwah & Advokasi': 'Dakwah___Advokasi',
+      'Operasional': 'Operasional',
+    }
+
     // --- 1. LOGIKA AUTO-ID BERDASARKAN PROGRAM_INDUK ---
     let prefix = 'MST-GEN'
     const prog = (program_induk || '').toUpperCase()
@@ -67,7 +79,7 @@ export async function POST(req: Request) {
           desa,
           kelurahan_kecamatan,
           kabupaten_kota: kabupaten_kota || 'Melawi',
-          kategori_pm: (kategori_pm as any) || 'To_Be_Determined',
+          kategori_pm: (KATEGORI_PM_MAP[kategori_pm] || 'To_Be_Determined') as any,
           sk_lokasi: newLocation.sk_lokasi,
           jumlah_jiwa: parseInt(jumlah_jiwa) || 1,
           is_active: true,
@@ -82,7 +94,7 @@ export async function POST(req: Request) {
             id_transaksi: `TX-${Date.now()}-${autoId}`,
             sk_mustahik: mustahik.sk_mustahik,
             dana_tersalur: parseFloat(dana_tersalur),
-            domain_program: (program_induk as any) || 'To_Be_Determined',
+            domain_program: (DOMAIN_PROGRAM_MAP[program_induk] || 'To_Be_Determined') as any,
             status_pengajuan: 'Disetujui',
             // Smart Date Key: YYYYMMDD (Standar Data Warehouse)
             sk_tgl_disalurkan: parseInt(

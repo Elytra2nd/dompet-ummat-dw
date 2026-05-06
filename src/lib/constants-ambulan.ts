@@ -34,7 +34,6 @@ export const STATUS_EKONOMI = [
 ]
 
 export const AMBULAN_LAYANAN_IMPORT_HEADERS = [
-  { key: 'id_transaksi',        label: 'ID Transaksi *',         required: true,  isNumber: false },
   { key: 'tanggal_layanan',     label: 'Tanggal (DD/MM/YYYY) *', required: true,  isNumber: false },
   { key: 'nama_pasien',         label: 'Nama Pasien *',          required: true,  isNumber: false },
   { key: 'no_hp',               label: 'No HP Pasien',           required: false, isNumber: false },
@@ -52,7 +51,6 @@ export const AMBULAN_LAYANAN_IMPORT_HEADERS = [
 ] as const
 
 export const AMBULAN_AKTIVITAS_IMPORT_HEADERS = [
-  { key: 'id_transaksi',        label: 'ID Transaksi *',         required: true,  isNumber: false },
   { key: 'tanggal_aktivitas',   label: 'Tanggal (DD/MM/YYYY) *', required: true,  isNumber: false },
   { key: 'jam',                 label: 'Shift Waktu *',          required: true,  isNumber: false },
   { key: 'armada',              label: 'Armada *',               required: true,  isNumber: false },

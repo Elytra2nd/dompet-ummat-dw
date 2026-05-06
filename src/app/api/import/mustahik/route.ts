@@ -88,6 +88,13 @@ export async function POST(req: Request) {
     const existingNikSet = new Set(existingNiks.map(e => e.nik).filter(Boolean) as string[])
     const rowsToImport = validCandidates.filter(c => !existingNikSet.has(c.data.nik))
 
+    // Map human-readable → Prisma enum name
+    const KATEGORI_PM_MAP: Record<string, string> = {
+      'Fakir': 'Fakir', 'Miskin': 'Miskin', 'Amil': 'Amil',
+      'Muallaf': 'Muallaf', 'Riqab': 'Riqab', 'Gharimin': 'Gharimin',
+      'Fisabilillah': 'Fisabilillah', 'Ibnu Sabil': 'Ibnu_Sabil',
+    }
+
     let imported = 0
     await prisma.$transaction(async (tx) => {
       for (const item of rowsToImport) {
@@ -123,7 +130,7 @@ export async function POST(req: Request) {
             desa: item.data.desa ?? null,
             kelurahan_kecamatan: item.data.kelurahan_kecamatan ?? null,
             kabupaten_kota: item.data.kabupaten_kota,
-            kategori_pm: item.data.kategori_pm as any,
+            kategori_pm: (KATEGORI_PM_MAP[item.data.kategori_pm] || 'To_Be_Determined') as any,
             jumlah_jiwa: item.data.jumlah_jiwa,
             sk_lokasi: sk_lokasi ?? -1,
             is_active: true,

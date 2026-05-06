@@ -392,7 +392,6 @@ function buildAmbulanLayananWorkbook(): ExcelJS.Workbook {
   data.getRow(1).height = 40
 
   const examples: Record<string, unknown> = {
-    id_transaksi: 'SRV-AMB-1001',
     tanggal_layanan: '15/01/2024',
     nama_pasien: 'Budi Santoso',
     no_hp: '081234567890',
@@ -456,7 +455,6 @@ function buildAmbulanAktivitasWorkbook(): ExcelJS.Workbook {
   data.getRow(1).height = 40
 
   const examples: Record<string, unknown> = {
-    id_transaksi: 'EXP-AMB-1001',
     tanggal_aktivitas: '16/01/2024',
     jam: 'Siang (12:00-15:00)',
     armada: 'Ambulan 1 (KB 1234 XX)',

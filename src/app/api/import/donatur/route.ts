@@ -122,6 +122,13 @@ export async function POST(req: Request) {
     const existingSet = new Set(existingKontaks.map(e => e.kontak_utama))
     const rowsToImport = validCandidates.filter(c => !existingSet.has(c.data.kontak_utama))
 
+    // Map human-readable tipe ke Prisma enum name
+    const TIPE_MAP: Record<string, string> = {
+      'Individu': 'Individu',
+      'Lembaga/Korporasi': 'Lembaga_Korporasi',
+      'Komunitas': 'Komunitas',
+    }
+
     let imported = 0
     const now = new Date()
     const year = now.getFullYear().toString().substring(2)
@@ -137,7 +144,7 @@ export async function POST(req: Request) {
               id_donatur,
               nama_lengkap: c.data.nama_lengkap,
               kontak_utama: c.data.kontak_utama,
-              tipe: c.data.tipe as any,
+              tipe: (TIPE_MAP[c.data.tipe] || 'To_Be_Determined') as any,
               alamat: c.data.alamat || '-',
               perusahaan: c.data.perusahaan || '-',
               is_active: true,
