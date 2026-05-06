@@ -24,7 +24,8 @@ import {
   Clock,
   CheckCircle2,
   Truck,
-  ShieldCheck
+  ShieldCheck,
+  ArrowLeft
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -182,7 +183,7 @@ export default function ReportsPage() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-white">
       <RefreshCw className="h-10 w-10 text-emerald-600 animate-spin" />
-      <p className="font-semibold text-slate-400 uppercase tracking-widest text-xs">Mempersiapkan Insight Warehouse...</p>
+      <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">Mempersiapkan Insight Warehouse...</p>
     </div>
   )
 
@@ -191,12 +192,16 @@ export default function ReportsPage() {
       {/* HEADER BAR */}
       <div className="mb-6 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
+            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
+          </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <TrendingUp className="h-7 w-7 text-emerald-600 shrink-0" /> Pusat <span className="text-emerald-600">Laporan</span>
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
+                <TrendingUp className="h-7 w-7 text-emerald-600 shrink-0" /> 
+                Pusat <span className="text-emerald-600">Laporan</span>
               </h1>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
                 BIDA Analytics • Executive Decision Support
               </p>
             </div>
@@ -375,7 +380,7 @@ export default function ReportsPage() {
                 {(donaturData?.stats ?? []).map((item: DonaturStats, i: number) => (
                   <div key={i} className="flex items-center justify-between group">
                     <span className="text-xs font-bold text-slate-600 uppercase">{item.tipe || 'Individu'}</span>
-                    <span className="text-xs font-black text-slate-800">{item._count.id_donatur} Jiwa</span>
+                    <span className="text-xs font-semibold text-slate-800">{item._count.id_donatur} Jiwa</span>
                   </div>
                 ))}
               </CardContent>
@@ -414,8 +419,8 @@ export default function ReportsPage() {
                 <CardContent className="p-6 grid grid-cols-2 gap-4">
                    {(ambulanData?.perWaktu ?? []).map((t: AmbulanWaktu, i: number) => (
                      <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-rose-500" /><span className="text-[10px] font-black uppercase text-slate-500">{t.jam}</span></div>
-                        <span className="text-lg font-black text-slate-800">{t._count.id_transaksi}</span>
+                        <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-rose-500" /><span className="text-[10px] font-semibold uppercase text-slate-500">{t.jam}</span></div>
+                        <span className="text-lg font-semibold text-slate-800">{t._count.id_transaksi}</span>
                      </div>
                    ))}
                 </CardContent>
@@ -451,7 +456,7 @@ export default function ReportsPage() {
                 {(mustahikData?.insights?.top_locations ?? []).map((loc: MustahikLocation, i: number) => (
                   <div key={i} className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-600 uppercase">{loc.kabupaten_kota}</span>
-                    <span className="text-xs font-black text-slate-800">{loc._count.id_mustahik} Jiwa</span>
+                    <span className="text-xs font-semibold text-slate-800">{loc._count.id_mustahik} Jiwa</span>
                   </div>
                 ))}
               </CardContent>
@@ -489,7 +494,7 @@ export default function ReportsPage() {
                   : <FileText className="text-white h-5 w-5" />}
               </div>
               <div>
-                <DialogTitle className="text-base font-black uppercase text-white leading-none">
+                <DialogTitle className="text-base font-semibold uppercase text-white leading-none">
                   Preview {previewData?.type === 'pdf' ? 'PDF' : 'Excel'}
                 </DialogTitle>
                 <p className="text-[10px] text-white/60 mt-0.5">{previewData?.title}</p>
@@ -554,7 +559,7 @@ export default function ReportsPage() {
                 <div className="mx-auto bg-white shadow-lg" style={{ maxWidth: '595px', minHeight: '400px' }}>
                   {/* Kop surat */}
                   <div className="border-b-4 border-double border-emerald-800 px-8 py-5">
-                    <p className="text-center text-base font-black text-emerald-900 tracking-tight">DOMPET UMMAT KALIMANTAN BARAT</p>
+                    <p className="text-center text-base font-semibold text-emerald-900 tracking-tight">DOMPET UMMAT KALIMANTAN BARAT</p>
                     <p className="text-center text-[9px] text-slate-500 mt-0.5">Jl. Danau Sentarum No. 99, Pontianak, Kalimantan Barat</p>
                     <p className="text-center text-[9px] text-slate-400 mt-0.5">BIDA Analytics Platform — Official Report</p>
                   </div>
@@ -562,7 +567,7 @@ export default function ReportsPage() {
                     <div className="flex justify-between">
                       <div>
                         <p className="text-[9px] font-bold uppercase text-slate-400">Laporan</p>
-                        <p className="text-sm font-black text-slate-800 uppercase">{previewData?.title}</p>
+                        <p className="text-sm font-semibold text-slate-800 uppercase">{previewData?.title}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] font-bold uppercase text-slate-400">Dicetak</p>

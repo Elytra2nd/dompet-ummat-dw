@@ -68,28 +68,18 @@ export default function MustahikSpasialPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* HEADER SECTION */}
-      <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
-          <div className="mb-2 flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="-ml-2 text-slate-500 font-bold transition-colors hover:text-indigo-600 uppercase text-[10px]"
-            >
-              <Link href="/dashboard">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Dashboard
-              </Link>
-            </Button>
-          </div>
-
+      <div className="mb-6 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
+            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
+          </Button>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="flex items-center gap-3 text-3xl font-black tracking-tighter text-slate-900 uppercase">
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-semibold tracking-tighter text-slate-900">
                 <MapPinned className="h-8 w-8 text-indigo-600" />
                 Peta Spasial <span className="text-indigo-600">Mustahik</span>
               </h1>
-              <p className="mt-1 text-sm font-bold text-slate-400 uppercase tracking-tight">
+              <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
                 Visualisasi <span className="text-indigo-500">Spatial OLAP</span> • Sebaran Administratif Dompet Ummat Kalbar
               </p>
             </div>
@@ -98,11 +88,11 @@ export default function MustahikSpasialPage() {
             <div className="flex gap-2">
               <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 border border-emerald-100">
                 <Database className="h-4 w-4 text-emerald-600" />
-                <span className="text-[10px] font-black text-emerald-700 uppercase">Warehouse Synced</span>
+                <span className="text-[10px] font-semibold text-emerald-700 uppercase">Warehouse Synced</span>
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 border border-indigo-100">
                 <Globe className="h-4 w-4 text-indigo-600" />
-                <span className="text-[10px] font-black text-indigo-700 uppercase">Geographic Ready</span>
+                <span className="text-[10px] font-semibold text-indigo-700 uppercase">Geographic Ready</span>
               </div>
             </div>
           </div>
@@ -116,8 +106,8 @@ export default function MustahikSpasialPage() {
              <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-50 rounded-lg"><Users className="h-5 w-5 text-indigo-600" /></div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase">Total Objek Terpetakan</p>
-                  <p className="text-xl font-black text-slate-900">
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase">Total Objek Terpetakan</p>
+                  <p className="text-xl font-semibold text-slate-900">
                     {loading ? "..." : `${points.length} Jiwa`}
                   </p>
                 </div>
