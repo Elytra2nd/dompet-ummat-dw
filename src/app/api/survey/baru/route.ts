@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('ERROR_SURVEY_SAVE:', error)
     return NextResponse.json(
-      { error: 'Gagal memproses data survey', details: error.message },
+      { error: 'Gagal memproses data survey' },
       { status: 500 },
     )
   }

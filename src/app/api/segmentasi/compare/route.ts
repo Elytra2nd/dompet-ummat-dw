@@ -6,11 +6,10 @@ import { runKMeans } from '@/lib/ml/kmeans'
 import { runKMedoids } from '@/lib/ml/kmedoids'
 import { runDBSCAN, autoTuneEps } from '@/lib/ml/dbscan'
 import { silhouetteScore, daviesBouldinIndex, calinskiHarabaszIndex } from '@/lib/ml/evaluation'
+import { CACHE_TTL, isCacheValid } from '@/lib/constants-cache'
 
-// ---- Server-side Compare Cache (TTL 30 menit) ----
-// K-Medoids butuh ~107 detik, jadi cache hasilnya
+// ---- Server-side Compare Cache ----
 let compareCache: { result: any; timestamp: number } | null = null
-const COMPARE_CACHE_TTL = 30 * 60 * 1000 // 30 menit
 
 /**
  * GET /api/segmentasi/compare
@@ -19,7 +18,7 @@ const COMPARE_CACHE_TTL = 30 * 60 * 1000 // 30 menit
  * Jika belum ada cache, return 404 dengan instruksi POST dulu.
  */
 export async function GET() {
-  if (compareCache && (Date.now() - compareCache.timestamp) < COMPARE_CACHE_TTL) {
+  if (compareCache && isCacheValid(compareCache.timestamp, CACHE_TTL.SEGMENTASI_COMPARE)) {
     return NextResponse.json({ ...compareCache.result, from_cache: true })
   }
   return NextResponse.json(
@@ -41,7 +40,7 @@ export async function GET() {
  */
 export async function POST() {
   // Return cache jika masih valid
-  if (compareCache && (Date.now() - compareCache.timestamp) < COMPARE_CACHE_TTL) {
+  if (compareCache && isCacheValid(compareCache.timestamp, CACHE_TTL.SEGMENTASI_COMPARE)) {
     return NextResponse.json({ ...compareCache.result, from_cache: true })
   }
 
@@ -269,7 +268,7 @@ export async function POST() {
   } catch (error: any) {
     console.error('SEGMENTASI_COMPARE_ERROR:', error)
     return NextResponse.json(
-      { error: 'Gagal menjalankan perbandingan algoritma', details: error.message },
+      { error: 'Gagal menjalankan perbandingan algoritma' },
       { status: 500 }
     )
   } finally {

@@ -28,10 +28,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('ERROR_GET_PERTANYAAN:', error)
     return NextResponse.json(
-      {
-        error: 'Gagal mengambil daftar pertanyaan survey',
-        details: error.message,
-      },
+      { error: 'Gagal mengambil daftar pertanyaan survey' },
       { status: 500 },
     )
   }

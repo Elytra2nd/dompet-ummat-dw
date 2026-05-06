@@ -1,14 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { validateQuery, DonaturQuerySchema } from '@/lib/validations'
 
 export const dynamic = 'force-dynamic'
 
 // --- READ (GET) ---
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const query = searchParams.get('q')
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
-  const limit = Math.min(1000, Math.max(1, parseInt(searchParams.get('limit') || '100')))
+  const { data: qp, error } = validateQuery(searchParams, DonaturQuerySchema)
+  if (error) return error
+  const { q: query, page, limit } = qp
 
   try {
     const [donatur, total] = await Promise.all([

@@ -216,7 +216,7 @@ export default function MonitoringAmbulanPage() {
             <CardTitle className="text-sm font-bold flex items-center gap-2">
               <Edit3 className="h-4 w-4 text-indigo-500" /> Koreksi Data Transaksi
             </CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full h-8 w-8"><X className="h-4 w-4"/></Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsFormOpen(false)} className="rounded-full h-8 w-8" aria-label="Tutup form"><X className="h-4 w-4"/></Button>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -314,12 +314,12 @@ export default function MonitoringAmbulanPage() {
                       <TableCell className="text-right pr-4">
                         <div className="flex justify-end gap-1 items-center">
                           <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"><Eye size={16} /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" aria-label="Lihat detail"><Eye size={16} /></Button>
                           </Link>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" aria-label="Edit data" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50"><Trash2 size={16} /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50" aria-label="Hapus data"><Trash2 size={16} /></Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent className="rounded-xl border-2">
                               <AlertDialogHeader>
@@ -370,12 +370,12 @@ export default function MonitoringAmbulanPage() {
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600"><Eye size={15} /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail"><Eye size={15} /></Button>
                       </Link>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(item)}><Edit3 size={15} /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600"><Trash2 size={15} /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus data"><Trash2 size={15} /></Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>

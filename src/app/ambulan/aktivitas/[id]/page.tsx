@@ -87,7 +87,7 @@ export default function DetailAktivitasPage() {
       {/* HEADER NAV */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.back()} className="rounded-full bg-white shadow-sm">
+          <Button variant="outline" size="icon" aria-label="Kembali" onClick={() => router.back()} className="rounded-full bg-white shadow-sm">
             <ArrowLeft size={18} />
           </Button>
           <div>

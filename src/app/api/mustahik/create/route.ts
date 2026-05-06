@@ -111,7 +111,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('ERROR_API_MUSTAHIK:', error)
     return NextResponse.json(
-      { error: 'Gagal menyimpan ke Data Warehouse', details: error.message },
+      { error: 'Gagal menyimpan ke Data Warehouse' },
       { status: 500 },
     )
   }
