@@ -5,11 +5,10 @@ import { calculateRFM, minMaxNormalize } from '@/lib/ml/rfm'
 import { runKMeans } from '@/lib/ml/kmeans'
 import { silhouetteScore, silhouetteToRating, daviesBouldinIndex, calinskiHarabaszIndex } from '@/lib/ml/evaluation'
 import { SEGMENT_CONFIGS, getSegmentConfig } from '@/lib/constants-segmentasi'
+import { CACHE_TTL, isCacheValid } from '@/lib/constants-cache'
 
-// ---- Server-side Run Cache (TTL 10 menit) ----
-// Hindari recompute K-Means pada setiap request context mount
+// ---- Server-side Run Cache ----
 let runCache: { result: unknown; timestamp: number } | null = null
-const RUN_CACHE_TTL = 10 * 60 * 1000
 
 /**
  * POST /api/segmentasi/run
@@ -24,7 +23,7 @@ const RUN_CACHE_TTL = 10 * 60 * 1000
  */
 export async function POST() {
   // Return dari cache jika masih valid
-  if (runCache && (Date.now() - runCache.timestamp) < RUN_CACHE_TTL) {
+  if (runCache && isCacheValid(runCache.timestamp, CACHE_TTL.SEGMENTASI_RUN)) {
     return NextResponse.json({ ...(runCache.result as object), from_cache: true })
   }
 
@@ -137,7 +136,7 @@ export async function POST() {
     const msg = error instanceof Error ? error.message : String(error)
     console.error('SEGMENTASI_RUN_ERROR:', msg)
     return NextResponse.json(
-      { error: 'Gagal menjalankan analisis segmentasi', details: msg },
+      { error: 'Gagal menjalankan analisis segmentasi' },
       { status: 500 }
     )
   } finally {

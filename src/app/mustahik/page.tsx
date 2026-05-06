@@ -212,7 +212,7 @@ export default function ManajemenMustahikPage() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Nonaktifkan mustahik">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>

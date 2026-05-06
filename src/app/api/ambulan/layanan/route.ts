@@ -84,7 +84,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('ERROR_AMBULAN_LAYANAN:', error)
     return NextResponse.json(
-      { error: 'Gagal mencatat layanan ambulans', details: error.message },
+      { error: 'Gagal mencatat layanan ambulans' },
       { status: 500 },
     )
   }

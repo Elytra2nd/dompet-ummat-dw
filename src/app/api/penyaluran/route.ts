@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('ERROR_PENYALURAN_POST:', error)
     return NextResponse.json(
-      { error: 'Gagal menyimpan transaksi penyaluran', details: error.message },
+      { error: 'Gagal menyimpan transaksi penyaluran' },
       { status: 500 },
     )
   }

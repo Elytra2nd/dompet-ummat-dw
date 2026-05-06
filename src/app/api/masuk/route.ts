@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('ERROR_DONASI_POST:', error)
     return NextResponse.json(
-      { error: 'Gagal memproses donasi', details: error.message },
+      { error: 'Gagal memproses donasi' },
       { status: 500 },
     )
   }

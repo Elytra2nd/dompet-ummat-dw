@@ -137,7 +137,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   } catch (error: any) {
     console.error('ERROR_SURVEY_UPDATE:', error)
     return NextResponse.json(
-      { error: 'Gagal memperbarui data survey', details: error.message },
+      { error: 'Gagal memperbarui data survey' },
       { status: 500 },
     )
   }

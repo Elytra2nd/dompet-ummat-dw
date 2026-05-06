@@ -25,57 +25,57 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
 
-    const whereClauses: string[] = []
-    const queryParams: any[] = []
+    // --- FIX: Use $queryRaw tagged templates (safe from SQL injection) ---
+    let rows: RawProgramRow[]
 
-    // --- LOGIK FILTER (Menyesuaikan sk_tgl_bersih YYYYMMDD) ---
-    
-    if (filterType === 'year') {
-      if (!startYear || !endYear) {
-        return NextResponse.json({ error: 'Parameter tahun tidak lengkap' }, { status: 400 })
-      }
-      whereClauses.push('SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 4) BETWEEN ? AND ?')
-      queryParams.push(startYear, endYear)
-    }
-
-    if (filterType === 'month') {
-      if (!startMonth || !endMonth) {
-        return NextResponse.json({ error: 'Parameter bulan tidak lengkap' }, { status: 400 })
-      }
+    if (filterType === 'year' && startYear && endYear) {
+      rows = await prisma.$queryRaw<RawProgramRow[]>`
+        SELECT
+          COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
+          COUNT(fd.sk_fakta_donasi) AS jumlahTransaksi,
+          COALESCE(SUM(fd.nominal_valid), 0) AS totalDonasi
+        FROM fact_donasi fd
+        LEFT JOIN dim_program_donasi dp ON fd.sk_program_donasi = dp.sk_program_donasi
+        WHERE SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 4) BETWEEN ${startYear} AND ${endYear}
+        GROUP BY dp.program_induk ORDER BY totalDonasi DESC
+      `
+    } else if (filterType === 'month' && startMonth && endMonth) {
       const sMonth = startMonth.replace('-', '')
       const eMonth = endMonth.replace('-', '')
-      whereClauses.push('SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 6) BETWEEN ? AND ?')
-      queryParams.push(sMonth, eMonth)
-    }
-
-    if (filterType === 'day') {
-      if (!startDate || !endDate) {
-        return NextResponse.json({ error: 'Parameter tanggal tidak lengkap' }, { status: 400 })
-      }
+      rows = await prisma.$queryRaw<RawProgramRow[]>`
+        SELECT
+          COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
+          COUNT(fd.sk_fakta_donasi) AS jumlahTransaksi,
+          COALESCE(SUM(fd.nominal_valid), 0) AS totalDonasi
+        FROM fact_donasi fd
+        LEFT JOIN dim_program_donasi dp ON fd.sk_program_donasi = dp.sk_program_donasi
+        WHERE SUBSTRING(CAST(fd.sk_tgl_bersih AS CHAR), 1, 6) BETWEEN ${sMonth} AND ${eMonth}
+        GROUP BY dp.program_induk ORDER BY totalDonasi DESC
+      `
+    } else if (filterType === 'day' && startDate && endDate) {
       const sDate = startDate.replaceAll('-', '')
       const eDate = endDate.replaceAll('-', '')
-      whereClauses.push('CAST(fd.sk_tgl_bersih AS CHAR) BETWEEN ? AND ?')
-      queryParams.push(sDate, eDate)
+      rows = await prisma.$queryRaw<RawProgramRow[]>`
+        SELECT
+          COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
+          COUNT(fd.sk_fakta_donasi) AS jumlahTransaksi,
+          COALESCE(SUM(fd.nominal_valid), 0) AS totalDonasi
+        FROM fact_donasi fd
+        LEFT JOIN dim_program_donasi dp ON fd.sk_program_donasi = dp.sk_program_donasi
+        WHERE CAST(fd.sk_tgl_bersih AS CHAR) BETWEEN ${sDate} AND ${eDate}
+        GROUP BY dp.program_induk ORDER BY totalDonasi DESC
+      `
+    } else {
+      rows = await prisma.$queryRaw<RawProgramRow[]>`
+        SELECT
+          COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
+          COUNT(fd.sk_fakta_donasi) AS jumlahTransaksi,
+          COALESCE(SUM(fd.nominal_valid), 0) AS totalDonasi
+        FROM fact_donasi fd
+        LEFT JOIN dim_program_donasi dp ON fd.sk_program_donasi = dp.sk_program_donasi
+        GROUP BY dp.program_induk ORDER BY totalDonasi DESC
+      `
     }
-
-    // --- CONSTRUCT QUERY ---
-    const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : ''
-    
-    const sql = `
-      SELECT
-        COALESCE(dp.program_induk, 'Tidak Diketahui') AS program,
-        COUNT(fd.sk_fakta_donasi) AS jumlahTransaksi,
-        COALESCE(SUM(fd.nominal_valid), 0) AS totalDonasi
-      FROM fact_donasi fd
-      LEFT JOIN dim_program_donasi dp
-        ON fd.sk_program_donasi = dp.sk_program_donasi
-      ${whereSql}
-      GROUP BY dp.program_induk
-      ORDER BY totalDonasi DESC
-    `
-
-    // --- EXECUTE ---
-    const rows = await prisma.$queryRawUnsafe<RawProgramRow[]>(sql, ...queryParams)
 
     // --- MAPPING ---
     const data: FormattedProgramData[] = rows.map((row) => ({
@@ -85,13 +85,11 @@ export async function GET(request: NextRequest) {
     }))
 
     return NextResponse.json(data)
-  } catch (error: any) {
-    console.error('API /api/donasi/program error:', error)
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('API /api/donasi/program error:', msg)
     return NextResponse.json(
-      {
-        error: 'Gagal mengambil distribusi program donasi',
-        detail: error?.message || 'Unknown error',
-      },
+      { error: 'Gagal mengambil distribusi program donasi' },
       { status: 500 }
     )
   }

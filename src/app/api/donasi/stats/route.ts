@@ -39,10 +39,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('STATS_ERROR:', error)
     return NextResponse.json(
-      {
-        error: 'Gagal memuat statistik',
-        details: error.message,
-      },
+      { error: 'Gagal memuat statistik' },
       { status: 500 },
     )
   }

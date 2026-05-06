@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { fetchRFMData } from '@/lib/segmentasi-query'
 import { calculateRFM } from '@/lib/ml/rfm'
 import { getSegmentConfig } from '@/lib/constants-segmentasi'
+import { CACHE_TTL, isCacheValid } from '@/lib/constants-cache'
 
 // ---- Types ----
 interface EnrichedDonatur {
@@ -24,7 +25,6 @@ interface EnrichedDonatur {
 
 // ---- Server-side RFM Cache (TTL 5 menit) ----
 let rfmCache: { data: EnrichedDonatur[]; timestamp: number } | null = null
-const CACHE_TTL = 5 * 60 * 1000 // 5 menit
 
 type SortKey = 'recency' | 'frequency' | 'monetary' | 'rfm_score' | 'nama_lengkap'
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     let enriched: EnrichedDonatur[]
     const now = Date.now()
 
-    if (rfmCache && (now - rfmCache.timestamp) < CACHE_TTL) {
+    if (rfmCache && isCacheValid(rfmCache.timestamp, CACHE_TTL.SEGMENTASI_DONATUR)) {
       enriched = rfmCache.data
     } else {
       conn = await db.getConnection()
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     const msg = error instanceof Error ? error.message : String(error)
     console.error('SEGMENTASI_DONATUR_ERROR:', msg)
     return NextResponse.json(
-      { error: 'Gagal memuat daftar donatur', details: msg },
+      { error: 'Gagal memuat daftar donatur' },
       { status: 500 }
     )
   } finally {

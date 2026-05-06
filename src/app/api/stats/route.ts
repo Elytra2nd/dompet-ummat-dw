@@ -49,10 +49,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("DW Error:", error);
     return NextResponse.json(
-      { 
-        error: "Gagal mengambil data DW",
-        details: error?.message 
-      }, 
+      { error: "Gagal mengambil data DW" }, 
       { status: 500 }
     );
   }
