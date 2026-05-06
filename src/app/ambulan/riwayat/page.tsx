@@ -176,7 +176,7 @@ export default function RiwayatAktivitasPage() {
             <div className="flex flex-wrap gap-2">
               <ImportButton modul="ambulan_aktivitas" onImportSuccess={fetchAktivitas} />
               <Link href="/ambulan/aktivitas">
-                <Button className="bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-semibold w-full sm:w-auto">
+                <Button className="bg-rose-600 hover:bg-rose-700 text-white shadow-sm font-semibold text-sm h-10 w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" /> Catat Biaya Baru
                 </Button>
               </Link>
@@ -271,7 +271,7 @@ export default function RiwayatAktivitasPage() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="Cari ID transaksi atau kategori..." 
-                className="pl-10 font-medium w-full" 
+                className="h-10 pl-10 text-sm font-medium w-full bg-white" 
                 value={search} 
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }} 
               />

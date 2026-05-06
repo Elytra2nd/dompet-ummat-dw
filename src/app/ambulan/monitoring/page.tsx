@@ -166,12 +166,12 @@ export default function MonitoringAmbulanPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm font-semibold">
+              <Button variant="outline" onClick={fetchAmbulan} className="h-10 text-sm bg-white shadow-sm font-semibold">
                 <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Sync
               </Button>
               <ImportButton modul="ambulan_layanan" onImportSuccess={fetchAmbulan} />
               <Link href="/ambulan/layanan">
-                <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white font-semibold w-full sm:w-auto">
+                <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white font-semibold text-sm h-10 w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" /> Catat Layanan Baru
                 </Button>
               </Link>
@@ -252,7 +252,7 @@ export default function MonitoringAmbulanPage() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="Cari nama pasien atau ID Transaksi..." 
-                className="pl-10 font-medium w-full" 
+                className="h-10 pl-10 text-sm font-medium w-full bg-white" 
                 value={search} 
                 onChange={(e) => {setSearch(e.target.value); setCurrentPage(1);}} 
               />

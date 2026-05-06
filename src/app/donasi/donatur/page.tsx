@@ -117,12 +117,12 @@ export default function ManajemenDonaturPage() {
             <Link href="/donasi/masuk"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
           </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
               <Users className="h-7 w-7 text-indigo-600 shrink-0" /> Database <span className="text-indigo-600">Donatur</span>
             </h1>
             <div className="flex flex-wrap items-center gap-2">
               <ImportButton modul="donatur" onImportSuccess={fetchDonatur} />
-              <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 w-full sm:w-auto">
+              <Button asChild className="bg-indigo-600 font-semibold text-sm h-10 shadow-md hover:bg-indigo-700 w-full sm:w-auto">
                 <Link href="/donasi/donatur/baru">
                   <Plus className="mr-2 h-4 w-4" /> Tambah Donatur
                 </Link>
@@ -140,7 +140,7 @@ export default function ManajemenDonaturPage() {
                 <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
                 <Input 
                   placeholder="Cari nama, kontak, atau perusahaan..." 
-                  className="pl-10 font-bold w-full" 
+                  className="h-10 pl-10 text-sm font-medium w-full bg-white" 
                   value={search} 
                   onChange={(e) => {
                     setSearch(e.target.value)
@@ -153,7 +153,7 @@ export default function ManajemenDonaturPage() {
                 <select
                   value={filterTipe}
                   onChange={(e) => { setFilterTipe(e.target.value); setCurrentPage(1) }}
-                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]"
+                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]"
                 >
                   <option value="">Semua Tipe</option>
                   {tipeOptions.map((t) => (

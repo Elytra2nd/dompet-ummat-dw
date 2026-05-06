@@ -279,7 +279,7 @@ export default function DonasiKeluarPage() {
                 <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <Input
                   placeholder="Cari transaksi, mustahik, atau domain..."
-                  className="pl-10 w-full"
+                  className="h-10 pl-10 w-full"
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1) }}
                 />

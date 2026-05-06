@@ -142,7 +142,7 @@ export default function SurveyMainPage() {
                 Data Warehouse • Decision Support System (DSS)
               </p>
             </div>
-            <Button asChild className="bg-indigo-600 font-bold shadow-md hover:bg-indigo-700 w-full sm:w-auto">
+            <Button asChild className="bg-indigo-600 font-semibold text-sm h-10 shadow-md hover:bg-indigo-700 w-full sm:w-auto">
               <Link href="/survey/baru">
                 <Plus className="mr-2 h-4 w-4" /> Buat Survey Baru
               </Link>
@@ -198,7 +198,7 @@ export default function SurveyMainPage() {
                 <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
                 <Input
                   placeholder="Cari mustahik atau no. register..."
-                  className="pl-10 font-bold w-full"
+                  className="h-10 pl-10 text-sm font-medium w-full bg-white"
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value)
@@ -211,7 +211,7 @@ export default function SurveyMainPage() {
                 <select
                   value={filterKelayakan}
                   onChange={(e) => { setFilterKelayakan(e.target.value); setCurrentPage(1) }}
-                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]"
+                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]"
                 >
                   <option value="">Semua Status</option>
                   {kelayakanOptions.map((k) => (

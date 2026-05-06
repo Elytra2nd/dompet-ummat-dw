@@ -145,7 +145,7 @@ export default function AuditLogPage() {
               variant="outline" 
               onClick={fetchLogs} 
               disabled={loading}
-              className="font-semibold bg-white"
+              className="h-10 text-sm font-semibold bg-white"
             >
               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
@@ -164,7 +164,7 @@ export default function AuditLogPage() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="Cari nama master atau ID Bisnis..." 
-                className="pl-10 font-medium w-full"
+                className="h-10 pl-10 text-sm font-medium w-full bg-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

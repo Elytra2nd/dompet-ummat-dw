@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import DonationStats from '@/components/donasi/DonationStats'
 import TransactionHistoryTable from '@/components/donasi/TransactionHistoryTable'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, HeartHandshake, Loader2 } from 'lucide-react'
+import { ArrowLeft, HeartHandshake, Loader2, Plus } from 'lucide-react'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
 
@@ -67,9 +67,9 @@ export default function DonasiMasukPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <ImportButton modul="donasi" onImportSuccess={fetchStats} />
-              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 font-bold shadow-md h-10">
+              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 font-semibold text-sm shadow-md h-10">
                 <Link href="/donasi/masuk/baru">
-                  Input Transaksi
+                  <Plus className="mr-2 h-4 w-4" /> Input Transaksi
                 </Link>
               </Button>
               {loading && (
