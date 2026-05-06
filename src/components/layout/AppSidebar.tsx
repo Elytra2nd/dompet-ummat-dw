@@ -205,7 +205,7 @@ export function AppSidebar() {
                             className={`h-10 font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-all ${isChildActive ? 'bg-emerald-50/50 text-emerald-700' : ''}`}
                           >
                             {item.icon && <item.icon className={`h-5 w-5 shrink-0 ${isChildActive ? 'text-emerald-600' : ''}`} />}
-                            <span className="truncate group-data-[collapsible=icon]:hidden min-w-0 flex-1">{item.title}</span>
+                            <span className="group-data-[collapsible=icon]:hidden min-w-0 flex-1 whitespace-normal text-left leading-tight">{item.title}</span>
                             <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
@@ -214,8 +214,8 @@ export function AppSidebar() {
                             {item.items.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
-                                  <Link href={subItem.url} className="text-[13px] font-semibold py-2 transition-all">
-                                    <span className="truncate">{subItem.title}</span>
+                                  <Link href={subItem.url} className="text-[13px] font-semibold py-2 transition-all h-auto min-h-8">
+                                    <span className="whitespace-normal text-left leading-tight">{subItem.title}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
@@ -234,7 +234,7 @@ export function AppSidebar() {
                       >
                         <Link href={item.url}>
                           {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
-                          <span className="truncate group-data-[collapsible=icon]:hidden min-w-0 flex-1">{item.title}</span>
+                          <span className="group-data-[collapsible=icon]:hidden min-w-0 flex-1 whitespace-normal text-left leading-tight">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
