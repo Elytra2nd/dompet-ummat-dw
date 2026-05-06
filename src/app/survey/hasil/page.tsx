@@ -283,7 +283,7 @@ export default function SurveyMainPage() {
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Link href={`/survey/baru?id=${item.sk_survey}`}>
+                        <Link href={`/survey/edit/${item.sk_survey}`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Edit Survey">
                             <Edit3 className="h-4 w-4" />
                           </Button>

@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, ClipboardCheck } from 'lucide-react'
 import Link from 'next/link'
 
-export default function BaruSurveyPage() {
+export default async function EditSurveyPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params
+  const surveyId = resolvedParams.id
+
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       <div className="mb-8 border-b bg-white shadow-sm">
@@ -15,8 +18,8 @@ export default function BaruSurveyPage() {
               asChild
               className="-ml-2 text-slate-500 transition-colors hover:text-slate-900"
             >
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
+              <Link href="/survey/hasil">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Hasil Survey
               </Link>
             </Button>
           </div>
@@ -25,10 +28,10 @@ export default function BaruSurveyPage() {
             <div>
               <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
                 <ClipboardCheck className="h-8 w-8 text-blue-600" />
-                Survey <span className="text-blue-600">Kelayakan</span>
+                Edit Survey <span className="text-blue-600">Kelayakan</span>
               </h1>
               <p className="mt-1 font-medium text-slate-500">
-                Sistem Pendukung Keputusan Penentuan Mustahik Dompet Ummat
+                Perbarui data kuesioner dan indikator penilaian mustahik
               </p>
             </div>
           </div>
@@ -36,7 +39,7 @@ export default function BaruSurveyPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-8">
-        <SurveyForm />
+        <SurveyForm id_survey={surveyId} />
       </div>
     </div>
   )

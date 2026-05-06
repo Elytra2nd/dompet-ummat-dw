@@ -243,7 +243,7 @@ export default function DonasiKeluarPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <ImportButton modul="penyaluran" onImportSuccess={fetchData} />
-              <Button asChild className="bg-amber-600 hover:bg-amber-700 font-bold w-full sm:w-auto">
+              <Button asChild className="bg-amber-600 hover:bg-amber-700 font-semibold text-sm h-10 w-full sm:w-auto">
                 <Link href="/donasi/keluar/baru">
                   <Plus className="mr-2 h-4 w-4" /> Input Penyaluran
                 </Link>
