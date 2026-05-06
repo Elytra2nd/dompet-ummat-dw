@@ -20,6 +20,7 @@ import {
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
+import Pagination from '@/components/ui/pagination-numbered'
 
 interface SurveyData {
   sk_survey: number;
@@ -299,23 +300,13 @@ export default function SurveyMainPage() {
               </TableBody>
             </Table>
 
-            {/* PAGINATION */}
-            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                Records {filteredSurveys.length === 0 ? 0 : Math.min((currentPage - 1) * itemsPerPage + 1, filteredSurveys.length)} - {Math.min(currentPage * itemsPerPage, filteredSurveys.length)} of {filteredSurveys.length}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-lg border">
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-xs font-black text-slate-900 mx-2 tracking-tighter">
-                  {currentPage} / {totalPages || 1}
-                </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="h-8 w-8 p-0 rounded-lg border">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredSurveys.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
           </CardContent>
         </Card>
       </div>

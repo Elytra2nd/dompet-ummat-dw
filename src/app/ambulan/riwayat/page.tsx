@@ -38,6 +38,7 @@ import {
 import Link from 'next/link'
 import { toast } from 'sonner'
 import ImportButton from '@/components/import/ImportButton'
+import Pagination from '@/components/ui/pagination-numbered'
 
 export default function RiwayatAktivitasPage() {
   const [data, setData] = useState<any>(null)
@@ -399,20 +400,13 @@ export default function RiwayatAktivitasPage() {
           </div>
           {/* PAGINATION */}
           {!loading && filteredLogs.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-              <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest">
-                {Math.min((currentPage - 1) * itemsPerPage + 1, filteredLogs.length)} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-lg">
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-xs font-semibold text-slate-900 mx-1">{currentPage} / {totalPages}</span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="h-8 w-8 p-0 rounded-lg">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredLogs.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
           )}
         </CardContent>
       </Card>

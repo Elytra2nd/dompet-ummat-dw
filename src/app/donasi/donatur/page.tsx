@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Pagination from '@/components/ui/pagination-numbered'
 import {
   Table,
   TableBody,
@@ -246,36 +247,13 @@ export default function ManajemenDonaturPage() {
               </TableBody>
             </Table>
 
-            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredDonatur.length)} of {filteredDonatur.length} records
-              </p>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="h-8 w-8 p-0 rounded-lg border-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-black text-slate-900 mx-2 uppercase tracking-tighter">
-                    Page {currentPage} / {totalPages || 1}
-                  </span>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="h-8 w-8 p-0 rounded-lg border-2"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredDonatur.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
           </CardContent>
         </Card>
       </div>

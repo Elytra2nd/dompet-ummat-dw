@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Pagination from '@/components/ui/pagination-numbered'
 import {
   Table,
   TableBody,
@@ -238,22 +239,13 @@ export default function ManajemenMustahikPage() {
               </TableBody>
             </Table>
 
-            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                Records {Math.min((currentPage - 1) * itemsPerPage + 1, filteredMustahik.length)} - {Math.min(currentPage * itemsPerPage, filteredMustahik.length)} of {filteredMustahik.length}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-lg border">
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-xs font-black text-slate-900 mx-2 tracking-tighter">
-                  {currentPage} / {totalPages || 1}
-                </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="h-8 w-8 p-0 rounded-lg border">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredMustahik.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
           </CardContent>
         </Card>
       </div>

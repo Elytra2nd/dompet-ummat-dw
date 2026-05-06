@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
+import Pagination from '@/components/ui/pagination-numbered'
 
 interface AmbulanLog {
   sk_fakta_layanan_ambulan: number;
@@ -395,16 +396,13 @@ export default function MonitoringAmbulanPage() {
           </div>
 
           {/* PAGINATION */}
-          <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-              {filteredData.length === 0 ? 0 : Math.min((currentPage - 1) * itemsPerPage + 1, filteredData.length)} - {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-lg" onClick={() => setCurrentPage(p => Math.max(p-1, 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4"/></Button>
-              <span className="text-xs font-semibold text-slate-900 mx-1">{currentPage} / {totalPages || 1}</span>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-lg" onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}><ChevronRight className="h-4 w-4"/></Button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredData.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
         </CardContent>
       </Card>
       </div>
