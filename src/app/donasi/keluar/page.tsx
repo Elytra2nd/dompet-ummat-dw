@@ -354,7 +354,7 @@ export default function DonasiKeluarPage() {
                           {toDisplay(item.status_pengajuan)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-black text-sm text-slate-900">
+                      <TableCell className="font-semibold text-sm text-slate-900">
                         {formatIDR(item.dana_tersalur)}
                       </TableCell>
                       <TableCell>
@@ -560,7 +560,7 @@ export default function DonasiKeluarPage() {
               <Trash2 className="h-5 w-5" /> Konfirmasi Hapus
             </AlertDialogTitle>
             <AlertDialogDescription className="text-slate-600">
-              Transaksi <span className="font-black text-slate-900">{deleteTarget?.id_transaksi}</span> akan dihapus
+              Transaksi <span className="font-semibold text-slate-900">{deleteTarget?.id_transaksi}</span> akan dihapus
               secara permanen dari data warehouse. Tindakan ini <span className="font-bold text-red-600">tidak dapat dibatalkan</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -582,7 +582,7 @@ export default function DonasiKeluarPage() {
       <Dialog open={!!detailItem} onOpenChange={(open) => { if (!open) setDetailItem(null) }}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-black uppercase text-amber-900 tracking-tight">
+            <DialogTitle className="flex items-center gap-2 font-semibold uppercase text-amber-900 tracking-tight">
               <Receipt className="h-5 w-5 text-amber-600" /> Detail Transaksi Keluar
             </DialogTitle>
           </DialogHeader>
@@ -595,7 +595,7 @@ export default function DonasiKeluarPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Dana Tersalur</p>
-                  <p className="font-black text-xl text-amber-700 mt-1">{formatIDR(detailItem.dana_tersalur)}</p>
+                  <p className="font-semibold text-xl text-amber-700 mt-1">{formatIDR(detailItem.dana_tersalur)}</p>
                 </div>
               </div>
 

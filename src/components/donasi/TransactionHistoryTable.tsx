@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle, Eye, Receipt } from 'lucide-react'
+import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle, Eye, Receipt, Search, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/utils-ambulan'
 import Pagination from '@/components/ui/pagination-numbered'
@@ -23,6 +23,10 @@ type Transaction = {
 export default function TransactionHistoryTable() {
   const [data, setData] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Search & Filter
+  const [search, setSearch] = useState('')
+  const [filterProgram, setFilterProgram] = useState('Semua')
   
   // Paginasi
   const [page, setPage] = useState(1)
@@ -49,7 +53,7 @@ export default function TransactionHistoryTable() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/donasi/riwayat?page=${page}&limit=${limit}`)
+      const res = await fetch(`/api/donasi/riwayat?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&program=${encodeURIComponent(filterProgram)}`)
       if (!res.ok) throw new Error('Failed to fetch')
       const json = await res.json()
       setData(json.data)
@@ -64,7 +68,7 @@ export default function TransactionHistoryTable() {
 
   useEffect(() => {
     fetchData()
-  }, [page])
+  }, [page, search, filterProgram])
 
   const openEditModal = (item: Transaction) => {
     setEditingData(item)
@@ -135,9 +139,33 @@ export default function TransactionHistoryTable() {
   return (
     <Card className="mt-8 border-none shadow-md">
       <CardHeader className="border-b bg-white">
-        <CardTitle className="text-lg font-black uppercase tracking-tight flex items-center gap-2 text-slate-800">
+        <CardTitle className="text-lg font-bold uppercase tracking-tight flex items-center gap-2 text-slate-800">
           <History className="h-5 w-5 text-indigo-600" /> Riwayat Transaksi Terakhir
         </CardTitle>
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <Input 
+              placeholder="Cari nama donatur..." 
+              className="h-10 pl-10 text-sm font-medium w-full bg-white" 
+              value={search} 
+              onChange={(e) => {setSearch(e.target.value); setPage(1);}} 
+            />
+          </div>
+          <div className="relative">
+            <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+            <select 
+              className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]" 
+              value={filterProgram} 
+              onChange={(e) => {setFilterProgram(e.target.value); setPage(1);}}
+            >
+              <option value="Semua">Semua Program</option>
+              {['Kesehatan','Pendidikan','Ekonomi','Sosial Kemanusiaan','Dakwah & Advokasi'].map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -178,7 +206,7 @@ export default function TransactionHistoryTable() {
                       <div className="font-semibold text-emerald-600">{item.dim_program_donasi?.program_induk || '-'}</div>
                       <div className="text-[10px] text-slate-400 uppercase">{item.dim_program_donasi?.sub_program || '-'}</div>
                     </td>
-                    <td className="px-6 py-4 text-right font-black text-indigo-600">
+                    <td className="px-6 py-4 text-right font-semibold text-indigo-600">
                       {formatRupiah(Number(item.nominal_valid))}
                     </td>
                     <td className="px-6 py-4 text-xs hidden lg:table-cell">{item.no_ref || '-'}</td>
@@ -225,7 +253,7 @@ export default function TransactionHistoryTable() {
                         <span className="text-[10px] text-slate-400">•</span>
                         <span className="text-[10px] text-slate-400 uppercase">{item.dim_program_donasi?.sub_program || '-'}</span>
                       </div>
-                      <p className="text-lg font-black text-indigo-600 mt-2">
+                      <p className="text-lg font-semibold text-indigo-600 mt-2">
                         {formatRupiah(Number(item.nominal_valid))}
                       </p>
                     </div>
@@ -262,7 +290,7 @@ export default function TransactionHistoryTable() {
       <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="font-black uppercase text-indigo-900 tracking-tight">Edit Transaksi Donasi</DialogTitle>
+            <DialogTitle className="font-semibold uppercase text-indigo-900 tracking-tight">Edit Transaksi Donasi</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -309,7 +337,7 @@ export default function TransactionHistoryTable() {
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-rose-600 font-black uppercase tracking-tight">
+            <DialogTitle className="flex items-center gap-2 text-rose-600 font-semibold uppercase tracking-tight">
               <AlertTriangle className="h-5 w-5" /> Konfirmasi Hapus
             </DialogTitle>
             <DialogDescription className="font-medium text-slate-600 pt-2">
@@ -328,7 +356,7 @@ export default function TransactionHistoryTable() {
       <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-black uppercase text-indigo-900 tracking-tight">
+            <DialogTitle className="flex items-center gap-2 font-semibold uppercase text-indigo-900 tracking-tight">
               <Receipt className="h-5 w-5 text-indigo-600" /> Detail Transaksi Masuk
             </DialogTitle>
           </DialogHeader>
@@ -341,7 +369,7 @@ export default function TransactionHistoryTable() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Nominal Donasi</p>
-                  <p className="font-black text-xl text-indigo-700 mt-1">{formatRupiah(Number(detailData.nominal_valid))}</p>
+                  <p className="font-semibold text-xl text-indigo-700 mt-1">{formatRupiah(Number(detailData.nominal_valid))}</p>
                 </div>
               </div>
 
