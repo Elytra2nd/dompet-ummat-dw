@@ -37,7 +37,7 @@ export default function DetailDonaturPage() {
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <div className="flex flex-col items-center gap-2">
-        <div className="h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="h-8 w-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Sinkronisasi Warehouse...</p>
       </div>
     </div>
@@ -56,13 +56,13 @@ export default function DetailDonaturPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* KIRI: PROFIL UTAMA */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="border-4 border-slate-900 rounded-none shadow-[8px_8px_0px_0px_rgba(16,185,129,1)] bg-white">
+          <Card className="border border-slate-200 rounded-2xl shadow-lg bg-white">
             <CardContent className="pt-8 flex flex-col items-center text-center">
               <div className="h-24 w-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4 border-2 border-emerald-500">
                 <User size={48} className="text-emerald-600" />
               </div>
               <h2 className="text-2xl font-black uppercase text-slate-900 leading-tight">{donatur.nama}</h2>
-              <Badge className="mt-2 bg-slate-900 text-white font-black px-4 py-1 rounded-none uppercase tracking-tighter">
+              <Badge className="mt-2 bg-slate-800 text-white font-black px-4 py-1 rounded-lg uppercase tracking-tighter">
                 {donatur.id_donatur}
               </Badge>
               
@@ -86,7 +86,7 @@ export default function DetailDonaturPage() {
           </Card>
 
           {/* INSIGHT SCD TYPE 2 */}
-          <Card className="border-2 border-slate-900 bg-emerald-50 rounded-none">
+          <Card className="border border-emerald-200 bg-emerald-50 rounded-2xl shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-[10px] font-black uppercase flex items-center gap-2 text-emerald-800">
                 <History size={14} className="text-emerald-600" /> SCD Type 2 Integrity
@@ -102,8 +102,8 @@ export default function DetailDonaturPage() {
 
         {/* KANAN: HISTORI TRANSAKSI */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-4 border-slate-900 rounded-none shadow-none overflow-hidden bg-white">
-            <CardHeader className="bg-slate-900 text-white flex flex-row items-center justify-between">
+          <Card className="border border-slate-200 rounded-2xl shadow-sm overflow-hidden bg-white">
+            <CardHeader className="bg-slate-800 text-white flex flex-row items-center justify-between rounded-t-2xl">
               <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                 <Wallet size={16} className="text-emerald-400" /> Riwayat Transaksi (Fact Donasi)
               </CardTitle>
@@ -112,7 +112,7 @@ export default function DetailDonaturPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 border-b-2 border-slate-900">
+                  <thead className="bg-slate-50 border-b border-slate-200">
                     <tr className="text-[10px] font-black uppercase text-slate-900">
                       <th className="p-4 border-r">Tgl. Transaksi</th>
                       <th className="p-4 border-r">Program Penyaluran</th>

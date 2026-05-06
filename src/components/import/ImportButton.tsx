@@ -137,9 +137,8 @@ export default function ImportButton({ modul, onImportSuccess, className = '', f
         <Button
           type="button"
           variant="outline"
-          size="sm"
           onClick={handleDownloadTemplate}
-          className={`gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-semibold text-xs whitespace-nowrap ${fullWidth ? 'flex-1 sm:flex-none h-10' : ''}`}
+          className={`gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-semibold text-sm h-10 whitespace-nowrap ${fullWidth ? 'flex-1 sm:flex-none' : ''}`}
           id={`btn-download-template-${modul}`}
         >
           <FileDown className="h-4 w-4 shrink-0" />
@@ -150,9 +149,8 @@ export default function ImportButton({ modul, onImportSuccess, className = '', f
         {/* Tombol Buka Popup Import */}
         <Button
           type="button"
-          size="sm"
           onClick={() => setDragDialogOpen(true)}
-          className={`gap-2 bg-emerald-600 hover:bg-emerald-700 font-semibold text-xs shadow-md whitespace-nowrap ${fullWidth ? 'flex-1 sm:flex-none h-10' : ''}`}
+          className={`gap-2 bg-emerald-600 hover:bg-emerald-700 font-semibold text-sm shadow-md h-10 whitespace-nowrap ${fullWidth ? 'flex-1 sm:flex-none' : ''}`}
           id={`btn-open-import-${modul}`}
         >
           <FileUp className="h-4 w-4 shrink-0" />

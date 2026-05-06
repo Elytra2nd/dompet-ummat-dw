@@ -14,17 +14,10 @@ import {
   YAxis,
 } from 'recharts'
 import {
-  ArrowDownRight,
   ArrowUpRight,
   Calendar,
   Filter,
-  HandCoins,
-  HeartHandshake,
-  PieChart,
-  UserCheck,
-  Users,
   X,
-  Zap,
   BarChart2,
   TrendingUp,
 } from 'lucide-react'
@@ -32,16 +25,7 @@ import { formatRupiah } from '@/lib/utils-ambulan'
 import { toast } from 'sonner'
 
 type FilterType = 'none' | 'year' | 'month' | 'day'
-type Grain = 'year' | 'month' | 'day'
 type ChartType = 'area' | 'bar'
-
-interface DonationStatsProps {
-  totalDonasi: number
-  jumlahDonatur: number
-  jumlahMustahik: number
-  danaTersalur: number
-  pertumbuhan: number
-}
 
 interface TrendItem {
   label: string
@@ -53,15 +37,8 @@ interface TrendItem {
   total: number
 }
 
-interface YearResponse {
-  years: string[]
-  minYear: string | null
-  maxYear: string | null
-}
-
 interface FilterState {
   filterType: FilterType
-  grain: Grain
   startYear: string
   endYear: string
   startMonth: string
@@ -70,30 +47,16 @@ interface FilterState {
   endDate: string
 }
 
-function buildDefaultFilter(minYear?: string | null, maxYear?: string | null): FilterState {
+function buildDefaultFilter(): FilterState {
   return {
     filterType: 'none',
-    grain: 'year',
-    startYear: minYear ?? '',
-    endYear: maxYear ?? '',
+    startYear: '',
+    endYear: '',
     startMonth: '',
     endMonth: '',
     startDate: '',
     endDate: '',
   }
-}
-
-function normalizeFilter(filter: FilterState): FilterState {
-  if (filter.filterType === 'none') {
-    return { ...filter, grain: 'year' }
-  }
-  if (filter.filterType === 'year') {
-    return { ...filter, grain: 'year' }
-  }
-  if (filter.filterType === 'month') {
-    return { ...filter, grain: 'month' }
-  }
-  return { ...filter, grain: 'day' }
 }
 
 function getFilterLabel(filter: FilterState) {
@@ -103,20 +66,17 @@ function getFilterLabel(filter: FilterState) {
   return `${filter.startDate} s.d. ${filter.endDate}`
 }
 
-export default function DonationStats({
-  totalDonasi = 0,
-  jumlahDonatur = 0,
-  jumlahMustahik = 0,
-  pertumbuhan = 0,
-  danaTersalur = 0,
-}: DonationStatsProps) {
+interface PenyaluranStatsProps {
+  totalDana: number
+  totalTransaksi: number
+}
+
+export default function PenyaluranStats({ totalDana = 0, totalTransaksi = 0 }: PenyaluranStatsProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [chartType, setChartType] = useState<ChartType>('area')
 
   const [availableYears, setAvailableYears] = useState<string[]>([])
-  const [minYear, setMinYear] = useState<string | null>(null)
-  const [maxYear, setMaxYear] = useState<string | null>(null)
 
   const [draftFilter, setDraftFilter] = useState<FilterState>(buildDefaultFilter())
   const [appliedFilter, setAppliedFilter] = useState<FilterState>(buildDefaultFilter())
@@ -129,29 +89,19 @@ export default function DonationStats({
     setIsMounted(true)
   }, [])
 
+  // Reuse the same tahun API since it lists available years
   useEffect(() => {
     const fetchYears = async () => {
       try {
         const res = await fetch('/api/donasi/tahun')
         if (!res.ok) throw new Error('Gagal memuat daftar tahun')
-
         const data = await res.json()
         const years = Array.isArray(data) ? data : data.years ?? []
-        const min = Array.isArray(data) ? data[0] ?? null : data.minYear ?? null
-        const max = Array.isArray(data) ? data[data.length - 1] ?? null : data.maxYear ?? null
-
         setAvailableYears(years)
-        setMinYear(min)
-        setMaxYear(max)
-
-        const initialFilter = buildDefaultFilter(min, max)
-        setDraftFilter(initialFilter)
-        setAppliedFilter(initialFilter)
       } catch (error) {
         console.error('Gagal memuat tahun:', error)
       }
     }
-
     fetchYears()
   }, [])
 
@@ -165,7 +115,6 @@ export default function DonationStats({
       try {
         const params = new URLSearchParams()
         params.set('filterType', appliedFilter.filterType)
-        params.set('grain', appliedFilter.grain)
 
         if (appliedFilter.filterType === 'year') {
           params.set('startYear', appliedFilter.startYear)
@@ -180,7 +129,7 @@ export default function DonationStats({
           params.set('endDate', appliedFilter.endDate)
         }
 
-        const res = await fetch(`/api/donasi/tren?${params.toString()}`)
+        const res = await fetch(`/api/donasi/keluar/tren?${params.toString()}`)
         if (!res.ok) throw new Error('Gagal memuat data tren')
 
         const data: TrendItem[] = await res.json()
@@ -197,147 +146,78 @@ export default function DonationStats({
     fetchTrend()
   }, [appliedFilter])
 
-  const isPositive = pertumbuhan >= 0
-  const persentasePenyaluran = totalDonasi > 0 ? (danaTersalur / totalDonasi) * 100 : 0
-
   const activeFilterLabel = useMemo(() => getFilterLabel(appliedFilter), [appliedFilter])
 
-  const handleFilterTypeChange = (value: FilterType) => {
-    setDraftFilter((prev) => normalizeFilter({ ...prev, filterType: value }))
-  }
-
   const handleApplyFilter = () => {
-    const normalized = normalizeFilter(draftFilter)
-
-    if (normalized.filterType === 'year' && (!normalized.startYear || !normalized.endYear)) {
+    if (draftFilter.filterType === 'year' && (!draftFilter.startYear || !draftFilter.endYear)) {
       toast.error('Pilih tahun awal dan tahun akhir terlebih dahulu')
       return
     }
-    if (normalized.filterType === 'month' && (!normalized.startMonth || !normalized.endMonth)) {
+    if (draftFilter.filterType === 'month' && (!draftFilter.startMonth || !draftFilter.endMonth)) {
       toast.error('Pilih bulan awal dan bulan akhir terlebih dahulu')
       return
     }
-    if (normalized.filterType === 'day' && (!normalized.startDate || !normalized.endDate)) {
+    if (draftFilter.filterType === 'day' && (!draftFilter.startDate || !draftFilter.endDate)) {
       toast.error('Pilih tanggal awal dan tanggal akhir terlebih dahulu')
       return
     }
-
-    setAppliedFilter(normalized)
+    setAppliedFilter({ ...draftFilter })
     setIsFilterOpen(false)
   }
 
   const handleResetFilter = () => {
-    const resetFilter = buildDefaultFilter(minYear, maxYear)
+    const resetFilter = buildDefaultFilter()
     setDraftFilter(resetFilter)
     setAppliedFilter(resetFilter)
     setIsFilterOpen(false)
   }
 
   if (!isMounted) {
-    return <div className="p-10 text-center font-sans">Memuat Dashboard...</div>
+    return <div className="p-10 text-center font-sans">Memuat...</div>
   }
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Stat Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <Card className="col-span-2 lg:col-span-1 relative overflow-hidden border-none bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl">
+      {/* Summary Cards */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl">
           <div className="absolute top-[-10px] right-[-10px] opacity-10">
-            <HeartHandshake size={100} />
+            <ArrowUpRight size={100} />
           </div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Total ZISWAF</p>
+              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Total Tersalurkan</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
-                <Zap className="h-4 w-4 text-yellow-300 fill-yellow-300" />
+                <ArrowUpRight className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3 overflow-hidden">
-              <h3 className="text-sm sm:text-base md:text-lg font-extrabold leading-tight break-all">
-                {formatRupiah(totalDonasi)}
+              <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
+                {formatRupiah(totalDana)}
               </h3>
-              <div className={`mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase ${isPositive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
-                {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                {Math.abs(pertumbuhan)}%
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+                Realisasi Penyaluran
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-xl">
-          <div className="absolute top-[-10px] right-[-10px] opacity-10"><HandCoins size={100} /></div>
+        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-xl">
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Tersalurkan</p>
+              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Jumlah Transaksi</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
-                <HandCoins className="h-4 w-4 text-white" />
-              </div>
-            </div>
-            <div className="mt-3 overflow-hidden">
-              <h3 className="text-sm sm:text-base md:text-lg font-extrabold leading-tight break-all">{formatRupiah(danaTersalur)}</h3>
-              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">Realisasi Manfaat</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-xl">
-          <div className="absolute top-[-10px] right-[-10px] opacity-10"><PieChart size={100} /></div>
-          <CardContent className="relative z-10 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Absorpsi</p>
-              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
-                <PieChart className="h-4 w-4 text-white" />
+                <BarChart2 className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3">
-              <div className="mt-3 flex items-center gap-2">
-                <h3 className="text-sm sm:text-base md:text-lg font-extrabold">{persentasePenyaluran.toFixed(1)}%</h3>
-                <div className="inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">Tingkat Penyaluran</div>
-              </div>
-              <div className="mt-2 h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
-                <div className="h-full bg-white rounded-full transition-all duration-1000" style={{ width: `${Math.min(persentasePenyaluran, 100)}%` }} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xl">
-          <div className="absolute top-[-10px] right-[-10px] opacity-10"><Users size={100} /></div>
-          <CardContent className="relative z-10 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Muzakki</p>
-              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
-                <Users className="h-4 w-4 text-white" />
-              </div>
-            </div>
-            <div className="mt-3">
-              <h3 className="text-base sm:text-lg md:text-xl font-extrabold truncate">
-                {jumlahDonatur.toLocaleString()}
-                <span className="text-[10px] ml-1 text-white/70">Jiwa</span>
+              <h3 className="text-base sm:text-lg md:text-xl font-black truncate">
+                {totalTransaksi.toLocaleString()}
+                <span className="text-[10px] ml-1 text-white/70">Record</span>
               </h3>
-              <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">
-                <span className="h-1 w-1 rounded-full bg-white animate-ping" />
-                Aktif
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+                Fact Penyaluran
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden border-none bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl">
-          <div className="absolute top-[-10px] right-[-10px] opacity-10"><UserCheck size={100} /></div>
-          <CardContent className="relative z-10 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Mustahik</p>
-              <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
-                <UserCheck className="h-4 w-4 text-white" />
-              </div>
-            </div>
-            <div className="mt-3">
-              <h3 className="text-base sm:text-lg md:text-xl font-extrabold truncate">
-                {jumlahMustahik.toLocaleString()}
-                <span className="text-[10px] ml-1 text-white/70">Jiwa</span>
-              </h3>
-              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-white/20 text-white/80">Penerima</div>
             </div>
           </CardContent>
         </Card>
@@ -345,16 +225,16 @@ export default function DonationStats({
 
       {/* Chart Card */}
       <Card className="border-none shadow-md">
-        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-4 space-y-0 pb-7">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-7">
           <div>
-            <CardTitle className="text-lg sm:text-xl font-bold text-slate-800">Grafik Penghimpunan Dana</CardTitle>
-            <CardDescription>Visualisasi pertumbuhan donasi Ziswaf dari waktu ke waktu</CardDescription>
-            <div className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+            <CardTitle className="text-xl font-black text-slate-800">Grafik Penyaluran Dana</CardTitle>
+            <CardDescription>Visualisasi distribusi penyaluran ZISWAF dari waktu ke waktu</CardDescription>
+            <div className="mt-3 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
               {activeFilterLabel}
             </div>
           </div>
 
-          <div className="relative flex flex-wrap items-center gap-2">
+          <div className="relative flex items-center gap-2">
             {/* Chart Type Toggle */}
             <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
               <button
@@ -363,7 +243,7 @@ export default function DonationStats({
                 title="Area Chart"
                 className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-bold transition-all ${
                   chartType === 'area'
-                    ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-slate-200'
+                    ? 'bg-white text-amber-700 shadow-sm ring-1 ring-slate-200'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
@@ -376,7 +256,7 @@ export default function DonationStats({
                 title="Bar Chart"
                 className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-bold transition-all ${
                   chartType === 'bar'
-                    ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-slate-200'
+                    ? 'bg-white text-amber-700 shadow-sm ring-1 ring-slate-200'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
@@ -406,12 +286,12 @@ export default function DonationStats({
               </button>
             )}
 
-            {/* Filter Dropdown — safe against viewport overflow */}
+            {/* Filter Dropdown */}
             {isFilterOpen && (
               <div className="absolute right-0 top-12 z-20 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
                 <div className="mb-4 flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-slate-500" />
-                  <p className="text-sm font-bold text-slate-800">Filter Waktu</p>
+                  <p className="text-sm font-black text-slate-800">Filter Waktu</p>
                 </div>
 
                 <div className="space-y-3">
@@ -421,7 +301,7 @@ export default function DonationStats({
                         type="radio"
                         name="filterType"
                         checked={draftFilter.filterType === type}
-                        onChange={() => handleFilterTypeChange(type)}
+                        onChange={() => setDraftFilter((prev) => ({ ...prev, filterType: type }))}
                       />
                       {type === 'none' ? 'Tanpa Range' : type === 'year' ? 'Range Tahun' : type === 'month' ? 'Range Bulan' : 'Range Hari'}
                     </label>
@@ -487,7 +367,7 @@ export default function DonationStats({
 
                 <div className="mt-5 flex items-center justify-end gap-2">
                   <button type="button" onClick={handleResetFilter} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50">Reset</button>
-                  <button type="button" onClick={handleApplyFilter} className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-700">Terapkan</button>
+                  <button type="button" onClick={handleApplyFilter} className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-bold text-white hover:bg-amber-700">Terapkan</button>
                 </div>
               </div>
             )}
@@ -495,7 +375,7 @@ export default function DonationStats({
         </CardHeader>
 
         <CardContent>
-          <div className="h-[250px] sm:h-[350px] w-full">
+          <div className="h-[350px] w-full">
             {loadingChart ? (
               <div className="flex h-full items-center justify-center text-sm font-medium text-slate-500">Memuat grafik...</div>
             ) : chartError ? (
@@ -507,9 +387,9 @@ export default function DonationStats({
                 {chartType === 'area' ? (
                   <AreaChart data={chartData}>
                     <defs>
-                      <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#059669" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                      <linearGradient id="colorTotalKeluar" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#d97706" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -517,27 +397,27 @@ export default function DonationStats({
                     <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `${value / 1000000}jt`} tick={{ fill: '#64748b', fontSize: 12 }} />
                     <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                      formatter={(value: any) => [formatRupiah(Number(value)), 'Total Donasi']}
+                      formatter={(value: any) => [formatRupiah(Number(value)), 'Dana Tersalur']}
                     />
-                    <Area type="monotone" dataKey="total" stroke="#059669" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" animationDuration={1500} />
+                    <Area type="monotone" dataKey="total" stroke="#d97706" strokeWidth={3} fillOpacity={1} fill="url(#colorTotalKeluar)" animationDuration={1500} />
                   </AreaChart>
                 ) : (
                   <BarChart data={chartData} barSize={chartData.length > 20 ? 10 : chartData.length > 10 ? 18 : 32}>
                     <defs>
-                      <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#059669" stopOpacity={1} />
-                        <stop offset="100%" stopColor="#34d399" stopOpacity={0.7} />
+                      <linearGradient id="colorBarKeluar" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#d97706" stopOpacity={1} />
+                        <stop offset="100%" stopColor="#fbbf24" stopOpacity={0.7} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `${value / 1000000}jt`} tick={{ fill: '#64748b', fontSize: 12 }} />
                     <Tooltip
-                      cursor={{ fill: '#f0fdf4', radius: 4 }}
+                      cursor={{ fill: '#fffbeb', radius: 4 }}
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                      formatter={(value: any) => [formatRupiah(Number(value)), 'Total Donasi']}
+                      formatter={(value: any) => [formatRupiah(Number(value)), 'Dana Tersalur']}
                     />
-                    <Bar dataKey="total" fill="url(#colorBar)" radius={[6, 6, 0, 0]} animationDuration={1200} />
+                    <Bar dataKey="total" fill="url(#colorBarKeluar)" radius={[6, 6, 0, 0]} animationDuration={1200} />
                   </BarChart>
                 )}
               </ResponsiveContainer>

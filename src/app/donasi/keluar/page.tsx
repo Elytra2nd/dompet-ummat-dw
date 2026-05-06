@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  ArrowUpRight, Search, Plus, Loader2, Pencil, Trash2, X, Save, ChevronLeft, ChevronRight, Eye, Receipt
+  ArrowUpRight, ArrowLeft, Search, Plus, Loader2, Pencil, Trash2, X, Save, ChevronLeft, ChevronRight, Eye, Receipt, Filter
 } from 'lucide-react'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -22,6 +22,8 @@ import {
 import { toast } from 'sonner'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
+import PenyaluranStats from '@/components/donasi/PenyaluranStats'
+import Pagination from '@/components/ui/pagination-numbered'
 import {
   DOMAIN_PROGRAM, KATEGORI_PROGRAM, JENIS_BANTUAN, STATUS_PENGAJUAN, KATEGORI_PENYAKIT,
 } from '@/lib/constants-penyaluran'
@@ -65,6 +67,7 @@ export default function DonasiKeluarPage() {
   const [mounted, setMounted] = useState(false)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [filterDomain, setFilterDomain] = useState('')
 
   // Edit state
   const [editItem, setEditItem] = useState<PenyaluranZiswaf | null>(null)
@@ -107,15 +110,24 @@ export default function DonasiKeluarPage() {
 
   // ─── Filter & Pagination ─────────────────────────────────────────────────
 
+  const domainOptions = useMemo(() => {
+    const set = new Set(data.map(d => d.domain_program).filter(Boolean))
+    return Array.from(set).sort()
+  }, [data])
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
     return data.filter(
-      (d) =>
-        d.id_transaksi?.toLowerCase().includes(q) ||
-        d.dim_mustahik?.nama?.toLowerCase().includes(q) ||
-        toDisplay(d.domain_program).toLowerCase().includes(q),
+      (d) => {
+        const matchSearch =
+          d.id_transaksi?.toLowerCase().includes(q) ||
+          d.dim_mustahik?.nama?.toLowerCase().includes(q) ||
+          toDisplay(d.domain_program).toLowerCase().includes(q)
+        const matchDomain = !filterDomain || d.domain_program === filterDomain
+        return matchSearch && matchDomain
+      }
     )
-  }, [data, search])
+  }, [data, search, filterDomain])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -216,19 +228,22 @@ export default function DonasiKeluarPage() {
       {/* Header */}
       <div className="border-b bg-white shadow-sm mb-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-semibold hover:bg-slate-50">
+            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
+          </Button>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
-                <ArrowUpRight className="h-7 w-7 text-amber-500 shrink-0" />
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
+                <Receipt className="h-7 w-7 text-amber-500 shrink-0" />
                 Penyaluran <span className="text-amber-600">ZISWAF</span>
               </h1>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
                 Data Warehouse • Fact Penyaluran
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <ImportButton modul="penyaluran" onImportSuccess={fetchData} />
-              <Button asChild className="bg-amber-600 hover:bg-amber-700 font-bold w-full sm:w-auto">
+              <Button asChild className="bg-amber-600 hover:bg-amber-700 font-semibold text-sm h-10 w-full sm:w-auto">
                 <Link href="/donasi/keluar/baru">
                   <Plus className="mr-2 h-4 w-4" /> Input Penyaluran
                 </Link>
@@ -240,28 +255,48 @@ export default function DonasiKeluarPage() {
           {!loading && (
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
               <span className="font-semibold text-slate-500">
-                Total Transaksi: <span className="text-slate-900 font-black">{filtered.length}</span>
+                Total Transaksi: <span className="text-slate-900 font-bold">{filtered.length}</span>
               </span>
               <span className="font-semibold text-slate-500">
-                Total Tersalur: <span className="text-amber-600 font-black">{formatIDR(totalDana)}</span>
+                Total Tersalur: <span className="text-amber-600 font-bold">{formatIDR(totalDana)}</span>
               </span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Stats & Chart */}
+        {!loading && (
+          <PenyaluranStats totalDana={totalDana} totalTransaksi={filtered.length} />
+        )}
+
         {/* Toolbar */}
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="py-4 border-b">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Cari transaksi, mustahik, atau domain..."
-                className="pl-10 w-full"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-              />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Cari transaksi, mustahik, atau domain..."
+                  className="h-10 pl-10 w-full"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                />
+              </div>
+              <div className="relative">
+                <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <select
+                  value={filterDomain}
+                  onChange={(e) => { setFilterDomain(e.target.value); setPage(1) }}
+                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 appearance-none cursor-pointer min-w-[180px]"
+                >
+                  <option value="">Semua Domain</option>
+                  {domainOptions.map((d) => (
+                    <option key={d} value={d}>{toDisplay(d)}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </CardHeader>
 
@@ -297,12 +332,12 @@ export default function DonasiKeluarPage() {
                   paginated.map((item) => (
                     <TableRow key={item.sk_fakta_penyaluran} className="hover:bg-amber-50/30 transition-colors">
                       <TableCell className="px-6 py-4">
-                        <p className="font-black text-xs text-slate-900">{toDisplay(item.domain_program)}</p>
+                        <p className="font-bold text-xs text-slate-900">{toDisplay(item.domain_program)}</p>
                         <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
                       </TableCell>
                       <TableCell>
                         <p className="font-bold text-sm text-slate-800">{item.dim_mustahik?.nama ?? 'UMUM'}</p>
-                        <p className="text-[9px] font-black text-amber-600 uppercase tracking-wider">
+                        <p className="text-[9px] font-semibold text-amber-600 uppercase tracking-wider">
                           {toDisplay(item.dim_mustahik?.kategori_pm ?? '')}
                         </p>
                       </TableCell>
@@ -370,7 +405,7 @@ export default function DonasiKeluarPage() {
                 <div key={item.sk_fakta_penyaluran} className="p-4 hover:bg-amber-50/20 transition-colors">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="font-black text-sm text-slate-900 truncate">{item.dim_mustahik?.nama ?? 'UMUM'}</p>
+                      <p className="font-bold text-sm text-slate-900 truncate">{item.dim_mustahik?.nama ?? 'UMUM'}</p>
                       <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
                     </div>
                     <div className="flex gap-1 shrink-0">
@@ -392,7 +427,7 @@ export default function DonasiKeluarPage() {
                     <Badge variant="outline" className={`font-bold text-[9px] ${STATUS_COLOR[toDisplay(item.status_pengajuan)] ?? ''}`}>
                       {toDisplay(item.status_pengajuan)}
                     </Badge>
-                    <span className="font-black text-sm text-slate-900 ml-auto">{formatIDR(item.dana_tersalur)}</span>
+                    <span className="font-bold text-sm text-slate-900 ml-auto">{formatIDR(item.dana_tersalur)}</span>
                   </div>
                 </div>
               ))
@@ -401,19 +436,13 @@ export default function DonasiKeluarPage() {
 
           {/* ─── Pagination ─── */}
           {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-t bg-slate-50/50">
-              <p className="text-xs text-slate-500 font-semibold">
-                Hal {page} dari {totalPages} ({filtered.length} data)
-              </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filtered.length}
+              itemsPerPage={PAGE_SIZE}
+              onPageChange={setPage}
+            />
           )}
         </Card>
       </div>
@@ -422,7 +451,7 @@ export default function DonasiKeluarPage() {
       <Dialog open={!!editItem} onOpenChange={(open) => { if (!open) setEditItem(null) }}>
         <DialogContent className="max-w-lg w-full">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-black text-slate-900">
+            <DialogTitle className="flex items-center gap-2 font-bold text-slate-900">
               <Pencil className="h-4 w-4 text-amber-500" />
               Edit Penyaluran
               <span className="ml-auto text-[10px] font-mono text-slate-400">{editItem?.id_transaksi}</span>

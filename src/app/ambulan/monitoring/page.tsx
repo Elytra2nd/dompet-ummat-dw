@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { 
-  Activity, MapPin, User, Truck, Clock, Search, 
+  Activity, MapPin, User, Truck, Clock, Search, ArrowLeft,
   AlertCircle, Filter, RefreshCw, Plus, Edit3, Trash2, X, Save, Eye,
   ChevronLeft, ChevronRight,
   Loader2
@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
+import Pagination from '@/components/ui/pagination-numbered'
 
 interface AmbulanLog {
   sk_fakta_layanan_ambulan: number;
@@ -147,25 +148,65 @@ export default function MonitoringAmbulanPage() {
   if (!mounted) return null
 
   return (
-    <div className="p-4 md:p-8 space-y-6 bg-slate-50/50 min-h-screen font-sans text-slate-900">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 tracking-tight uppercase">
-            <Activity className="text-rose-500 h-6 w-6" /> Monitoring <span className="text-rose-600">Layanan</span>
-          </h1>
-          <p className="text-slate-500 text-sm">Rekapitulasi Transaksi Bantuan Pasien & Masyarakat</p>
-        </div>
-        <div className="flex flex-wrap gap-2 w-full md:w-auto">
-          <Button variant="outline" onClick={fetchAmbulan} className="bg-white shadow-sm border-slate-200 font-bold uppercase text-[10px]">
-            <RefreshCw className={`mr-2 h-3 w-3 ${loading ? 'animate-spin' : ''}`} /> Sync Data
+    <div className="min-h-screen bg-slate-50/50 pb-12 font-sans text-slate-900">
+      {/* HEADER BAR */}
+      <div className="mb-6 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-semibold hover:bg-slate-50">
+            <Link href="/ambulan"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard Ambulan</Link>
           </Button>
-          <ImportButton modul="ambulan_layanan" onImportSuccess={fetchAmbulan} />
-          <Link href="/ambulan/layanan" className="w-full md:w-auto">
-            <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white w-full font-bold uppercase text-[10px] tracking-widest">
-              <Plus className="mr-2 h-4 w-4" /> Catat Layanan Baru
-            </Button>
-          </Link>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
+                <Activity className="h-7 w-7 text-rose-600 shrink-0" />
+                Monitoring <span className="text-rose-600">Layanan</span>
+              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
+                Rekapitulasi Transaksi Bantuan Pasien & Masyarakat
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={fetchAmbulan} className="h-10 text-sm bg-white shadow-sm font-semibold">
+                <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Sync
+              </Button>
+              <ImportButton modul="ambulan_layanan" onImportSuccess={fetchAmbulan} />
+              <Link href="/ambulan/layanan">
+                <Button className="bg-rose-600 hover:bg-rose-700 shadow-sm text-white font-semibold text-sm h-10 w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" /> Catat Layanan Baru
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="border-none shadow-sm bg-white rounded-xl">
+          <CardContent className="p-4 text-center">
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Total Layanan</p>
+            <p className="text-2xl font-bold text-slate-800 mt-1">{loading ? '-' : data.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-sm bg-rose-50 rounded-xl">
+          <CardContent className="p-4 text-center">
+            <p className="text-[9px] font-semibold text-rose-500 uppercase tracking-widest">Antar Pasien</p>
+            <p className="text-2xl font-bold text-rose-700 mt-1">{data.filter(i => i.kategori_layanan === 'Antar_Pasien').length}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-sm bg-amber-50 rounded-xl">
+          <CardContent className="p-4 text-center">
+            <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-widest">Jemput Pasien</p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">{data.filter(i => i.kategori_layanan === 'Jemput_Pasien').length}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-sm bg-slate-100 rounded-xl">
+          <CardContent className="p-4 text-center">
+            <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-widest">Jenazah</p>
+            <p className="text-2xl font-bold text-slate-700 mt-1">{data.filter(i => i.kategori_layanan === 'Layanan_Jenazah').length}</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* FORM EDIT SECTION (Tetap muncul saat Edit diklik) */}
@@ -204,27 +245,33 @@ export default function MonitoringAmbulanPage() {
         </Card>
       )}
 
-      <Card className="border-none shadow-sm overflow-hidden bg-white rounded-xl">
-        <div className="p-4 border-b bg-slate-50/50 flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <input 
-              placeholder="Cari nama pasien atau ID Transaksi..." 
-              className="pl-10 w-full h-10 bg-white border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none transition-all" 
-              value={search} 
-              onChange={(e) => {setSearch(e.target.value); setCurrentPage(1);}} 
-            />
+      <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-xl">
+        <CardHeader className="border-b py-4 bg-slate-50/50">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <Input 
+                placeholder="Cari nama pasien atau ID Transaksi..." 
+                className="h-10 pl-10 text-sm font-medium w-full bg-white" 
+                value={search} 
+                onChange={(e) => {setSearch(e.target.value); setCurrentPage(1);}} 
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+              <select 
+                className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 appearance-none cursor-pointer min-w-[180px]" 
+                value={filterKategori} 
+                onChange={(e) => {setFilterKategori(e.target.value); setCurrentPage(1);}}
+              >
+                <option value="Semua">Semua Kategori</option>
+                <option value="Antar_Pasien">Antar Pasien</option>
+                <option value="Jemput_Pasien">Jemput Pasien</option>
+                <option value="Layanan_Jenazah">Layanan Jenazah</option>
+              </select>
+            </div>
           </div>
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-md px-3 h-10 shadow-sm">
-            <Filter className="h-4 w-4 text-slate-400" />
-            <select className="text-xs bg-transparent outline-none min-w-[150px] font-bold uppercase text-slate-600" value={filterKategori} onChange={(e) => {setFilterKategori(e.target.value); setCurrentPage(1);}}>
-              <option value="Semua">Semua Kategori</option>
-              <option value="Antar_Pasien">Antar Pasien</option>
-              <option value="Jemput_Pasien">Jemput Pasien</option>
-              <option value="Layanan_Jenazah">Layanan Jenazah</option>
-            </select>
-          </div>
-        </div>
+        </CardHeader>
         
         <CardContent className="p-0">
           {/* Desktop Table */}
@@ -245,13 +292,13 @@ export default function MonitoringAmbulanPage() {
                   currentItems.map((item) => (
                     <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0 group">
                       <TableCell>
-                        <Badge variant="secondary" className="mb-1 font-bold text-[9px] bg-rose-50 text-rose-700 hover:bg-rose-50 border-none px-2 py-0.5 rounded-none uppercase">
+                        <Badge variant="outline" className="mb-1 font-semibold text-[9px] bg-rose-50 text-rose-700 border-rose-200 px-2 py-0.5 rounded-lg">
                           {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
                         </Badge>
                         <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter uppercase">{item.id_transaksi}</p>
                       </TableCell>
                       <TableCell>
-                        <p className="font-bold text-sm text-slate-900 uppercase group-hover:text-rose-600 transition-colors">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
+                        <p className="font-semibold text-sm text-slate-900 uppercase group-hover:text-rose-600 transition-colors">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{item.dim_pasien_ambulan?.status_ekonomi || 'Non-Subsidi'}</p>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
@@ -276,7 +323,7 @@ export default function MonitoringAmbulanPage() {
                             </AlertDialogTrigger>
                             <AlertDialogContent className="rounded-xl border-2">
                               <AlertDialogHeader>
-                                <AlertDialogTitle className="font-black uppercase text-lg flex items-center gap-2">
+                                <AlertDialogTitle className="font-bold text-lg flex items-center gap-2">
                                   <AlertCircle className="text-rose-600" /> Hapus Record?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-slate-500 text-sm font-medium leading-relaxed">
@@ -332,7 +379,7 @@ export default function MonitoringAmbulanPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="font-black text-rose-600">Hapus Record?</AlertDialogTitle>
+                            <AlertDialogTitle className="font-bold text-rose-600">Hapus Record?</AlertDialogTitle>
                             <AlertDialogDescription>Data <strong>{item.id_transaksi}</strong> akan dihapus permanen.</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -349,15 +396,16 @@ export default function MonitoringAmbulanPage() {
           </div>
 
           {/* PAGINATION */}
-          <div className="p-4 border-t flex items-center justify-between bg-slate-50/30">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Halaman {currentPage} dari {totalPages || 1}</span>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200 shadow-sm rounded-lg" onClick={() => setCurrentPage(p => Math.max(p-1, 1))} disabled={currentPage === 1} aria-label="Halaman sebelumnya"><ChevronLeft size={16}/></Button>
-              <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200 shadow-sm rounded-lg" onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}><ChevronRight size={16}/></Button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredData.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

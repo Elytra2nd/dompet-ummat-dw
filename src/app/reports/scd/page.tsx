@@ -21,10 +21,13 @@ import {
   Layers,
   RefreshCw,
   Search,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
+import Link from 'next/link'
+import Pagination from '@/components/ui/pagination-numbered'
 
 // 1. Interface Universal untuk Gabungan Entitas Warehouse (SCD Type 2)
 interface AuditLog {
@@ -121,67 +124,77 @@ export default function AuditLogPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-8 bg-slate-50/30 min-h-screen font-sans">
-      {/* HEADER SECTION */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tighter text-slate-900 flex items-center gap-3">
-            <History className="h-8 w-8 text-indigo-600" />
-            Log Audit <span className="text-indigo-600">Terpadu</span>
-          </h1>
-          <p className="text-slate-500 font-medium text-sm max-w-2xl">
-            Sistem pelacakan perubahan data master (SCD Type 2) untuk seluruh entitas organisasi.
-          </p>
+    <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
+      {/* HEADER BAR */}
+      <div className="mb-6 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-semibold hover:bg-slate-50">
+            <Link href="/reports"><ArrowLeft className="mr-2 h-4 w-4" /> Pusat Laporan</Link>
+          </Button>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
+                <History className="h-7 w-7 text-indigo-600 shrink-0" />
+                Log Audit <span className="text-indigo-600">Terpadu</span>
+              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
+                Pelacakan Perubahan Data Master • SCD Type 2
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={fetchLogs} 
+              disabled={loading}
+              className="h-10 text-sm font-semibold bg-white"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={fetchLogs} 
-          disabled={loading}
-          className="font-bold border-2 hover:bg-indigo-50 bg-white"
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Data
-        </Button>
       </div>
 
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
+
       {/* SEARCH & FILTER BAR */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="md:col-span-3 border-2 shadow-sm">
-           <div className="relative p-2">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      <Card className="border-slate-200 shadow-sm rounded-xl bg-white">
+        <CardHeader className="border-b py-4 bg-slate-50/50">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Cari berdasarkan nama master atau ID Bisnis..." 
-                className="pl-10 border-none shadow-none focus-visible:ring-0 font-bold text-slate-700"
+                placeholder="Cari nama master atau ID Bisnis..." 
+                className="h-10 pl-10 text-sm font-medium w-full bg-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-           </div>
-        </Card>
-        <Card className="border-2 shadow-sm flex items-center px-4 bg-white">
-          <Filter className="h-4 w-4 text-slate-400 mr-3" />
-          <select 
-            className="w-full bg-transparent text-sm font-black text-slate-600 outline-none cursor-pointer"
-            value={filterEntitas}
-            onChange={(e) => setFilterEntitas(e.target.value)}
-          >
-            <option value="Semua">Semua Entitas</option>
-            <option value="Donatur">Donatur</option>
-            <option value="Mustahik">Mustahik</option>
-            <option value="Petugas">Petugas</option>
-            <option value="Pasien">Pasien</option>
-          </select>
-        </Card>
-      </div>
+            </div>
+            <div className="relative">
+              <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+              <select 
+                className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer min-w-[180px]"
+                value={filterEntitas}
+                onChange={(e) => setFilterEntitas(e.target.value)}
+              >
+                <option value="Semua">Semua Entitas</option>
+                <option value="Donatur">Donatur</option>
+                <option value="Mustahik">Mustahik</option>
+                <option value="Petugas">Petugas</option>
+                <option value="Pasien">Pasien</option>
+              </select>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-      <Card className="border-2 shadow-sm overflow-hidden bg-white">
+      <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-xl">
         <CardHeader className="border-b bg-slate-50/50 py-4 flex flex-row items-center justify-between">
-          <CardTitle className="text-xs font-black flex items-center gap-2 text-slate-500 uppercase tracking-[0.2em]">
+          <CardTitle className="text-xs font-semibold flex items-center gap-2 text-slate-500 uppercase tracking-widest">
             <DatabaseZap className="h-4 w-4 text-amber-500" /> 
             Audit Trail Result
           </CardTitle>
-          <Badge variant="outline" className="font-black text-[10px] border-indigo-200 text-indigo-600 bg-indigo-50">
-            {filteredLogs.length} RECORDS FOUND
+          <Badge variant="outline" className="font-semibold text-[10px] border-indigo-200 text-indigo-600 bg-indigo-50">
+            {filteredLogs.length} RECORDS
           </Badge>
         </CardHeader>
 
@@ -189,10 +202,10 @@ export default function AuditLogPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="font-black text-[10px] uppercase text-slate-500 w-[120px]">Entitas</TableHead>
-                <TableHead className="font-black text-[10px] uppercase text-slate-500">ID & Nama Master</TableHead>
-                <TableHead className="font-black text-[10px] uppercase text-slate-500 text-center">Masa Berlaku Record</TableHead>
-                <TableHead className="font-black text-[10px] uppercase text-slate-500 text-center">Status Audit</TableHead>
+                <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px]">Entitas</TableHead>
+                <TableHead className="font-semibold text-[10px] uppercase text-slate-500">ID & Nama Master</TableHead>
+                <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-center">Masa Berlaku Record</TableHead>
+                <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-center">Status Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -210,7 +223,7 @@ export default function AuditLogPage() {
                   <TableRow key={i} className={`hover:bg-slate-50/50 transition-colors ${!log.is_active ? 'opacity-70 grayscale-[0.5]' : ''}`}>
                     <TableCell>
                       <Badge 
-                        className={`font-black text-[9px] uppercase tracking-wider px-2 py-1 border-none shadow-none ${
+                        className={`font-semibold text-[9px] uppercase tracking-wider px-2 py-1 border-none shadow-none ${
                           log.entitas === 'Donatur' ? 'bg-blue-100 text-blue-700' :
                           log.entitas === 'Mustahik' ? 'bg-emerald-100 text-emerald-700' :
                           log.entitas === 'Petugas' ? 'bg-purple-100 text-purple-700' :
@@ -222,13 +235,13 @@ export default function AuditLogPage() {
                     </TableCell>
 
                     <TableCell>
-                      <p className="font-mono text-[10px] font-black text-indigo-500 mb-0.5">{log.id_bisnis}</p>
-                      <p className="font-black text-slate-900 uppercase tracking-tighter text-sm">{log.nama}</p>
+                      <p className="font-mono text-[10px] font-semibold text-indigo-500 mb-0.5">{log.id_bisnis}</p>
+                      <p className="font-semibold text-slate-900 uppercase text-sm">{log.nama}</p>
                     </TableCell>
 
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center">
-                        <span suppressHydrationWarning className="text-[10px] font-black text-slate-700">
+                        <span suppressHydrationWarning className="text-[10px] font-semibold text-slate-700">
                           {formatDate(log.valid_from)}
                         </span>
                         <div className="h-2 w-px bg-slate-300 my-1" />
@@ -241,7 +254,7 @@ export default function AuditLogPage() {
                     <TableCell className="text-center">
                       <Badge 
                         variant="outline"
-                        className={`font-black text-[9px] uppercase tracking-tighter rounded-md ${
+                        className={`font-semibold text-[9px] uppercase tracking-tighter rounded-md ${
                           log.status_record.includes('Active')
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                           : "bg-slate-100 text-slate-500 border-slate-200"
@@ -265,43 +278,19 @@ export default function AuditLogPage() {
             </TableBody>
           </Table>
 
-          {/* PAGINASI */}
-          <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-              Showing {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(filteredLogs.length, currentPage * itemsPerPage)} of {filteredLogs.length} records
-            </p>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                   setCurrentPage(prev => Math.max(prev - 1, 1))
-                   window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
-                disabled={currentPage === 1}
-                className="h-8 w-8 p-0 rounded-lg border-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-xs font-black text-slate-900 mx-2">
-                {currentPage} / {totalPages || 1}
-              </span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                   setCurrentPage(prev => Math.min(prev + 1, totalPages))
-                   window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="h-8 w-8 p-0 rounded-lg border-2"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredLogs.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={(page) => {
+              setCurrentPage(page)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+          />
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Pagination from '@/components/ui/pagination-numbered'
 import {
   Table,
   TableBody,
@@ -37,6 +38,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Filter,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -59,6 +61,7 @@ export default function ManajemenMustahikPage() {
   const [mustahik, setMustahik] = useState<Mustahik[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [filterKategori, setFilterKategori] = useState('')
 
   // --- STATE PAGINASI ---
   const [currentPage, setCurrentPage] = useState(1)
@@ -89,11 +92,18 @@ export default function ManajemenMustahikPage() {
     } catch (e) { toast.error('Gagal menonaktifkan record') }
   }
 
+  const kategoriOptions = useMemo(() => {
+    const set = new Set(mustahik.map(m => m.kategori_pm).filter(Boolean))
+    return Array.from(set).sort()
+  }, [mustahik])
+
   const filteredMustahik = mustahik.filter((m) => {
     const nama = (m.nama || '').toLowerCase()
     const id = (m.id_mustahik || '').toLowerCase()
     const nik = m.nik || ''
-    return nama.includes(search.toLowerCase()) || id.includes(search.toLowerCase()) || nik.includes(search)
+    const matchSearch = nama.includes(search.toLowerCase()) || id.includes(search.toLowerCase()) || nik.includes(search)
+    const matchKategori = !filterKategori || m.kategori_pm === filterKategori
+    return matchSearch && matchKategori
   })
 
   const totalPages = Math.ceil(filteredMustahik.length / itemsPerPage)
@@ -110,12 +120,12 @@ export default function ManajemenMustahikPage() {
             <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
           </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tighter">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900 uppercase tracking-tighter">
               <Users className="h-7 w-7 text-emerald-600 shrink-0" /> Database <span className="text-emerald-600">Mustahik</span>
             </h1>
             <div className="flex flex-wrap items-center gap-2">
               <ImportButton modul="mustahik" onImportSuccess={fetchMustahik} />
-              <Button asChild className="bg-emerald-600 font-bold shadow-md hover:bg-emerald-700 uppercase text-xs h-9">
+              <Button asChild className="bg-emerald-600 font-semibold shadow-md hover:bg-emerald-700 text-sm h-10 w-full sm:w-auto">
                 <Link href="/mustahik/baru">
                   <Plus className="mr-2 h-4 w-4" /> Tambah Mustahik
                 </Link>
@@ -126,19 +136,34 @@ export default function ManajemenMustahikPage() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
-        <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-none">
+        <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-xl">
           <CardHeader className="border-b py-4 bg-slate-50/50">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="Cari nama, NIK, atau ID Mustahik..." 
-                className="pl-10 font-bold w-full" 
-                value={search} 
-                onChange={(e) => {
-                  setSearch(e.target.value)
-                  setCurrentPage(1)
-                }} 
-              />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute top-3 left-3 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Cari nama, NIK, atau ID Mustahik..." 
+                  className="h-10 pl-10 text-sm font-medium w-full bg-white" 
+                  value={search} 
+                  onChange={(e) => {
+                    setSearch(e.target.value)
+                    setCurrentPage(1)
+                  }} 
+                />
+              </div>
+              <div className="relative">
+                <Filter className="absolute top-3 left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <select
+                  value={filterKategori}
+                  onChange={(e) => { setFilterKategori(e.target.value); setCurrentPage(1) }}
+                  className="h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 appearance-none cursor-pointer min-w-[180px]"
+                >
+                  <option value="">Semua Kategori</option>
+                  {kategoriOptions.map((k) => (
+                    <option key={k} value={k}>{k.replace(/_/g, ' ')}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -191,19 +216,19 @@ export default function ManajemenMustahikPage() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-none border-4 border-slate-900">
+                          <AlertDialogContent className="rounded-2xl border border-slate-200 shadow-xl">
                             <AlertDialogHeader>
                               <div className="flex items-center gap-3 text-rose-600 mb-2">
-                                <AlertTriangle className="h-6 w-6" />
-                                <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Nonaktifkan?</AlertDialogTitle>
+                                <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
+                                <AlertDialogTitle className="font-black text-xl">Nonaktifkan Mustahik?</AlertDialogTitle>
                               </div>
-                              <AlertDialogDescription className="font-bold text-slate-600 text-sm">
+                              <AlertDialogDescription className="font-medium text-slate-500 text-sm">
                                 Record <strong>{m.nama}</strong> akan dinonaktifkan. Histori (SCD Type 2) tetap aman di warehouse.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">
-                              <AlertDialogCancel className="rounded-none border-2 border-slate-900">Batal</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(m.sk_mustahik, m.nama)} className="bg-rose-600 hover:bg-rose-700 rounded-none font-black">Hapus</AlertDialogAction>
+                              <AlertDialogCancel className="rounded-xl font-bold">Batal</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(m.sk_mustahik, m.nama)} className="bg-rose-600 hover:bg-rose-700 rounded-xl font-bold">Ya, Nonaktifkan</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -214,22 +239,13 @@ export default function ManajemenMustahikPage() {
               </TableBody>
             </Table>
 
-            <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/30">
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                Records {Math.min((currentPage - 1) * itemsPerPage + 1, filteredMustahik.length)} - {Math.min(currentPage * itemsPerPage, filteredMustahik.length)} of {filteredMustahik.length}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 w-8 p-0 rounded-none border-2" aria-label="Halaman sebelumnya">
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-xs font-black text-slate-900 mx-2 tracking-tighter">
-                  {currentPage} / {totalPages || 1}
-                </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0} className="h-8 w-8 p-0 rounded-none border-2" aria-label="Halaman selanjutnya">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredMustahik.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
           </CardContent>
         </Card>
       </div>

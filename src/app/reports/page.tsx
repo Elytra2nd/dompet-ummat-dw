@@ -182,32 +182,43 @@ export default function ReportsPage() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-white">
       <RefreshCw className="h-10 w-10 text-emerald-600 animate-spin" />
-      <p className="font-black text-slate-400 uppercase tracking-widest text-xs">Mempersiapkan Insight Warehouse...</p>
+      <p className="font-semibold text-slate-400 uppercase tracking-widest text-xs">Mempersiapkan Insight Warehouse...</p>
     </div>
   )
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-slate-50/50 min-h-screen font-sans">
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b-2 pb-6 border-slate-200">
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-3">
-            <TrendingUp className="h-10 w-10 text-emerald-600" /> BIDA <span className="text-emerald-600">Analytics</span>
-          </h1>
-          <p className="text-slate-500 font-bold text-xs tracking-widest mt-1 uppercase">Executive Decision Support System</p>
-        </div>
-        <div className="flex gap-2">
-          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-black px-4 py-2">
-            SYSTEM: {summary?.system.status}
-          </Badge>
-          <Button onClick={() => fetchData()} variant="outline" className="font-bold border-2 bg-white"><RefreshCw className="mr-2 h-4 w-4" /> Sync</Button>
+    <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
+      {/* HEADER BAR */}
+      <div className="mb-6 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+                <TrendingUp className="h-7 w-7 text-emerald-600 shrink-0" /> Pusat <span className="text-emerald-600">Laporan</span>
+              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
+                BIDA Analytics • Executive Decision Support
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold px-3 py-1.5">
+                <CheckCircle2 className="h-3 w-3 mr-1" /> {summary?.system.status}
+              </Badge>
+              <Button onClick={() => fetchData()} variant="outline" className="font-semibold bg-white">
+                <RefreshCw className="mr-2 h-4 w-4" /> Sync
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
+      <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-8">
+
       {/* FILTER PERIODE */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Filter Periode</span>
+      <Card className="border-slate-200 shadow-sm rounded-xl bg-white">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+          <span className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest">Filter Periode</span>
           {(period.from || period.to) && (
             <button
               onClick={() => setPeriod({ from: '', to: '' })}
@@ -263,7 +274,8 @@ export default function ReportsPage() {
             {!period.from && !period.to ? '— Menampilkan seluruh data —' : `${period.from || '—'} s/d ${period.to || 'sekarang'}`}
           </span>
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* KPI CARDS — clickable drill-down */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -271,11 +283,11 @@ export default function ReportsPage() {
           <Card className="border-none shadow-sm bg-white border-t-4 border-t-emerald-500 transition-all group-hover:shadow-md group-hover:-translate-y-0.5">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
-                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Donatur Aktif</p>
+                <p className="text-[10px] font-semibold uppercase text-slate-400 mb-1">Donatur Aktif</p>
                 <Users className="h-4 w-4 text-slate-300 group-hover:text-emerald-400 transition-colors" />
               </div>
               <div className="flex items-end gap-2">
-                <h3 className="text-4xl font-black text-slate-800">{summary?.totals.donatur?.toLocaleString()}</h3>
+                <h3 className="text-3xl sm:text-4xl font-bold text-slate-800">{summary?.totals.donatur?.toLocaleString()}</h3>
                 <Badge className="bg-emerald-100 text-emerald-700 border-none mb-1">+{summary?.growth.donatur_new} bulan ini</Badge>
               </div>
               {delta(summary?.totals.donatur, prevSummary?.totals.donatur) && (
@@ -295,11 +307,11 @@ export default function ReportsPage() {
           <Card className="border-none shadow-sm bg-white border-t-4 border-t-blue-500 transition-all group-hover:shadow-md group-hover:-translate-y-0.5">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
-                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Penerima Manfaat</p>
+                <p className="text-[10px] font-semibold uppercase text-slate-400 mb-1">Penerima Manfaat</p>
                 <HeartHandshake className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
               </div>
               <div className="flex items-end gap-2">
-                <h3 className="text-4xl font-black text-slate-800">{summary?.totals.mustahik?.toLocaleString()}</h3>
+                <h3 className="text-3xl sm:text-4xl font-bold text-slate-800">{summary?.totals.mustahik?.toLocaleString()}</h3>
                 <Badge className="bg-blue-100 text-blue-700 border-none mb-1">+{summary?.growth.mustahik_new} bulan ini</Badge>
               </div>
               {delta(summary?.totals.mustahik, prevSummary?.totals.mustahik) && (
@@ -319,11 +331,11 @@ export default function ReportsPage() {
           <Card className="border-none shadow-sm bg-white border-t-4 border-t-rose-500 transition-all group-hover:shadow-md group-hover:-translate-y-0.5">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
-                <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Layanan Ambulan</p>
+                <p className="text-[10px] font-semibold uppercase text-slate-400 mb-1">Layanan Ambulan</p>
                 <Ambulance className="h-4 w-4 text-slate-300 group-hover:text-rose-400 transition-colors" />
               </div>
               <div className="flex items-end gap-2">
-                <h3 className="text-4xl font-black text-slate-800">{summary?.totals.ambulan?.toLocaleString()}</h3>
+                <h3 className="text-3xl sm:text-4xl font-bold text-slate-800">{summary?.totals.ambulan?.toLocaleString()}</h3>
                 <Badge className="bg-rose-100 text-rose-700 border-none mb-1">{summary?.growth.ambulan_this_month} trips bulan ini</Badge>
               </div>
               {delta(summary?.totals.ambulan, prevSummary?.totals.ambulan) && (
@@ -343,9 +355,9 @@ export default function ReportsPage() {
 
       <Tabs defaultValue="donatur" className="w-full">
         <TabsList className="bg-slate-100 p-1 mb-8">
-          <TabsTrigger value="donatur" className="font-black text-xs uppercase px-8">Donatur</TabsTrigger>
-          <TabsTrigger value="ambulan" className="font-black text-xs uppercase px-8">Ambulan</TabsTrigger>
-          <TabsTrigger value="mustahik" className="font-black text-xs uppercase px-8">Mustahik</TabsTrigger>
+          <TabsTrigger value="donatur" className="font-semibold text-xs uppercase px-6 sm:px-8">Donatur</TabsTrigger>
+          <TabsTrigger value="ambulan" className="font-semibold text-xs uppercase px-6 sm:px-8">Ambulan</TabsTrigger>
+          <TabsTrigger value="mustahik" className="font-semibold text-xs uppercase px-6 sm:px-8">Mustahik</TabsTrigger>
         </TabsList>
 
         {/* TAB DONATUR */}
@@ -353,7 +365,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="md:col-span-2 border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between border-b">
-                <CardTitle className="text-sm font-black uppercase tracking-tighter">Segmentasi Tipe Donatur</CardTitle>
+                <CardTitle className="text-sm font-semibold uppercase tracking-tight">Segmentasi Tipe Donatur</CardTitle>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => donaturData && handlePreview(donaturData.stats as unknown as Record<string, unknown>[], 'Laporan Donatur', 'excel', 'donatur')}>Excel</Button>
                   <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => donaturData && handlePreview(donaturData.stats as unknown as Record<string, unknown>[], 'Laporan Donatur', 'pdf', 'donatur')}>PDF</Button>
@@ -368,16 +380,20 @@ export default function ReportsPage() {
                 ))}
               </CardContent>
             </Card>
-            <Card className="bg-emerald-900 text-white border-none shadow-xl">
-               <CardHeader><CardTitle className="text-xs font-black uppercase text-emerald-400">Warehouse Insight</CardTitle></CardHeader>
-               <CardContent className="space-y-6">
+            <Card className="bg-emerald-900 text-white border-none shadow-xl rounded-xl">
+               <CardHeader><CardTitle className="text-xs font-semibold uppercase text-emerald-400">Warehouse Insight</CardTitle></CardHeader>
+               <CardContent className="space-y-5">
                   <div>
-                    <p className="text-[9px] font-black uppercase text-emerald-500 italic">SCD Tracking</p>
-                    <p className="text-2xl font-black">{donaturData?.insights.total_historical_changes} Histori</p>
+                    <p className="text-[9px] font-semibold uppercase text-emerald-500">SCD Tracking</p>
+                    <p className="text-2xl font-bold">{donaturData?.insights.total_historical_changes} <span className="text-sm font-normal text-emerald-300">Histori</span></p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-black uppercase text-emerald-500 italic">Corporate Partners</p>
-                    <p className="text-2xl font-black">{donaturData?.insights.corporate_donors}</p>
+                    <p className="text-[9px] font-semibold uppercase text-emerald-500">Corporate Partners</p>
+                    <p className="text-2xl font-bold">{donaturData?.insights.corporate_donors}</p>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-800">
+                    <p className="text-[9px] font-semibold uppercase text-emerald-500">Rasio Korporat</p>
+                    <p className="text-lg font-bold">{summary?.totals.donatur && donaturData?.insights.corporate_donors ? ((donaturData.insights.corporate_donors / summary.totals.donatur) * 100).toFixed(1) : 0}%</p>
                   </div>
                </CardContent>
             </Card>
@@ -389,7 +405,7 @@ export default function ReportsPage() {
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
              <Card className="md:col-span-2 border-none shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between border-b">
-                  <CardTitle className="text-sm font-black uppercase tracking-tighter">Beban Waktu Operasional</CardTitle>
+                  <CardTitle className="text-sm font-semibold uppercase tracking-tight">Beban Waktu Operasional</CardTitle>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => ambulanData && handlePreview(ambulanData.perWaktu as unknown as Record<string, unknown>[], 'Beban Operasional Ambulan', 'excel', 'ambulan')}>Excel</Button>
                     <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => ambulanData && handlePreview(ambulanData.perWaktu as unknown as Record<string, unknown>[], 'Beban Operasional Ambulan', 'pdf', 'ambulan')}>PDF</Button>
@@ -404,12 +420,16 @@ export default function ReportsPage() {
                    ))}
                 </CardContent>
              </Card>
-             <Card className="border-none shadow-sm bg-white border-l-4 border-l-rose-500">
-                <CardHeader><CardTitle className="text-xs font-black uppercase text-slate-400">Peak Performance</CardTitle></CardHeader>
+             <Card className="border-none shadow-sm bg-white border-l-4 border-l-rose-500 rounded-xl">
+                <CardHeader><CardTitle className="text-xs font-semibold uppercase text-slate-400">Peak Performance</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                    <div className="flex items-center gap-3 p-3 bg-rose-50 rounded-lg">
                       <Truck className="h-5 w-5 text-rose-600" />
-                      <div><p className="text-[9px] font-black text-rose-400 uppercase">Armada Teraktif</p><p className="text-xs font-black text-slate-800">{ambulanData?.insight_summary?.most_busy_armada?.armada ?? '-'}</p></div>
+                      <div><p className="text-[9px] font-semibold text-rose-400 uppercase">Armada Teraktif</p><p className="text-xs font-semibold text-slate-800">{ambulanData?.insight_summary?.most_busy_armada?.armada ?? '-'}</p></div>
+                   </div>
+                   <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+                      <Clock className="h-5 w-5 text-amber-600" />
+                      <div><p className="text-[9px] font-semibold text-amber-500 uppercase">Jam Tersibuk</p><p className="text-xs font-semibold text-slate-800">{ambulanData?.perWaktu?.[0]?.jam?.replace(/__/g, ' ').replace(/_/g, ' ') ?? '-'}</p></div>
                    </div>
                 </CardContent>
              </Card>
@@ -421,7 +441,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="md:col-span-2 border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between border-b">
-                <CardTitle className="text-sm font-black uppercase tracking-tighter">Sebaran Wilayah Mustahik</CardTitle>
+                <CardTitle className="text-sm font-semibold uppercase tracking-tight">Sebaran Wilayah Mustahik</CardTitle>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="font-bold h-7 text-[9px]" onClick={() => mustahikData && handlePreview(mustahikData.insights.top_locations as unknown as Record<string, unknown>[], 'Sebaran Lokasi Mustahik', 'excel', 'mustahik')}>Excel</Button>
                   <Button size="sm" className="bg-slate-900 font-bold h-7 text-[9px]" onClick={() => mustahikData && handlePreview(mustahikData.insights.top_locations as unknown as Record<string, unknown>[], 'Sebaran Lokasi Mustahik', 'pdf', 'mustahik')}>PDF</Button>
@@ -436,16 +456,20 @@ export default function ReportsPage() {
                 ))}
               </CardContent>
             </Card>
-            <Card className="bg-blue-900 text-white border-none shadow-xl">
-               <CardHeader><CardTitle className="text-xs font-black uppercase text-blue-400">Vulnerability Score</CardTitle></CardHeader>
-               <CardContent className="space-y-6">
+            <Card className="bg-blue-900 text-white border-none shadow-xl rounded-xl">
+               <CardHeader><CardTitle className="text-xs font-semibold uppercase text-blue-400">Vulnerability Score</CardTitle></CardHeader>
+               <CardContent className="space-y-5">
                   <div>
-                    <p className="text-[9px] font-black uppercase text-blue-500 italic">Rata-rata Skor</p>
-                    <p className="text-2xl font-black">{mustahikData?.insights.avg_score}</p>
+                    <p className="text-[9px] font-semibold uppercase text-blue-500">Rata-rata Skor</p>
+                    <p className="text-2xl font-bold">{mustahikData?.insights.avg_score}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-black uppercase text-blue-500 italic">Total Registrasi (3Bln)</p>
-                    <p className="text-2xl font-black">{mustahikData?.insights.new_registrations_3m}</p>
+                    <p className="text-[9px] font-semibold uppercase text-blue-500">Registrasi Baru (3 Bulan)</p>
+                    <p className="text-2xl font-bold">{mustahikData?.insights.new_registrations_3m}</p>
+                  </div>
+                  <div className="pt-2 border-t border-blue-800">
+                    <p className="text-[9px] font-semibold uppercase text-blue-500">Cakupan Wilayah</p>
+                    <p className="text-lg font-bold">{mustahikData?.insights?.top_locations?.length ?? 0} <span className="text-sm font-normal text-blue-300">Kabupaten</span></p>
                   </div>
                </CardContent>
             </Card>
@@ -599,6 +623,7 @@ export default function ReportsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   )
 }

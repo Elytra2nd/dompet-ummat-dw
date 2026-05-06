@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle, Eye, Receipt } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatRupiah } from '@/lib/utils-ambulan'
+import Pagination from '@/components/ui/pagination-numbered'
 
 type Transaction = {
   sk_fakta_donasi: number
@@ -26,6 +27,7 @@ export default function TransactionHistoryTable() {
   // Paginasi
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
   const [limit] = useState(10)
 
   // Modal Edit
@@ -52,6 +54,7 @@ export default function TransactionHistoryTable() {
       const json = await res.json()
       setData(json.data)
       setTotalPages(json.meta.totalPages)
+      setTotalItems(json.meta.total)
     } catch (error) {
       toast.error('Gagal mengambil riwayat transaksi')
     } finally {
@@ -246,31 +249,13 @@ export default function TransactionHistoryTable() {
 
         {/* Paginasi */}
         {!loading && totalPages > 0 && (
-          <div className="flex items-center justify-between border-t px-6 py-4 bg-slate-50">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-              Halaman {page} dari {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="font-bold"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" /> Prev
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="font-bold"
-              >
-                Next <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={limit}
+            onPageChange={setPage}
+          />
         )}
       </CardContent>
 

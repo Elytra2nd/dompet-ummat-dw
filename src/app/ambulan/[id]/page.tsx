@@ -47,7 +47,7 @@ export default function DetailLayananAmbulanPage() {
         <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white border-2 border-transparent hover:border-slate-200">
           <ArrowLeft size={16} /> Kembali ke Monitoring
         </Button>
-        <Button onClick={() => window.print()} className="bg-slate-900 text-white font-black uppercase text-[10px] tracking-widest rounded-none px-6">
+        <Button onClick={() => window.print()} className="bg-slate-800 text-white font-bold uppercase text-[10px] tracking-widest rounded-xl px-6 hover:bg-slate-700">
           <Printer size={14} className="mr-2" /> Print Audit Log
         </Button>
       </div>
@@ -55,8 +55,8 @@ export default function DetailLayananAmbulanPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* KOLOM KIRI: STATUS & INFO UTAMA */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="border-4 border-slate-900 rounded-none shadow-[8px_8px_0px_0px_rgba(225,29,72,1)] bg-white">
-            <CardHeader className="bg-rose-600 text-white border-b-4 border-slate-900">
+          <Card className="border border-slate-200 rounded-2xl shadow-lg bg-white">
+            <CardHeader className="bg-rose-600 text-white border-b border-rose-700 rounded-t-2xl">
               <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                 <Activity size={16} /> Detail Transaksi
               </CardTitle>
@@ -70,7 +70,7 @@ export default function DetailLayananAmbulanPage() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 bg-slate-100 flex items-center justify-center border-2 border-slate-900">
+                  <div className="h-10 w-10 bg-slate-100 flex items-center justify-center rounded-xl">
                     <Calendar size={18} className="text-slate-600" />
                   </div>
                   <div>
@@ -80,7 +80,7 @@ export default function DetailLayananAmbulanPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 bg-slate-100 flex items-center justify-center border-2 border-slate-900">
+                  <div className="h-10 w-10 bg-slate-100 flex items-center justify-center rounded-xl">
                     <Clock size={18} className="text-slate-600" />
                   </div>
                   <div>
@@ -92,7 +92,7 @@ export default function DetailLayananAmbulanPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-slate-900 rounded-none bg-slate-900 text-white">
+          <Card className="border border-slate-700 rounded-2xl bg-slate-800 text-white shadow-sm">
             <CardContent className="pt-6">
                <div className="flex items-start gap-3">
                   <ShieldCheck className="text-emerald-400 shrink-0" />
@@ -111,8 +111,8 @@ export default function DetailLayananAmbulanPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* CARD PASIEN */}
-            <Card className="border-2 border-slate-900 rounded-none bg-white shadow-none">
-              <CardHeader className="border-b-2 border-slate-900 py-3 bg-slate-50">
+            <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm">
+              <CardHeader className="border-b border-slate-200 py-3 bg-slate-50 rounded-t-2xl">
                 <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                   <User size={14} className="text-blue-600" /> Dimensi Pasien
                 </CardTitle>
@@ -124,7 +124,7 @@ export default function DetailLayananAmbulanPage() {
                 </div>
                 <div>
                   <p className="text-[9px] font-black text-slate-400 uppercase">Kondisi Ekonomi</p>
-                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 rounded-none font-black text-[9px] uppercase">
+                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 rounded-lg font-black text-[9px] uppercase">
                     {data.dim_pasien_ambulan?.status_ekonomi || 'NON-SUBSIDI'}
                   </Badge>
                 </div>
@@ -132,8 +132,8 @@ export default function DetailLayananAmbulanPage() {
             </Card>
 
             {/* CARD LOKASI */}
-            <Card className="border-2 border-slate-900 rounded-none bg-white shadow-none">
-              <CardHeader className="border-b-2 border-slate-900 py-3 bg-slate-50">
+            <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm">
+              <CardHeader className="border-b border-slate-200 py-3 bg-slate-50 rounded-t-2xl">
                 <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                   <MapPin size={14} className="text-rose-600" /> Dimensi Lokasi
                 </CardTitle>
@@ -152,8 +152,8 @@ export default function DetailLayananAmbulanPage() {
           </div>
 
           {/* CARD LOGISTIK UNIT */}
-          <Card className="border-2 border-slate-900 rounded-none bg-white shadow-none overflow-hidden">
-            <CardHeader className="bg-slate-900 text-white">
+          <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+            <CardHeader className="bg-slate-800 text-white rounded-t-2xl">
                <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                   <Truck size={14} className="text-rose-400" /> Logistik & Operasional Armada
                </CardTitle>
