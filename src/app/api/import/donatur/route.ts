@@ -127,19 +127,10 @@ export async function POST(req: Request) {
     const year = now.getFullYear().toString().substring(2)
 
     await prisma.$transaction(async (tx) => {
-      // Ambil lastId sekali di awal transaksi
-      const lastRecord = await tx.dim_donatur.findFirst({
-        orderBy: { sk_donatur: 'desc' },
-        select: { id_donatur: true },
-      })
-      let lastIdNumber = lastRecord?.id_donatur
-        ? parseInt(lastRecord.id_donatur.split('.').pop() || '0')
-        : 0
-
       for (const batch of chunk(rowsToImport, 100)) {
         for (const c of batch) {
-          lastIdNumber++
-          const id_donatur = `DU-${year}01.${lastIdNumber.toString().padStart(3, '0')}`
+          const uniqueHash = Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+          const id_donatur = `DU-${year}01.${uniqueHash}`
 
           await tx.dim_donatur.create({
             data: {

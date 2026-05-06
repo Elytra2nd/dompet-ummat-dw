@@ -35,18 +35,9 @@ export async function POST(req: Request) {
     else if (prog.includes('DAKWAH')) prefix = 'MST-DKW'
     else if (prog.includes('OPERASIONAL')) prefix = 'PTG-OPS'
 
-    const lastRecord = await prisma.dim_mustahik.findFirst({
-      where: { id_mustahik: { startsWith: prefix } },
-      orderBy: { id_mustahik: 'desc' },
-    })
-
-    let nextNumber = 1
-    if (lastRecord) {
-      const parts = lastRecord.id_mustahik.split('-')
-      const lastSeq = parseInt(parts[parts.length - 1])
-      if (!isNaN(lastSeq)) nextNumber = lastSeq + 1
-    }
-    const autoId = `${prefix}-${nextNumber.toString().padStart(4, '0')}`
+    // Menggunakan timestamp base36 + random untuk menghindari race condition (Unique Constraint Violation)
+    const uniqueSuffix = Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const autoId = `${prefix}-${uniqueSuffix}`
 
     // --- 2. TRANSACTION (LOKASI -> MUSTAHIK -> PENYALURAN) ---
     const result = await prisma.$transaction(async (tx) => {

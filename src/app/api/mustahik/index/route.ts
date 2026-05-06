@@ -33,28 +33,32 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { nama, nik, alamat, kabupaten_kota, kategori_pm, skoring, latitude, longitude } = body
 
-    // 1. Buat record lokasi baru di dim_lokasi
-    const lokasi = await prisma.dim_lokasi.create({
-      data: {
-        provinsi: "Kalimantan Barat",
-        kabupaten_kota: kabupaten_kota,
-        latitude: latitude,
-        longitude: longitude,
-      }
-    })
+    const newMustahik = await prisma.$transaction(async (tx) => {
+      // 1. Buat record lokasi baru di dim_lokasi
+      const lokasi = await tx.dim_lokasi.create({
+        data: {
+          provinsi: "Kalimantan Barat",
+          kabupaten_kota: kabupaten_kota,
+          latitude: latitude,
+          longitude: longitude,
+        }
+      })
 
-    // 2. Buat record mustahik dan hubungkan ke sk_lokasi baru
-    const newMustahik = await prisma.dim_mustahik.create({
-      data: {
-        id_mustahik: `MST-${Date.now()}`, // Generate ID sederhana
-        nama,
-        nik,
-        alamat,
-        kategori_pm,
-        skoring,
-        sk_lokasi: lokasi.sk_lokasi,
-        is_active: true,
-      }
+      // 2. Buat record mustahik dan hubungkan ke sk_lokasi baru
+      const mustahik = await tx.dim_mustahik.create({
+        data: {
+          id_mustahik: `MST-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`, // Generate ID dengan timestamp unik
+          nama,
+          nik,
+          alamat,
+          kategori_pm,
+          skoring,
+          sk_lokasi: lokasi.sk_lokasi,
+          is_active: true,
+        }
+      })
+      
+      return mustahik
     })
 
     return NextResponse.json(newMustahik)
@@ -69,61 +73,56 @@ export async function PUT(req: Request) {
     const body = await req.json()
     const { sk_mustahik, nama, nik, alamat, kabupaten_kota, kategori_pm, skoring, latitude, longitude } = body
 
-    // 1. Cari data lama untuk proses historisasi (SCD Type 2)
-    const oldData = await prisma.dim_mustahik.findUnique({
-      where: { sk_mustahik }
-    })
+    // Gunakan Transaction agar tidak ada partial commit (orphaned data)
+    const updatedMustahik = await prisma.$transaction(async (tx) => {
+      // 1. Cari data lama untuk proses historisasi (SCD Type 2)
+      const oldData = await tx.dim_mustahik.findUnique({
+        where: { sk_mustahik }
+      })
 
-    if (!oldData) throw new Error("Data tidak ditemukan")
+      if (!oldData) throw new Error("Data tidak ditemukan")
 
-    // 2. Ambil business key asli (tanpa suffix versi jika sudah ada)
-    const baseId = oldData.id_mustahik.replace(/-v\d+$/, '')
+      // 2. Ambil business key asli (tanpa suffix versi jika sudah ada)
+      const baseId = oldData.id_mustahik.replace(/-v\d+$/, '')
 
-    // 3. Hitung jumlah versi yang sudah ada untuk business key ini
-    const existingVersions = await prisma.dim_mustahik.findMany({
-      where: {
-        OR: [
-          { id_mustahik: baseId },
-          { id_mustahik: { startsWith: `${baseId}-v` } },
-        ],
-      },
-      select: { id_mustahik: true },
-    })
-    const nextVersion = existingVersions.length + 1
-    const newIdMustahik = `${baseId}-v${nextVersion}`
+      // 3. Versi baru = menggunakan timestamp untuk menghindari race condition antar transaksi
+      const newIdMustahik = `${baseId}-v${Date.now()}`
 
-    // 4. Nonaktifkan record lama
-    await prisma.dim_mustahik.update({
-      where: { sk_mustahik },
-      data: {
-        is_active: false,
-        valid_to: new Date()
-      }
-    })
+      // 4. Nonaktifkan record lama
+      await tx.dim_mustahik.update({
+        where: { sk_mustahik },
+        data: {
+          is_active: false,
+          valid_to: new Date()
+        }
+      })
 
-    // 5. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
-    const lokasiBaru = await prisma.dim_lokasi.create({
-      data: {
-        provinsi: "Kalimantan Barat",
-        kabupaten_kota: kabupaten_kota,
-        latitude: latitude,
-        longitude: longitude,
-      }
-    })
+      // 5. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
+      const lokasiBaru = await tx.dim_lokasi.create({
+        data: {
+          provinsi: "Kalimantan Barat",
+          kabupaten_kota: kabupaten_kota,
+          latitude: latitude,
+          longitude: longitude,
+        }
+      })
 
-    // 6. Buat record mustahik baru sebagai versi terbaru (Active) dengan ID unik
-    const updatedMustahik = await prisma.dim_mustahik.create({
-      data: {
-        id_mustahik: newIdMustahik,
-        nama,
-        nik,
-        alamat,
-        kategori_pm,
-        skoring,
-        sk_lokasi: lokasiBaru.sk_lokasi,
-        is_active: true,
-        valid_from: new Date(),
-      }
+      // 6. Buat record mustahik baru sebagai versi terbaru (Active) dengan ID unik
+      const mustahikBaru = await tx.dim_mustahik.create({
+        data: {
+          id_mustahik: newIdMustahik,
+          nama,
+          nik,
+          alamat,
+          kategori_pm,
+          skoring,
+          sk_lokasi: lokasiBaru.sk_lokasi,
+          is_active: true,
+          valid_from: new Date(),
+        }
+      })
+      
+      return mustahikBaru
     })
 
     return NextResponse.json(updatedMustahik)
