@@ -71,7 +71,21 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json()
-    const { sk_mustahik, nama, nik, alamat, kabupaten_kota, kategori_pm, skoring, latitude, longitude } = body
+    const {
+      sk_mustahik,
+      nama, nik, kk,
+      gender, no_hp,
+      alamat, desa, kelurahan_kecamatan, kabupaten_kota, provinsi,
+      kategori_pm, skoring, jumlah_jiwa,
+      latitude, longitude,
+    } = body
+
+    // Map human-readable → Prisma enum name
+    const KATEGORI_PM_MAP: Record<string, string> = {
+      'Fakir': 'Fakir', 'Miskin': 'Miskin', 'Amil': 'Amil',
+      'Muallaf': 'Muallaf', 'Riqab': 'Riqab', 'Gharimin': 'Gharimin',
+      'Fisabilillah': 'Fisabilillah', 'Ibnu Sabil': 'Ibnu_Sabil',
+    }
 
     // Gunakan Transaction agar tidak ada partial commit (orphaned data)
     const updatedMustahik = await prisma.$transaction(async (tx) => {
@@ -100,10 +114,12 @@ export async function PUT(req: Request) {
       // 5. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
       const lokasiBaru = await tx.dim_lokasi.create({
         data: {
-          provinsi: "Kalimantan Barat",
-          kabupaten_kota: kabupaten_kota,
-          latitude: latitude,
-          longitude: longitude,
+          provinsi: provinsi || "Kalimantan Barat",
+          kabupaten_kota: kabupaten_kota || null,
+          kecamatan: kelurahan_kecamatan || null,
+          desa_kelurahan: desa || null,
+          latitude: latitude || null,
+          longitude: longitude || null,
         }
       })
 
@@ -112,10 +128,17 @@ export async function PUT(req: Request) {
         data: {
           id_mustahik: newIdMustahik,
           nama,
-          nik,
+          nik: nik || null,
+          kk: kk || null,
+          gender: gender === 'L' ? 'L' : gender === 'P' ? 'P' : 'To_Be_Determined',
+          no_hp: no_hp || null,
           alamat,
-          kategori_pm,
-          skoring,
+          desa: desa || null,
+          kelurahan_kecamatan: kelurahan_kecamatan || null,
+          kabupaten_kota: kabupaten_kota || null,
+          kategori_pm: (KATEGORI_PM_MAP[kategori_pm] || kategori_pm || 'To_Be_Determined') as any,
+          skoring: skoring ?? null,
+          jumlah_jiwa: jumlah_jiwa || null,
           sk_lokasi: lokasiBaru.sk_lokasi,
           is_active: true,
           valid_from: new Date(),
