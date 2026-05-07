@@ -69,9 +69,13 @@ export default function ManajemenDonaturPage() {
   const fetchDonatur = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/donasi/donatur?limit=1000')
+      const res = await fetch('/api/donasi/donatur?limit=1000', { cache: 'no-store' })
       const json = await res.json()
-      if (json.data && Array.isArray(json.data)) setDonatur(json.data)
+      if (json.data && Array.isArray(json.data)) {
+        // Sort by latest (sk_donatur) descending manually on client just in case
+        const sorted = json.data.sort((a, b) => b.sk_donatur - a.sk_donatur);
+        setDonatur(sorted);
+      }
     } catch (e) {
       toast.error('Gagal memuat data dari warehouse')
     } finally {

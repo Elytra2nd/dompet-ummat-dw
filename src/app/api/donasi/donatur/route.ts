@@ -27,7 +27,7 @@ export async function GET(req: Request) {
         },
         take: limit,
         skip: (page - 1) * limit,
-        orderBy: { nama_lengkap: 'asc' },
+        orderBy: { sk_donatur: 'desc' },
       }),
       prisma.dim_donatur.count({
         where: {
