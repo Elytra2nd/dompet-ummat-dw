@@ -120,12 +120,12 @@ export default function MonitoringAmbulanPage() {
   const startEdit = (item: AmbulanLog) => {
     setFormData({
       sk_fakta_layanan_ambulan: item.sk_fakta_layanan_ambulan,
-      sk_pasien: item.sk_pasien.toString(),
-      sk_tanggal: item.sk_tanggal_layanan.toString(),
-      jam: item.jam,
-      armada: item.armada,
-      kategori: item.kategori_layanan,
-      sk_lokasi: item.sk_lokasi.toString()
+      sk_pasien: item.sk_pasien?.toString() || '',
+      sk_tanggal: item.sk_tanggal_layanan?.toString() || new Date().toISOString().split('T')[0].replace(/-/g, ''),
+      jam: item.jam || 'Pagi__06_00_12_00_',
+      armada: item.armada || 'Ambulan_1__KB_1234_XX_',
+      kategori: item.kategori_layanan || 'Antar_Pasien',
+      sk_lokasi: item.sk_lokasi?.toString() || '1'
     })
     setIsEditing(true)
     setIsFormOpen(true)
@@ -233,6 +233,26 @@ export default function MonitoringAmbulanPage() {
                 <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium" value={formData.armada} onChange={(e) => setFormData({...formData, armada: e.target.value})}>
                   <option value="Ambulan_1__KB_1234_XX_">Unit 1 (KB 1234 XX)</option>
                   <option value="Ambulan_2__KB_5678_YY_">Unit 2 (KB 5678 YY)</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-600 uppercase">Shift Waktu</Label>
+                <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium" value={formData.jam} onChange={(e) => setFormData({...formData, jam: e.target.value})}>
+                  <option value="Pagi__06_00_12_00_">Pagi (06:00-12:00)</option>
+                  <option value="Siang__12_00_15_00_">Siang (12:00-15:00)</option>
+                  <option value="Sore__15_00_18_00_">Sore (15:00-18:00)</option>
+                  <option value="Malam__18_00_06_00_">Malam (18:00-06:00)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-600 uppercase">Kategori Layanan</Label>
+                <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium" value={formData.kategori} onChange={(e) => setFormData({...formData, kategori: e.target.value})}>
+                  <option value="Antar_Pasien">Antar Pasien</option>
+                  <option value="Jemput_Pasien">Jemput Pasien</option>
+                  <option value="Layanan_Jenazah">Layanan Jenazah</option>
+                  <option value="Gawat_Darurat">Gawat Darurat</option>
+                  <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
               <div className="md:col-span-3 flex justify-end">

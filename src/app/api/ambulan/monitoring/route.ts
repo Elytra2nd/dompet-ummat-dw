@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
     const newLog = await prisma.fact_layanan_ambulan.create({
       data: {
         id_transaksi: idTransaksi,
-        sk_pasien: parseInt(body.sk_pasien),
-        sk_lokasi: parseInt(body.sk_lokasi),
-        sk_tanggal_layanan: parseInt(body.sk_tanggal),
+        sk_pasien: body.sk_pasien ? parseInt(body.sk_pasien) : null,
+        sk_lokasi: body.sk_lokasi ? parseInt(body.sk_lokasi) : null,
+        sk_tanggal_layanan: body.sk_tanggal ? parseInt(body.sk_tanggal) : null,
         jam: body.jam,
         armada: body.armada,
         kategori_layanan: body.kategori,
@@ -55,9 +55,9 @@ export async function PUT(request: NextRequest) {
     const updatedLog = await prisma.fact_layanan_ambulan.update({
       where: { sk_fakta_layanan_ambulan: body.sk_fakta_layanan_ambulan },
       data: {
-        sk_pasien: parseInt(body.sk_pasien),
-        sk_lokasi: parseInt(body.sk_lokasi),
-        sk_tanggal_layanan: parseInt(body.sk_tanggal),
+        sk_pasien: body.sk_pasien ? parseInt(body.sk_pasien) : null,
+        sk_lokasi: body.sk_lokasi ? parseInt(body.sk_lokasi) : null,
+        sk_tanggal_layanan: body.sk_tanggal ? parseInt(body.sk_tanggal) : null,
         jam: body.jam,
         armada: body.armada,
         kategori_layanan: body.kategori,

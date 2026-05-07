@@ -110,7 +110,7 @@ export async function PUT(req: Request) {
           id_donatur: newIdDonatur,
           nama_lengkap: nama_donatur,
           kontak_utama: no_hp,
-          alamat: alamat,
+          alamat: alamat || '-',
           perusahaan: perusahaan || '-',
           tipe: kategori_donatur,
           is_active: true,
