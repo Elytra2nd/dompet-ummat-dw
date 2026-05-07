@@ -73,7 +73,7 @@ export default function ManajemenDonaturPage() {
       const json = await res.json()
       if (json.data && Array.isArray(json.data)) {
         // Sort by latest (sk_donatur) descending manually on client just in case
-        const sorted = json.data.sort((a, b) => b.sk_donatur - a.sk_donatur);
+        const sorted = json.data.sort((a: Donatur, b: Donatur) => b.sk_donatur - a.sk_donatur);
         setDonatur(sorted);
       }
     } catch (e) {
