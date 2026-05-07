@@ -297,10 +297,10 @@ export default function RiwayatAktivitasPage() {
             <Table>
               <TableHeader className="bg-slate-50 border-b">
                 <TableRow>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4 px-6">ID & Kategori</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 hidden md:table-cell">Unit Armada</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Biaya Operasional</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-8">Aksi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4 w-[250px] text-left px-6">ID & Kategori</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 hidden md:table-cell min-w-[200px] text-left">Unit Armada</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[150px] text-left">Biaya Operasional</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center pr-8">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -309,21 +309,21 @@ export default function RiwayatAktivitasPage() {
                 ) : currentLogs.length > 0 ? (
                   currentLogs.map((log: any) => (
                     <TableRow key={log.sk_fakta_aktivitas_ambulan} className="group hover:bg-rose-50/30 transition-colors">
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-6 py-4 text-left">
                         <p className="font-bold text-xs text-slate-900 uppercase">{log.kategori_aktivitas?.replace(/_/g, ' ') || 'Umum'}</p>
                         <p className="text-[10px] font-mono font-semibold text-slate-400 mt-0.5 tracking-tighter uppercase">{log.id_transaksi}</p>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
+                      <TableCell className="hidden md:table-cell text-left">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
                           <Truck size={14} className="text-slate-400"/> {log.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Ready'}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left">
                         <p className="font-bold text-sm text-rose-600">
                           {formatIDR(log.biaya_operasional || 0)}
                         </p>
                       </TableCell>
-                      <TableCell className="text-right pr-6">
+                      <TableCell className="text-center pr-6">
                         <div className="flex justify-end gap-1 items-center">
                           <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" aria-label="Lihat detail"><Eye size={16} /></Button>

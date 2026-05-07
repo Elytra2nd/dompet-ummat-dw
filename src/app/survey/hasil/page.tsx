@@ -225,11 +225,11 @@ export default function SurveyMainPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 pl-6">Mustahik & Reg</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-center">Skor Akhir</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-center">Status Kelayakan</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500">Rekomendasi Bantuan</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[200px] text-left pl-6">Mustahik & Reg</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px] text-center">Skor Akhir</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center">Status Kelayakan</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[200px] text-left">Rekomendasi Bantuan</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[140px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -247,7 +247,7 @@ export default function SurveyMainPage() {
                   </TableRow>
                 ) : currentSurveys.map((item) => (
                   <TableRow key={item.sk_survey} className="group hover:bg-indigo-50/30 transition-colors">
-                    <TableCell className="pl-6 py-4">
+                    <TableCell className="pl-6 py-4 text-left">
                       <p className="font-semibold text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || 'N/A'}</p>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -268,7 +268,7 @@ export default function SurveyMainPage() {
                         {item.kelayakan_sistem?.replace(/_/g, ' ')}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-left">
                       <div className="flex items-start gap-2">
                         <ClipboardCheck className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
                         <p className="text-xs font-bold text-slate-600 max-w-[200px] leading-relaxed">
@@ -276,7 +276,7 @@ export default function SurveyMainPage() {
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right pr-4">
+                    <TableCell className="text-center pr-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/survey/hasil/${item.sk_survey}`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Detail Survey">

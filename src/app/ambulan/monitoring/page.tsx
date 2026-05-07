@@ -299,10 +299,10 @@ export default function MonitoringAmbulanPage() {
             <Table>
               <TableHeader className="bg-slate-50 border-b">
                 <TableRow>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4">Layanan & ID</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Identitas Pasien</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 hidden md:table-cell">Unit & Lokasi</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right pr-6">Aksi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 py-4 w-[200px] text-left px-6">Layanan & ID</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left">Identitas Pasien</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 hidden md:table-cell min-w-[150px] text-left">Unit & Lokasi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -311,17 +311,17 @@ export default function MonitoringAmbulanPage() {
                 ) : currentItems.length > 0 ? (
                   currentItems.map((item) => (
                     <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0 group">
-                      <TableCell>
+                      <TableCell className="px-6 text-left">
                         <Badge variant="outline" className="mb-1 font-semibold text-[9px] bg-rose-50 text-rose-700 border-rose-200 px-2 py-0.5 rounded-lg">
                           {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
                         </Badge>
                         <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter uppercase">{item.id_transaksi}</p>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left">
                         <p className="font-semibold text-sm text-slate-900 uppercase group-hover:text-rose-600 transition-colors">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{item.dim_pasien_ambulan?.status_ekonomi || 'Non-Subsidi'}</p>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
+                      <TableCell className="hidden md:table-cell text-left">
                         <div className="space-y-1">
                           <div className="flex items-center text-[11px] text-slate-700 font-semibold gap-1.5 uppercase">
                              <Truck size={13} className="text-slate-400"/> {item.armada?.split('__')[0].replace(/_/g, ' ') || 'Unit Standar'}
@@ -331,7 +331,7 @@ export default function MonitoringAmbulanPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right pr-4">
+                      <TableCell className="text-center pr-4">
                         <div className="flex justify-end gap-1 items-center">
                           <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" aria-label="Lihat detail"><Eye size={16} /></Button>

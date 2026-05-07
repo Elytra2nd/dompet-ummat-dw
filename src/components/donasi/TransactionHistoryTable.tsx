@@ -173,12 +173,12 @@ export default function TransactionHistoryTable() {
           <table className="hidden sm:table w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b">
               <tr>
-                <th className="px-6 py-4">ID Transaksi</th>
-                <th className="px-6 py-4">Donatur</th>
-                <th className="px-6 py-4">Program</th>
-                <th className="px-6 py-4 text-right">Nominal</th>
-                <th className="px-6 py-4 hidden lg:table-cell">Keterangan</th>
-                <th className="px-6 py-4 text-center">Aksi</th>
+                <th className="px-6 py-4 w-[180px] text-left">ID Transaksi</th>
+                <th className="px-6 py-4 min-w-[200px] text-left">Donatur</th>
+                <th className="px-6 py-4 min-w-[150px] text-left">Program</th>
+                <th className="px-6 py-4 min-w-[150px] text-right">Nominal</th>
+                <th className="px-6 py-4 hidden lg:table-cell min-w-[150px] text-left">Keterangan</th>
+                <th className="px-6 py-4 w-[140px] text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -198,18 +198,18 @@ export default function TransactionHistoryTable() {
               ) : (
                 data.map((item) => (
                   <tr key={item.sk_fakta_donasi} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs">{item.id_transaksi_donasi}</td>
-                    <td className="px-6 py-4 font-bold text-slate-800">
+                    <td className="px-6 py-4 font-mono text-xs text-left">{item.id_transaksi_donasi}</td>
+                    <td className="px-6 py-4 font-bold text-slate-800 text-left">
                       {item.dim_donatur?.nama_lengkap || 'Hamba Allah'}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-left">
                       <div className="font-semibold text-emerald-600">{item.dim_program_donasi?.program_induk || '-'}</div>
                       <div className="text-[10px] text-slate-400 uppercase">{item.dim_program_donasi?.sub_program || '-'}</div>
                     </td>
                     <td className="px-6 py-4 text-right font-semibold text-indigo-600">
                       {formatRupiah(Number(item.nominal_valid))}
                     </td>
-                    <td className="px-6 py-4 text-xs hidden lg:table-cell">{item.no_ref || '-'}</td>
+                    <td className="px-6 py-4 text-xs hidden lg:table-cell text-left">{item.no_ref || '-'}</td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Button variant="outline" size="icon" className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)} title="Detail Transaksi">

@@ -227,12 +227,12 @@ export default function KelolaPertanyaanPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="w-[100px] font-bold">KODE</TableHead>
-                  <TableHead className="font-bold">GRUP</TableHead>
-                  <TableHead className="font-bold">
+                  <TableHead className="w-[150px] font-bold text-left px-6">KODE</TableHead>
+                  <TableHead className="w-[200px] font-bold text-left">GRUP</TableHead>
+                  <TableHead className="min-w-[300px] font-bold text-left">
                     INDIKATOR PENILAIAN
                   </TableHead>
-                  <TableHead className="text-right font-bold">AKSI</TableHead>
+                  <TableHead className="w-[120px] text-center font-bold pr-6">AKSI</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -257,18 +257,18 @@ export default function KelolaPertanyaanPage() {
                       key={q.sk_pertanyaan}
                       className="hover:bg-slate-50/50"
                     >
-                      <TableCell className="font-mono text-xs font-bold text-blue-600">
+                      <TableCell className="font-mono text-xs font-bold text-blue-600 px-6 text-left">
                         {q.kode_pertanyaan}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left">
                         <span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600 uppercase">
                           {q.grup_pertanyaan}
                         </span>
                       </TableCell>
-                      <TableCell className="text-sm font-medium text-slate-700">
+                      <TableCell className="text-sm font-medium text-slate-700 text-left">
                         {q.teks_pertanyaan}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-center pr-6">
                         <Button
                           variant="ghost"
                           size="sm"

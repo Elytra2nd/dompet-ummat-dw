@@ -234,11 +234,11 @@ export default function UserManagementPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="w-[200px]">Nama Lengkap</TableHead>
-                  <TableHead className="hidden sm:table-cell">Email</TableHead>
-                  <TableHead>Role Hak Akses</TableHead>
-                  <TableHead className="hidden md:table-cell">Terdaftar Sejak</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead className="w-[250px] text-left px-6">Nama Lengkap</TableHead>
+                  <TableHead className="hidden sm:table-cell min-w-[200px] text-left">Email</TableHead>
+                  <TableHead className="min-w-[150px] text-left">Role Hak Akses</TableHead>
+                  <TableHead className="hidden md:table-cell min-w-[150px] text-left">Terdaftar Sejak</TableHead>
+                  <TableHead className="text-center w-[120px] pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -258,15 +258,15 @@ export default function UserManagementPage() {
                 ) : (
                   users.map((user) => (
                     <TableRow key={user.id} className="group hover:bg-slate-50/50">
-                      <TableCell className="font-semibold text-slate-900">{user.name}</TableCell>
-                      <TableCell className="text-slate-600 hidden sm:table-cell">{user.email}</TableCell>
-                      <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell className="text-slate-500 text-sm hidden md:table-cell">
+                      <TableCell className="font-semibold text-slate-900 px-6 text-left">{user.name}</TableCell>
+                      <TableCell className="text-slate-600 hidden sm:table-cell text-left">{user.email}</TableCell>
+                      <TableCell className="text-left">{getRoleBadge(user.role)}</TableCell>
+                      <TableCell className="text-slate-500 text-sm hidden md:table-cell text-left">
                         {new Date(user.createdAt).toLocaleDateString('id-ID', {
                           day: 'numeric', month: 'long', year: 'numeric'
                         })}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-center pr-6">
                         <div className="flex justify-end gap-2">
                           <Button 
                             variant="outline" 

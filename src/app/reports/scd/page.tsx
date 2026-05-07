@@ -201,12 +201,12 @@ export default function AuditLogPage() {
         <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px]">Entitas</TableHead>
-                <TableHead className="font-semibold text-[10px] uppercase text-slate-500">ID & Nama Master</TableHead>
-                <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-center">Masa Berlaku Record</TableHead>
-                <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-center">Status Audit</TableHead>
-              </TableRow>
+                <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-left px-6">Entitas</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">ID & Nama Master</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-center">Masa Berlaku Record</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Status Audit</TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
               {loading && logs.length === 0 ? (
@@ -221,7 +221,7 @@ export default function AuditLogPage() {
               ) : currentLogs.length > 0 ? (
                 currentLogs.map((log, i) => (
                   <TableRow key={i} className={`hover:bg-slate-50/50 transition-colors ${!log.is_active ? 'opacity-70 grayscale-[0.5]' : ''}`}>
-                    <TableCell>
+                    <TableCell className="px-6 text-left">
                       <Badge 
                         className={`font-semibold text-[9px] uppercase tracking-wider px-2 py-1 border-none shadow-none ${
                           log.entitas === 'Donatur' ? 'bg-blue-100 text-blue-700' :
@@ -234,7 +234,7 @@ export default function AuditLogPage() {
                       </Badge>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="text-left">
                       <p className="font-mono text-[10px] font-semibold text-indigo-500 mb-0.5">{log.id_bisnis}</p>
                       <p className="font-semibold text-slate-900 uppercase text-sm">{log.nama}</p>
                     </TableCell>
@@ -251,7 +251,7 @@ export default function AuditLogPage() {
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-center">
+                    <TableCell className="text-center pr-6">
                       <Badge 
                         variant="outline"
                         className={`font-semibold text-[9px] uppercase tracking-tighter rounded-md ${

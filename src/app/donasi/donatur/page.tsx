@@ -171,9 +171,9 @@ export default function ManajemenDonaturPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500">ID & Tipe</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500">Profil Donatur</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left px-6">ID & Tipe</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">Profil Donatur</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -181,13 +181,13 @@ export default function ManajemenDonaturPage() {
                   <TableRow><TableCell colSpan={3} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-indigo-400" /></TableCell></TableRow>
                 ) : currentDonatur.map((d) => (
                   <TableRow key={d.sk_donatur} className="group hover:bg-indigo-50/30 transition-colors">
-                    <TableCell>
+                    <TableCell className="px-6 text-left">
                       <p className="font-mono text-[10px] font-semibold text-indigo-400 leading-none mb-1">{d.id_donatur}</p>
                       <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
                         {d.tipe?.replace('_', ' ')}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-left">
                       <p className="font-semibold text-slate-900 uppercase leading-none mb-1 tracking-tight">{d.nama_lengkap}</p>
                       <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
                         <Phone className="h-3 w-3 text-emerald-500"/> {d.kontak_utama}
@@ -198,7 +198,7 @@ export default function ManajemenDonaturPage() {
                           </div>
                       )}
                     </TableCell>
-                    <TableCell className="text-right pr-4">
+                    <TableCell className="text-center pr-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/donasi/donatur/${d.id_donatur}`}>
                           <Button 
