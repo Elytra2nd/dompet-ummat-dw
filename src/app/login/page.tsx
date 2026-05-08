@@ -29,7 +29,7 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Email atau Password salah!");
+      setError("Email atau Kata Sandi salah!");
       setLoading(false);
     } else {
       const sessionRes = await fetch('/api/auth/session');
@@ -84,7 +84,7 @@ export default function LoginPage() {
             {/* Input Email */}
             <div className={`space-y-1.5 ${animFadeInUp} delay-[400ms]`}>
               <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">
-                Email Address
+                Alamat Email
               </label>
               <input
                 type="email"
@@ -99,7 +99,7 @@ export default function LoginPage() {
             {/* Input Password */}
             <div className={`space-y-1.5 ${animFadeInUp} delay-[500ms]`}>
               <label className="block text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">
-                Password
+                Kata Sandi
               </label>
               <input
                 type="password"
@@ -127,7 +127,7 @@ export default function LoginPage() {
                 className="w-full sm:w-auto rounded-full bg-emerald-600 px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/30 transition-all hover:bg-emerald-500 hover:-translate-y-0.5 hover:shadow-emerald-500/40 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {loading ? 'Memverifikasi...' : 'Login Sekarang'}
+                {loading ? 'Memverifikasi...' : 'Masuk Sekarang'}
               </button>
             </div>
           </form>

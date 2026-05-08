@@ -187,7 +187,7 @@ export default function UserManagementPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'ADMIN': return <Badge className="bg-indigo-500">Administrator</Badge>
-      case 'SURVEYOR': return <Badge className="bg-emerald-500">Relawan/Surveyor</Badge>
+      case 'SURVEYOR': return <Badge className="bg-emerald-500">Relawan / Petugas Survei</Badge>
       case 'STAFF': return <Badge className="bg-amber-500">Staff Internal</Badge>
       default: return <Badge variant="outline">{role}</Badge>
     }
@@ -360,7 +360,7 @@ export default function UserManagementPage() {
                   <SelectValue placeholder="Pilih Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SURVEYOR">Relawan / Surveyor (Akses Terbatas)</SelectItem>
+                  <SelectItem value="SURVEYOR">Relawan / Petugas Survei (Akses Terbatas)</SelectItem>
                   <SelectItem value="STAFF">Staff Internal</SelectItem>
                   <SelectItem value="ADMIN">Administrator (Akses Penuh)</SelectItem>
                 </SelectContent>
