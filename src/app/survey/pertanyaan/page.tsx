@@ -227,14 +227,14 @@ export default function KelolaPertanyaanPage() {
           </CardHeader>
           <CardContent className="p-0">
             <Table>
-              <TableHeader className="bg-slate-50">
+              <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="w-[150px] font-bold text-left px-6">KODE</TableHead>
-                  <TableHead className="w-[200px] font-bold text-left">GRUP</TableHead>
-                  <TableHead className="min-w-[300px] font-bold text-left">
-                    INDIKATOR PENILAIAN
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-left pl-6">Kode</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left">Grup</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">
+                    Indikator Penilaian
                   </TableHead>
-                  <TableHead className="w-[120px] text-center font-bold pr-6">AKSI</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -259,7 +259,7 @@ export default function KelolaPertanyaanPage() {
                       key={q.sk_pertanyaan}
                       className="hover:bg-slate-50/50"
                     >
-                      <TableCell className="font-mono text-xs font-bold text-blue-600 px-6 text-left">
+                      <TableCell className="font-mono text-xs font-bold text-blue-600 pl-6 text-left">
                         {q.kode_pertanyaan}
                       </TableCell>
                       <TableCell className="text-left">

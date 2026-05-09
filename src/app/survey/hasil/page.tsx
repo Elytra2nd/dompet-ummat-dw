@@ -276,7 +276,7 @@ export default function SurveyMainPage() {
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center pr-4">
+                    <TableCell className="text-center pr-6">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/survey/hasil/${item.sk_survey}`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Detail Survey">
