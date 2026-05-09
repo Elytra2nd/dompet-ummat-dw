@@ -41,7 +41,7 @@ export default function KelolaPertanyaanPage() {
   // Form State untuk Pertanyaan Baru
   const [newQuestion, setNewQuestion] = useState({
     kode_pertanyaan: '',
-    grup_pertanyaan: 'Ekonomi',
+    grup_pertanyaan: 'DATA KELUARGA',
     teks_pertanyaan: '',
   })
 
@@ -178,10 +178,12 @@ export default function KelolaPertanyaanPage() {
                       })
                     }
                   >
-                    <option value="Ekonomi">Ekonomi</option>
-                    <option value="Kesehatan">Kesehatan</option>
-                    <option value="Sosial">Sosial</option>
-                    <option value="Pendidikan">Pendidikan</option>
+                    <option value="DATA KELUARGA">DATA KELUARGA</option>
+                    <option value="KONDISI RUMAH">KONDISI RUMAH</option>
+                    <option value="KEPEMILIKAN BARANG">KEPEMILIKAN BARANG</option>
+                    <option value="KESEHATAN KELUARGA">KESEHATAN KELUARGA</option>
+                    <option value="TANGGUNGAN KEBUTUHAN HIDUP">TANGGUNGAN KEBUTUHAN HIDUP</option>
+                    <option value="INDIKATOR KEIMANAN">INDIKATOR KEIMANAN</option>
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-1">
