@@ -150,11 +150,11 @@ export default function PerbandinganPage() {
 
   const PERBANDINGAN_SCHEMA: ExportColumn[] = [
     { header: 'Segmen', key: 'label', width: 20 },
-    { header: 'Donatur', key: 'count', width: 12, format: 'number' },
-    { header: '%', key: 'percentage', width: 8, format: 'number' },
-    { header: 'Avg Terakhir (hr)', key: 'avg_recency', width: 18, format: 'number' },
-    { header: 'Avg Frekuensi', key: 'avg_frequency', width: 16, format: 'number' },
-    { header: 'Avg Donasi (Rp)', key: 'avg_monetary', width: 20, format: 'rupiah' },
+    { header: 'Jumlah Donatur', key: 'count', width: 12, format: 'number' },
+    { header: 'Persentase', key: 'percentage', width: 8, format: 'number' },
+    { header: 'Hari Terakhir Donasi', key: 'avg_recency', width: 18, format: 'number' },
+    { header: 'Frekuensi Donasi', key: 'avg_frequency', width: 16, format: 'number' },
+    { header: 'Rata-rata Donasi (Rp)', key: 'avg_monetary', width: 20, format: 'rupiah' },
     { header: 'Total Kontribusi (Rp)', key: 'total_monetary', width: 24, format: 'rupiah' },
   ]
 
@@ -172,7 +172,7 @@ export default function PerbandinganPage() {
     try {
       const blob = await exportExcel({
         title: 'Perbandingan Segmen Donatur',
-        subtitle: 'Ringkasan RFM & kontribusi per segmen',
+        subtitle: 'Ringkasan profil dan kontribusi per segmen',
         columns: PERBANDINGAN_SCHEMA,
         rows: exportRows,
       })
@@ -187,7 +187,7 @@ export default function PerbandinganPage() {
     try {
       const blob = exportPDF({
         title: 'Perbandingan Segmen Donatur',
-        subtitle: 'Ringkasan RFM & kontribusi per segmen — BIDA Analytics',
+        subtitle: 'Ringkasan profil dan kontribusi per segmen — BIDA Analytics',
         columns: PERBANDINGAN_SCHEMA,
         rows: exportRows,
         landscape: true,

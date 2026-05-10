@@ -98,7 +98,7 @@ export default function MustahikSpasialPage() {
             <div className="flex gap-2">
               <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 border border-emerald-100">
                 <Database className="h-4 w-4 text-emerald-600" />
-                <span className="text-[10px] font-black text-emerald-700 uppercase">Warehouse Synced</span>
+                <span className="text-[10px] font-black text-emerald-700 uppercase">Data Tersinkronisasi</span>
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 border border-indigo-100">
                 <Globe className="h-4 w-4 text-indigo-600" />

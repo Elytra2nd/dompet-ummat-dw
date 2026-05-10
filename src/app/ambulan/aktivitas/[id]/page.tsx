@@ -150,7 +150,7 @@ export default function DetailAktivitasPage() {
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Data</p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        <p className="font-bold text-slate-900 uppercase text-xs">Verified in Warehouse</p>
+                        <p className="font-bold text-slate-900 uppercase text-xs">Terverifikasi</p>
                       </div>
                     </div>
                   </div>

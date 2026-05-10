@@ -79,7 +79,7 @@ export default function DashboardPage() {
           })
         }
       } catch (error) {
-        console.error("Gagal mengambil data dari Data Warehouse:", error)
+        console.error("Gagal memuat data:", error)
       } finally {
         setLoading(false)
       }
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 Dashboard <span className="text-emerald-600 font-extrabold">Amil</span> Analitik
               </h1>
               <p className="text-slate-500 font-medium max-w-xl text-sm md:text-base leading-relaxed">
-                Sistem pendukung keputusan berbasis <span className="text-slate-900">Data Warehouse</span> untuk optimalisasi penghimpunan ZISWAF.
+                Sistem pendukung keputusan berbasis <span className="text-slate-900">Sistem Data</span> untuk optimalisasi penghimpunan ZISWAF.
               </p>
             </div>
             
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="mt-4 font-black text-lg text-slate-900">Database Donatur</h3>
                     <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
-                      Manajemen profil Muzakki melalui skema tabel dimensi.
+                      Kelola data profil dan riwayat donasi setiap donatur.
                     </p>
                   </CardContent>
                 </Card>

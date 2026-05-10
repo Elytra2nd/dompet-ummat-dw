@@ -268,7 +268,7 @@ export async function POST() {
   } catch (error: any) {
     console.error('SEGMENTASI_COMPARE_ERROR:', error)
     return NextResponse.json(
-      { error: 'Gagal menjalankan perbandingan algoritma' },
+      { error: 'Gagal membandingkan hasil analisis' },
       { status: 500 }
     )
   } finally {

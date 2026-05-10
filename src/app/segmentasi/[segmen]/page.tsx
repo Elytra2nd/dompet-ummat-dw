@@ -606,7 +606,7 @@ export default function SegmentDetailPage({
                   {showAdvanced && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                       <div>
-                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Donasi Min (Rp)</label>
+                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Minimum Donasi (Rp)</label>
                         <input
                           type="number"
                           placeholder="e.g. 1000000"

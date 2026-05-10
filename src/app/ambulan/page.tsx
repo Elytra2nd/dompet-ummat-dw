@@ -84,7 +84,7 @@ export default function AmbulanExecutivePage() {
             Dashboard <span className="text-rose-600">Ambulan</span>
           </h1>
           <p className="text-slate-500 font-medium mt-1 text-xs tracking-wide">
-            SOLAP Analytical Hub • BIDA Warehouse
+            Pusat Analisis Ambulan • BIDA Analytics
           </p>
         </div>
         <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1.5 self-start sm:self-auto">
@@ -174,7 +174,7 @@ export default function AmbulanExecutivePage() {
                       <Area type="monotone" dataKey="count" stroke="#f43f5e" strokeWidth={2.5} fill="url(#colorTrendAmb)" animationDuration={1200} />
                     </AreaChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-slate-400 text-center pt-20">Belum ada data tren</p>}
+                ) : <p className="text-sm text-slate-400 text-center pt-20">Belum ada data pertumbuhan</p>}
               </div>
             </CardContent>
           </Card>
@@ -212,7 +212,7 @@ export default function AmbulanExecutivePage() {
                       ))}
                     </div>
                   </div>
-                ) : <p className="text-sm text-slate-400 text-center w-full">Belum ada data</p>}
+                ) : <p className="text-sm text-slate-400 text-center w-full">Belum ada data kategori</p>}
               </div>
             </CardContent>
           </Card>
@@ -250,7 +250,7 @@ export default function AmbulanExecutivePage() {
                     <Bar dataKey="value" fill="#6366f1" radius={[0, 6, 6, 0]} animationDuration={800} />
                   </BarChart>
                 </ResponsiveContainer>
-              ) : <p className="text-sm text-slate-400 text-center pt-20">Data cube kosong</p>}
+              ) : <p className="text-sm text-slate-400 text-center pt-20">Tidak ada data untuk ditampilkan</p>}
             </div>
           </CardContent>
         </Card>
