@@ -328,7 +328,7 @@ export function AddMustahikFormContent() {
               <ClipboardList className="h-8 w-8 text-emerald-600" /> {isEditing ? 'Update Data Mustahik' : 'Registrasi Entitas Baru'}
             </h1>
             <p className="text-sm font-medium text-slate-500">
-              Sistem Informasi Geospasial (SOLAP Ready)
+              Pemetaan Lokasi
             </p>
           </div>
         </div>

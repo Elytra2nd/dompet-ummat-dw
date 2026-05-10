@@ -139,7 +139,7 @@ export default function SurveyMainPage() {
                 Hasil <span className="text-indigo-600">Survey Kelayakan</span>
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
-                Data Warehouse • Decision Support System (DSS)
+                Sistem Pendukung Keputusan
               </p>
             </div>
             <Button asChild className="bg-indigo-600 font-semibold text-sm h-10 shadow-md hover:bg-indigo-700 w-full sm:w-auto">

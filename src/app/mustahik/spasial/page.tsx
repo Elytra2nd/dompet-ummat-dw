@@ -31,7 +31,7 @@ const SpatialMustahikMap = dynamic(
       <div className="flex h-[500px] w-full items-center justify-center rounded-2xl border-2 border-dashed bg-white text-slate-400">
         <div className="text-center">
           <div className="mb-4 h-10 w-10 animate-spin rounded-full border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="font-bold uppercase tracking-tighter text-xs">Menginisialisasi Engine Spasial...</p>
+          <p className="font-bold uppercase tracking-tighter text-xs">Memuat peta...</p>
         </div>
       </div>
     ) 
@@ -80,7 +80,7 @@ export default function MustahikSpasialPage() {
                 Peta Spasial <span className="text-indigo-600">Mustahik</span>
               </h1>
               <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                Visualisasi <span className="text-indigo-500">Spatial OLAP</span> • Sebaran Administratif Dompet Ummat Kalbar
+                Visualisasi <span className="text-indigo-500">Pemetaan Sebaran</span> • Sebaran Administratif Dompet Ummat Kalbar
               </p>
             </div>
             
@@ -92,7 +92,7 @@ export default function MustahikSpasialPage() {
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 border border-indigo-100">
                 <Globe className="h-4 w-4 text-indigo-600" />
-                <span className="text-[10px] font-semibold text-indigo-700 uppercase">Geographic Ready</span>
+                <span className="text-[10px] font-semibold text-indigo-700 uppercase">Peta Siap</span>
               </div>
             </div>
           </div>

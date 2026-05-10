@@ -74,7 +74,7 @@ function AddDonaturFormContent() {
       const result = await res.json()
 
       if (res.ok) {
-        toast.success(isEditing ? 'Versi data terbaru disimpan (SCD Type 2)' : 'Donatur baru terdaftar')
+        toast.success(isEditing ? 'Data berhasil diperbarui' : 'Donatur baru terdaftar')
         router.push('/donasi/donatur')
       } else {
         toast.error(result.error || 'Gagal menyimpan data')
@@ -98,7 +98,7 @@ function AddDonaturFormContent() {
               <Heart className="h-8 w-8 text-indigo-600" /> {isEditing ? 'Update Profil' : 'Registrasi Baru'} <span className="text-indigo-600">Donatur</span>
             </h1>
             <p className="text-sm font-medium text-slate-500">
-              {isEditing ? 'Pembaruan ini menggunakan SCD Type 2, riwayat lama tetap tersimpan.' : 'Masukkan entitas donatur ke dalam sistem Data Warehouse.'}
+              {isEditing ? 'Riwayat perubahan akan tersimpan otomatis.' : 'Daftarkan donatur baru ke dalam sistem.'}
             </p>
           </div>
         </div>

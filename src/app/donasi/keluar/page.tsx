@@ -238,7 +238,7 @@ export default function DonasiKeluarPage() {
                 Penyaluran <span className="text-amber-600">ZISWAF</span>
               </h1>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
-                Data Warehouse • Fact Penyaluran
+                Catatan Penyaluran
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

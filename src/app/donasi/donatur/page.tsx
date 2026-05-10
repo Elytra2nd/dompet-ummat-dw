@@ -205,7 +205,7 @@ export default function ManajemenDonaturPage() {
                             variant="ghost" 
                             size="icon" 
                             className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
-                            title="Lihat Rekam Jejak (SCD)"
+                            title="Lihat Riwayat"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -230,7 +230,7 @@ export default function ManajemenDonaturPage() {
                                 <AlertDialogTitle className="font-semibold text-xl uppercase tracking-tighter">Hapus Donatur?</AlertDialogTitle>
                               </div>
                               <AlertDialogDescription className="font-medium text-slate-500 text-sm">
-                                Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. Histori tetap ada di Warehouse namun tidak aktif operasional.
+                                Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. Data tetap tersimpan namun tidak aktif lagi.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">

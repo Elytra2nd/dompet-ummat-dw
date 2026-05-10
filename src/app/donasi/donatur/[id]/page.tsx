@@ -38,7 +38,7 @@ export default function DetailDonaturPage() {
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <div className="flex flex-col items-center gap-2">
         <div className="h-8 w-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Sinkronisasi Warehouse...</p>
+        <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Memuat data...</p>
       </div>
     </div>
   )
@@ -77,7 +77,7 @@ export default function DetailDonaturPage() {
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-slate-100 rounded-lg"><MapPin size={16} className="text-slate-600" /></div>
                   <div>
-                    <p className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Domisili Warehouse</p>
+                    <p className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Alamat</p>
                     <p className="text-sm font-bold text-slate-800 leading-tight">{donatur.alamat || 'N/A'}</p>
                   </div>
                 </div>
@@ -89,12 +89,12 @@ export default function DetailDonaturPage() {
           <Card className="border border-emerald-200 bg-emerald-50 rounded-2xl shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-[10px] font-black uppercase flex items-center gap-2 text-emerald-800">
-                <History size={14} className="text-emerald-600" /> SCD Type 2 Integrity
+                <History size={14} className="text-emerald-600" /> Riwayat Profil
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-[11px] font-bold text-emerald-900 leading-relaxed">
-                Terdapat <span className="text-lg font-black">{history.length} data arsip</span> yang terekam secara historis untuk donatur ini. Menjamin audit trail data master tetap terjaga.
+                Terdapat <span className="text-lg font-black">{history.length} data arsip</span> yang terekam secara historis untuk donatur ini. Setiap perubahan profil tersimpan otomatis.
               </p>
             </CardContent>
           </Card>
@@ -105,7 +105,7 @@ export default function DetailDonaturPage() {
           <Card className="border border-slate-200 rounded-2xl shadow-sm overflow-hidden bg-white">
             <CardHeader className="bg-slate-800 text-white flex flex-row items-center justify-between rounded-t-2xl">
               <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <Wallet size={16} className="text-emerald-400" /> Riwayat Transaksi (Fact Donasi)
+                <Wallet size={16} className="text-emerald-400" /> Riwayat Donasi
               </CardTitle>
               <Search size={16} className="text-slate-500" />
             </CardHeader>
@@ -116,8 +116,8 @@ export default function DetailDonaturPage() {
                     <tr className="text-[10px] font-black uppercase text-slate-900">
                       <th className="p-4 border-r">Tgl. Transaksi</th>
                       <th className="p-4 border-r">Program Penyaluran</th>
-                      <th className="p-4 border-r">ID Ref / Transaksi</th>
-                      <th className="p-4 text-right">Nominal Valid</th>
+                      <th className="p-4 border-r">No. Referensi</th>
+                      <th className="p-4 text-right">Jumlah Donasi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -146,7 +146,7 @@ export default function DetailDonaturPage() {
                         </tr>
                       ))
                     ) : (
-                      <tr><td colSpan={4} className="p-16 text-center font-black text-slate-300 uppercase tracking-widest">Zero Historical Transaction</td></tr>
+                      <tr><td colSpan={4} className="p-16 text-center font-black text-slate-300 uppercase tracking-widest">Belum ada riwayat donasi</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -158,7 +158,7 @@ export default function DetailDonaturPage() {
           {history.length > 0 && (
             <div className="space-y-3">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <History size={14} /> Arsip Perubahan (Historical Dimension Records)
+                <History size={14} /> Riwayat Perubahan Data
               </h4>
               {history.map((h: any, i: number) => (
                 <div key={i} className="bg-white border-2 border-slate-200 border-l-blue-600 p-4 shadow-sm flex justify-between items-center group hover:border-blue-200 transition-all">
@@ -169,7 +169,7 @@ export default function DetailDonaturPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Data Valid From - To</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Periode Berlaku</p>
                     <p className="text-[11px] font-black text-blue-700 font-mono">
                       {new Date(h.valid_from).toLocaleDateString('id-ID')} → {new Date(h.valid_to).toLocaleDateString('id-ID')}
                     </p>
