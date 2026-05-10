@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { EmptyState } from '@/components/ui/empty-state'
 import Pagination from '@/components/ui/pagination-numbered'
 import {
   Table,
@@ -168,55 +169,147 @@ export default function ManajemenDonaturPage() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-slate-50/80">
-                <TableRow>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left px-6">ID & Tipe</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">Profil Donatur</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && !donatur.length ? (
-                  <TableRow><TableCell colSpan={3} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-indigo-400" /></TableCell></TableRow>
-                ) : currentDonatur.map((d) => (
-                  <TableRow key={d.sk_donatur} className="group hover:bg-indigo-50/30 transition-colors">
-                    <TableCell className="px-6 text-left">
-                      <p className="font-mono text-[10px] font-semibold text-indigo-400 leading-none mb-1">{d.id_donatur}</p>
-                      <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
-                        {d.tipe?.replace('_', ' ')}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-left">
-                      <p className="font-semibold text-slate-900 uppercase leading-none mb-1 tracking-tight">{d.nama_lengkap}</p>
-                      <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
-                        <Phone className="h-3 w-3 text-emerald-500"/> {d.kontak_utama}
-                      </div>
-                      {d.perusahaan && d.perusahaan !== '-' && (
+            {/* Desktop Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-50/80">
+                  <TableRow>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[200px] text-left px-6">ID & Tipe</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[300px] text-left">Profil Donatur</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading && !donatur.length ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="h-40 text-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mx-auto" />
+                        <p className="mt-2 text-xs font-bold text-slate-400">Memuat data...</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : currentDonatur.length === 0 ? (
+                    <EmptyState asTableRow colSpan={3} title="Belum ada donatur" description="Data donatur akan tampil setelah proses import." />
+                  ) : currentDonatur.map((d) => (
+                    <TableRow key={d.sk_donatur} className="group hover:bg-indigo-50/30 transition-colors">
+                      <TableCell className="px-6 text-left">
+                        <p className="font-mono text-[10px] font-semibold text-indigo-400 leading-none mb-1">{d.id_donatur}</p>
+                        <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                          {d.tipe?.replace('_', ' ')}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-left">
+                        <p className="font-semibold text-slate-900 uppercase leading-none mb-1 tracking-tight">{d.nama_lengkap}</p>
+                        <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
+                          <Phone className="h-3 w-3 text-emerald-500"/> {d.kontak_utama}
+                        </div>
+                        {d.perusahaan && d.perusahaan !== '-' && (
+                            <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 capitalize mt-1">
+                              <Building2 className="h-3 w-3" /> {d.perusahaan}
+                            </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center pr-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <Link href={`/donasi/donatur/${d.id_donatur}`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                              title="Lihat Riwayat"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+
+                          <Link href={`/donasi/donatur/baru?id=${d.id_donatur}`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" aria-label="Edit donatur">
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          </Link>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus donatur">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-2xl border-2">
+                              <AlertDialogHeader>
+                                <div className="flex items-center gap-3 text-rose-600 mb-2">
+                                  <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
+                                  <AlertDialogTitle className="font-semibold text-xl uppercase tracking-tighter">Hapus Donatur?</AlertDialogTitle>
+                                </div>
+                                <AlertDialogDescription className="font-medium text-slate-500 text-sm">
+                                  Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. Data tetap tersimpan namun tidak aktif lagi.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="mt-6 gap-2">
+                                <AlertDialogCancel className="rounded-xl font-semibold uppercase text-[10px]">Batal</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(d.sk_donatur, d.nama_lengkap)}
+                                  className="bg-rose-600 hover:bg-rose-700 rounded-xl font-semibold uppercase text-[10px]"
+                                >
+                                  Ya, Nonaktifkan
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="sm:hidden divide-y divide-slate-100">
+              {loading && !donatur.length ? (
+                <div className="flex flex-col items-center py-12 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+                  <p className="text-xs font-bold text-slate-400">Memuat data...</p>
+                </div>
+              ) : currentDonatur.length === 0 ? (
+                <div className="py-12 px-4">
+                  <EmptyState title="Belum ada donatur" description="Data donatur akan tampil setelah proses import." />
+                </div>
+              ) : (
+                currentDonatur.map((d) => (
+                  <div key={d.sk_donatur} className="p-4 hover:bg-indigo-50/30 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 text-sm uppercase truncate">{d.nama_lengkap}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs font-bold text-indigo-400 font-mono">{d.id_donatur}</span>
+                          <span className="text-[10px] text-slate-400">•</span>
+                          <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                            {d.tipe?.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2 mt-1">
+                          <Phone className="h-3 w-3 text-emerald-500"/> {d.kontak_utama}
+                        </div>
+                        {d.perusahaan && d.perusahaan !== '-' && (
                           <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 capitalize mt-1">
                             <Building2 className="h-3 w-3" /> {d.perusahaan}
                           </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center pr-4">
-                      <div className="flex items-center justify-end gap-1">
+                        )}
+                      </div>
+                      <div className="flex gap-1 shrink-0">
                         <Link href={`/donasi/donatur/${d.id_donatur}`}>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
-                            title="Lihat Rekam Jejak (SCD)"
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-
                         <Link href={`/donasi/donatur/baru?id=${d.id_donatur}`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600">
                             <Edit3 className="h-4 w-4" />
                           </Button>
                         </Link>
-
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
@@ -230,12 +323,12 @@ export default function ManajemenDonaturPage() {
                                 <AlertDialogTitle className="font-semibold text-xl uppercase tracking-tighter">Hapus Donatur?</AlertDialogTitle>
                               </div>
                               <AlertDialogDescription className="font-medium text-slate-500 text-sm">
-                                Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. Histori tetap ada di Warehouse namun tidak aktif operasional.
+                                Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. Data tetap tersimpan namun tidak aktif lagi.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">
                               <AlertDialogCancel className="rounded-xl font-semibold uppercase text-[10px]">Batal</AlertDialogCancel>
-                              <AlertDialogAction 
+                              <AlertDialogAction
                                 onClick={() => handleDelete(d.sk_donatur, d.nama_lengkap)}
                                 className="bg-rose-600 hover:bg-rose-700 rounded-xl font-semibold uppercase text-[10px]"
                               >
@@ -245,11 +338,11 @@ export default function ManajemenDonaturPage() {
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
 
             <Pagination
               currentPage={currentPage}

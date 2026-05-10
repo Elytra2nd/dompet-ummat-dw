@@ -202,10 +202,10 @@ export default function AuditLogPage() {
           <Table>
             <TableHeader>
                 <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-left px-6">Entitas</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">ID & Nama Master</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-center">Masa Berlaku Record</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Status Audit</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-left px-6">Entitas</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[300px] text-left">ID & Nama Master</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[200px] text-center">Masa Berlaku Record</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center pr-6">Status Audit</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

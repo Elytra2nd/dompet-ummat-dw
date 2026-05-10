@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, MapPinned, Users, Globe, Database } from 'lucide-react'
+import { ArrowLeft, MapPinned, Users, Globe, Database, Loader2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 
@@ -25,16 +25,16 @@ interface SpatialPoint {
 // Import dinamis untuk komponen peta
 const SpatialMustahikMap = dynamic(
   () => import('@/components/map/MustahikMap'),
-  { 
-    ssr: false, 
+  {
+    ssr: false,
     loading: () => (
-      <div className="flex h-[500px] w-full items-center justify-center rounded-2xl border-2 border-dashed bg-white text-slate-400">
+      <div className="flex h-[500px] w-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white text-slate-400">
         <div className="text-center">
-          <div className="mb-4 h-10 w-10 animate-spin rounded-full border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="font-bold uppercase tracking-tighter text-xs">Menginisialisasi Engine Spasial...</p>
+          <Loader2 className="mb-4 h-8 w-8 animate-spin text-indigo-500 mx-auto" />
+          <p className="font-bold uppercase tracking-tighter text-xs">Memuat peta...</p>
         </div>
       </div>
-    ) 
+    )
   }
 )
 
@@ -68,19 +68,19 @@ export default function MustahikSpasialPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* HEADER SECTION */}
-      <div className="mb-6 border-b bg-white shadow-sm">
+      <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
             <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
           </Button>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-semibold tracking-tighter text-slate-900">
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold tracking-tighter text-slate-900">
                 <MapPinned className="h-8 w-8 text-indigo-600" />
                 Peta Spasial <span className="text-indigo-600">Mustahik</span>
               </h1>
               <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                Visualisasi <span className="text-indigo-500">Spatial OLAP</span> • Sebaran Administratif Dompet Ummat Kalbar
+                Visualisasi <span className="text-indigo-500">Pemetaan Sebaran</span> • Sebaran Administratif Dompet Ummat Kalbar
               </p>
             </div>
             
@@ -92,7 +92,7 @@ export default function MustahikSpasialPage() {
               </div>
               <div className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 border border-indigo-100">
                 <Globe className="h-4 w-4 text-indigo-600" />
-                <span className="text-[10px] font-semibold text-indigo-700 uppercase">Geographic Ready</span>
+                <span className="text-[10px] font-semibold text-indigo-700 uppercase">Peta Siap</span>
               </div>
             </div>
           </div>

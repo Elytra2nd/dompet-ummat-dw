@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { EmptyState } from '@/components/ui/empty-state'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Loader2, Pencil, Trash2, ChevronLeft, ChevronRight, History, AlertTriangle, Eye, Receipt, Search, Filter } from 'lucide-react'
 import { toast } from 'sonner'
@@ -191,8 +192,16 @@ export default function TransactionHistoryTable() {
                 </tr>
               ) : data.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500 italic">
-                    Belum ada transaksi donasi yang tercatat.
+                  <td colSpan={6} className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-300">
+                        <History className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-500">Belum ada transaksi</p>
+                        <p className="text-xs text-slate-400">Data transaksi donasi akan muncul di sini.</p>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -237,8 +246,8 @@ export default function TransactionHistoryTable() {
                 <p className="text-xs font-bold text-slate-400">Memuat data...</p>
               </div>
             ) : data.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 italic text-sm px-4">
-                Belum ada transaksi donasi yang tercatat.
+              <div className="py-12 px-4">
+                <EmptyState title="Belum ada transaksi" description="Data transaksi donasi akan muncul di sini." />
               </div>
             ) : (
               data.map((item) => (

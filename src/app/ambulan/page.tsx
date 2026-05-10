@@ -89,7 +89,7 @@ export default function AmbulanExecutivePage() {
         </div>
         <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1.5 self-start sm:self-auto">
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-tight text-emerald-700">Live Sync</span>
+          <span className="text-xs font-bold uppercase tracking-tight text-emerald-700">Real-time</span>
         </div>
       </div>
 
@@ -227,7 +227,7 @@ export default function AmbulanExecutivePage() {
             <CardHeader className="pb-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
-                  <Layers3 size={16} className="text-indigo-500" /> OLAP Cube — Slice & Dice
+                  <Layers3 size={16} className="text-indigo-500" /> Analisis Multi-Dimensi
                 </CardTitle>
                 <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
                   {(['tahun', 'armada', 'kategori'] as CubeSlice[]).map(s => (
@@ -264,7 +264,7 @@ export default function AmbulanExecutivePage() {
           <CardHeader className="pb-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
-                <MapPin size={16} className="text-emerald-500" /> SOLAP — Spatial Drill-Down
+                <MapPin size={16} className="text-emerald-500" /> Peta Distribusi Layanan
               </CardTitle>
               <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
                 <button onClick={() => setSpatialLevel('kabupaten')}
@@ -394,7 +394,7 @@ export default function AmbulanExecutivePage() {
                     )}
                   </p>
                 </div>
-                <ArrowRight size={15} className="text-slate-300 shrink-0" />
+                <ArrowRight size={16} className="text-slate-300 shrink-0" />
               </div>
             ))}
               </div>

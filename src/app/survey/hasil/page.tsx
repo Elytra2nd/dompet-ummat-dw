@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   ClipboardCheck, Search, UserCheck, AlertTriangle, CheckCircle2,
   XCircle, Eye, Edit3, Trash2, Loader2, ArrowLeft, Filter,
@@ -139,7 +140,7 @@ export default function SurveyMainPage() {
                 Hasil <span className="text-indigo-600">Survey Kelayakan</span>
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
-                Data Warehouse • Decision Support System (DSS)
+                Sistem Pendukung Keputusan
               </p>
             </div>
             <Button asChild className="bg-indigo-600 font-semibold text-sm h-10 shadow-md hover:bg-indigo-700 w-full sm:w-auto">
@@ -225,30 +226,31 @@ export default function SurveyMainPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[200px] text-left pl-6">Mustahik & Reg</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px] text-center">Skor Akhir</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center">Status Kelayakan</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[200px] text-left">Rekomendasi Bantuan</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[140px] text-center pr-6">Aksi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left pl-6">Mustahik & Reg</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[120px] text-center">Skor Akhir</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center">Status Kelayakan</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left">Rekomendasi Bantuan</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[140px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-40 text-center">
-                      <Loader2 className="mx-auto animate-spin text-indigo-400" />
+                      <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mx-auto" />
+                      <p className="mt-2 text-xs font-bold text-slate-400">Memuat data...</p>
                     </TableCell>
                   </TableRow>
                 ) : currentSurveys.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-16 font-bold text-slate-400">
-                      Belum ada data survey.
+                    <TableCell colSpan={5} className="text-center py-20">
+                      <EmptyState asTableRow={false} title="Belum ada data survey" description="Buat survey baru untuk memulai penilaian kelayakan." />
                     </TableCell>
                   </TableRow>
                 ) : currentSurveys.map((item) => (
                   <TableRow key={item.sk_survey} className="group hover:bg-indigo-50/30 transition-colors">
                     <TableCell className="pl-6 py-4 text-left">
-                      <p className="font-semibold text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || 'N/A'}</p>
+                      <p className="font-semibold text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || '-'}</p>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">
                           {item.no_register}

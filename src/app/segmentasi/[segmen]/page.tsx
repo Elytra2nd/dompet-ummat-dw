@@ -4,6 +4,7 @@ import { useState, useEffect, use, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
   Clock,
@@ -694,21 +695,21 @@ export default function SegmentDetailPage({
                                 onChange={toggleSelectAll}
                               />
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('nama_lengkap')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('nama_lengkap')}>
                               <span className="inline-flex items-center gap-1">Nama <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500">Tipe</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500">Kontak WA</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('recency')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500">Tipe</th>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500">Kontak WA</th>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('recency')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Terakhir (hari) <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('frequency')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('frequency')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Frekuensi <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('monetary')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('monetary')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Total Donasi <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('rfm_score')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('rfm_score')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Skor <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
                           </tr>
@@ -768,16 +769,16 @@ export default function SegmentDetailPage({
                                       {formatPhoneDisplay(wa)}
                                     </a>
                                   ) : (
-                                    <span className="text-[11px] text-slate-300 italic">tidak tersedia</span>
+                                    <span className="text-[11px] text-slate-300">-</span>
                                   )}
                                 </td>
                                 <td className="px-4 py-3 text-right text-slate-600">{d.recency.toLocaleString()}</td>
                                 <td className="px-4 py-3 text-right text-slate-600">{d.frequency}x</td>
                                 <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatRupiah(d.monetary)}</td>
                                 <td className="px-4 py-3 text-right">
-                                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${config.bgColor} ${config.color}`}>
+                                  <Badge size="sm" className={`${config.bgColor} ${config.color}`}>
                                     {d.rfm_score}
-                                  </span>
+                                  </Badge>
                                 </td>
                               </tr>
                             )

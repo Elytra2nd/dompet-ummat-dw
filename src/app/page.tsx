@@ -113,18 +113,18 @@ export default function DashboardPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${loading ? 'bg-slate-100 text-slate-400' : 'bg-emerald-100 text-emerald-700'}`}>
                   {loading ? (
-                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Connecting...</>
-                  ) : 'OLAP Core Connected'}
+                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Menghubungkan...</>
+                  ) : 'Sistem Online'}
                 </span>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest">
-                  SVM AI Active
+                  Analisis AI Aktif
                 </span>
               </div>
               <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 leading-tight">
                 Dashboard <span className="text-emerald-600 font-extrabold">Amil</span> Analitik
               </h1>
               <p className="text-slate-500 font-medium max-w-xl text-sm md:text-base leading-relaxed">
-                Sistem pendukung keputusan berbasis <span className="text-slate-900">Sistem Data</span> untuk optimalisasi penghimpunan ZISWAF.
+                Sistem pendukung keputusan berbasis <span className="text-slate-900">Data Warehouse</span> untuk optimalisasi penghimpunan ZISWAF.
               </p>
             </div>
             

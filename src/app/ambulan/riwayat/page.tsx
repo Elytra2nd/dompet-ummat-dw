@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmptyState } from '@/components/ui/empty-state'
 import { 
   Truck, 
   Settings2, 
@@ -305,7 +306,12 @@ export default function RiwayatAktivitasPage() {
               </TableHeader>
               <TableBody>
                 {loading && !data ? (
-                  <TableRow><TableCell colSpan={4} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-rose-400" /></TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-40 text-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" />
+                      <p className="mt-2 text-xs font-bold text-slate-400">Memuat data...</p>
+                    </TableCell>
+                  </TableRow>
                 ) : currentLogs.length > 0 ? (
                   currentLogs.map((log: any) => (
                     <TableRow key={log.sk_fakta_aktivitas_ambulan} className="group hover:bg-rose-50/30 transition-colors">
@@ -351,7 +357,11 @@ export default function RiwayatAktivitasPage() {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 italic font-medium uppercase text-xs">Tidak ada catatan aktivitas.</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-20">
+                      <EmptyState asTableRow={false} title="Belum ada catatan aktivitas" description="Data log aktivitas akan muncul di sini." />
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -362,7 +372,9 @@ export default function RiwayatAktivitasPage() {
             {loading && !data ? (
               <div className="py-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" /></div>
             ) : filteredLogs.length === 0 ? (
-              <div className="py-10 text-center text-slate-400 italic text-sm">Tidak ada catatan aktivitas.</div>
+              <div className="py-12 px-4">
+                <EmptyState title="Belum ada catatan aktivitas" description="Data log aktivitas akan muncul di sini." />
+              </div>
             ) : (
               currentLogs.map((log: any) => (
                 <div key={log.sk_fakta_aktivitas_ambulan} className="p-4 hover:bg-slate-50">
@@ -374,12 +386,12 @@ export default function RiwayatAktivitasPage() {
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Link href={`/ambulan/aktivitas/${log.sk_fakta_aktivitas_ambulan}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail"><Eye size={15} /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail"><Eye size={16} /></Button>
                       </Link>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(log)}><Edit3 size={15}/></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" aria-label="Edit aktivitas" onClick={() => startEdit(log)}><Edit3 size={16}/></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus data"><Trash2 size={15}/></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus data"><Trash2 size={16}/></Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>

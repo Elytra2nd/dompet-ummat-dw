@@ -27,7 +27,7 @@ export default function TransaksiMasukBaruPage() {
               Input <span className="text-indigo-600">Transaksi Masuk</span>
             </h1>
             <p className="mt-1 text-sm font-medium text-slate-500">
-              Catat penerimaan donasi ZISWAF ke dalam sistem Data Warehouse.
+              Catat penerimaan donasi ZISWAF baru.
             </p>
           </div>
         </div>

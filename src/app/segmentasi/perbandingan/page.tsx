@@ -211,11 +211,11 @@ export default function PerbandinganPage() {
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* Header */}
       <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/segmentasi" className="mb-4 inline-flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors">
             <ArrowLeft className="h-3 w-3" /> Kembali ke Overview
           </Link>
-          <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-900">
+          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
             <BarChart3 className="h-8 w-8 text-emerald-600" />
             Perbandingan <span className="text-emerald-600">Segmen</span>
           </h1>
@@ -225,7 +225,7 @@ export default function PerbandinganPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-6 px-8">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
         {/* Bar Charts */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Jumlah Donatur */}

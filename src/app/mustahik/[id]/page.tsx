@@ -2,11 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  ArrowLeft, User, MapPin, ShieldAlert, 
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import {
+  ArrowLeft, User, MapPin, ShieldAlert,
   History, Calendar, Info, LineChart
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -42,9 +52,24 @@ export default function DetailMustahikPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 bg-slate-50 min-h-screen font-sans">
-      <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white">
-        <ArrowLeft size={16} /> Kembali
-      </Button>
+      <div className="space-y-3">
+        <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white">
+          <ArrowLeft size={16} /> Kembali
+        </Button>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/mustahik">Mustahik</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{mustahik.nama}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* KIRI: BIODATA & SKORING */}
@@ -55,7 +80,7 @@ export default function DetailMustahikPage() {
                 <User size={48} className="text-blue-600" />
               </div>
               <h2 className="text-2xl font-black uppercase text-slate-900 text-center leading-tight">{mustahik.nama}</h2>
-              <Badge className="mt-2 bg-slate-800 text-white rounded-lg">{mustahik.id_mustahik}</Badge>
+              <Badge size="md" className="mt-2 bg-slate-800 text-white">{mustahik.id_mustahik}</Badge>
 
               <div className="w-full mt-8 space-y-4">
                 <div className="p-4 bg-slate-800 text-white rounded-xl flex justify-between items-center">
@@ -121,7 +146,7 @@ export default function DetailMustahikPage() {
                </div>
                <div className="md:col-span-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
                   <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Alamat Lengkap Records</p>
-                  <p className="text-sm font-medium text-slate-700 leading-relaxed">{mustahik.alamat || 'Alamat tidak tersedia dalam metadata.'}</p>
+                  <p className="text-sm font-medium text-slate-700 leading-relaxed">{mustahik.alamat || '-'}</p>
                </div>
             </CardContent>
           </Card>
@@ -130,23 +155,23 @@ export default function DetailMustahikPage() {
           {history.length > 0 && (
             <div className="space-y-3">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 pl-2">
-                <History size={14} /> Historical Changes (SCD Type 2)
+                <History size={14} /> Riwayat Perubahan Data
               </h4>
               {history.map((h: any, i: number) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center group hover:bg-slate-50 transition-all shadow-sm">
+                <div key={i} className="bg-white border-2 border-slate-200 border-l-blue-600 p-4 shadow-sm flex justify-between items-center group hover:border-blue-200 transition-all">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <p className="text-xs font-black text-slate-800 uppercase">{h.nama}</p>
-                      <Badge className="h-4 text-[8px] bg-slate-200 text-slate-600 rounded-md">ARSIP</Badge>
+                      <Badge size="sm" variant="outline" className="bg-slate-100 text-slate-600 border-slate-200">ARSIP</Badge>
                     </div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                       Skor: {h.skoring} • {h.kecamatan}
                     </p>
                   </div>
                   <div className="text-right border-l-2 border-slate-100 pl-4">
-                    <p className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Valid Period</p>
-                    <p className="text-[10px] font-black text-blue-600 font-mono">
-                      {new Date(h.valid_from).toLocaleDateString('id-ID')} - {new Date(h.valid_to).toLocaleDateString('id-ID')}
+                    <p className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Periode Berlaku</p>
+                    <p className="text-[10px] font-black text-blue-700 font-mono">
+                      {new Date(h.valid_from).toLocaleDateString('id-ID')} → {new Date(h.valid_to).toLocaleDateString('id-ID')}
                     </p>
                   </div>
                 </div>

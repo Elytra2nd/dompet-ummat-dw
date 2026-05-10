@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { EmptyState } from '@/components/ui/empty-state'
 import Pagination from '@/components/ui/pagination-numbered'
 import {
   Table,
@@ -117,7 +118,7 @@ export default function ManajemenMustahikPage() {
       <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
-            <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
+            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
           </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
@@ -170,42 +171,53 @@ export default function ManajemenMustahikPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left px-6">ID & Kategori</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">Profil & Lokasi</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[200px] text-left px-6">ID & Kategori</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[300px] text-left">Profil & Lokasi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading && !mustahik.length ? (
-                  <TableRow><TableCell colSpan={3} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-emerald-400" /></TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={3} className="h-40 text-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-emerald-400 mx-auto" />
+                      <p className="mt-2 text-xs font-bold text-slate-400">Memuat data...</p>
+                    </TableCell>
+                  </TableRow>
+                ) : currentMustahik.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-20">
+                      <EmptyState asTableRow={false} title="Belum ada mustahik" description="Data mustahik akan tampil setelah proses import." />
+                    </TableCell>
+                  </TableRow>
                 ) : currentMustahik.map((m) => (
                   <TableRow key={m.sk_mustahik} className="group hover:bg-emerald-50/30 transition-colors">
                     <TableCell className="px-6 text-left">
                       <p className="font-mono text-[10px] font-semibold text-emerald-600 leading-none mb-1">{m.id_mustahik}</p>
-                      <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                      <Badge size="sm" variant="outline" className="bg-slate-100 text-slate-600 border-slate-200">
                         {m.kategori_pm?.replace(/_/g, ' ')}
-                      </span>
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-left">
                       <p className="font-semibold text-slate-900 uppercase leading-none mb-1 tracking-tight">{m.nama}</p>
                       <div className="text-[10px] font-bold text-slate-400 flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="text-[8px] h-4 font-semibold bg-blue-50 text-blue-600 border-blue-200 uppercase">Score: {m.skoring}</Badge>
+                        <Badge size="sm" variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Score: {m.skoring}</Badge>
                         <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-rose-500"/> {m.kabupaten_kota}</span>
                         {m.latitude && m.longitude && (
-                          <Badge variant="secondary" className="text-[7px] h-3 bg-emerald-50 text-emerald-600 border-none px-1">LOKASI SIAP</Badge>
+                          <Badge size="sm" className="bg-emerald-50 text-emerald-600 border-none">LOKASI SIAP</Badge>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-center pr-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/mustahik/${m.id_mustahik}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Detail & Histori">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail dan riwayat">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-                        
+
                         <Link href={`/mustahik/baru?id=${m.id_mustahik}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Edit Data & Spasial">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" aria-label="Edit data dan lokasi spasial">
                             <Edit3 className="h-4 w-4" />
                           </Button>
                         </Link>
