@@ -69,43 +69,41 @@ export default function DetailLayananAmbulanPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* KOLOM KIRI: STATUS & INFO UTAMA */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="border-none rounded-3xl shadow-xl overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-            <div className="bg-gradient-to-br from-rose-500 to-rose-700 p-8 text-center relative">
-              {/* Decorative Background Icon */}
-              <Activity className="absolute -bottom-4 -right-4 w-32 h-32 text-white opacity-10 transform -rotate-12 group-hover:scale-110 transition-transform duration-500" />
-              
-              <p className="text-[10px] font-black text-rose-100 uppercase tracking-[0.2em] relative z-10">
+          <Card className="border-none rounded-3xl shadow-xl overflow-hidden group hover:-translate-y-1 transition-all duration-300 bg-gradient-to-br from-rose-500 to-rose-700 text-white relative">
+            <Activity className="absolute -bottom-4 -right-4 w-48 h-48 text-white opacity-[0.05] transform -rotate-12 group-hover:scale-110 transition-transform duration-500" />
+            <div className="p-8 text-center relative z-10 border-b border-rose-400/30">
+              <p className="text-[10px] font-black text-rose-100 uppercase tracking-[0.2em]">
                 ID Layanan
               </p>
-              <h2 className="text-3xl font-black text-white tracking-tighter mt-2 relative z-10">
+              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter mt-2 break-all">
                 {data.id_transaksi}
               </h2>
-              <div className="mt-4 relative z-10 flex justify-center">
+              <div className="mt-4 flex justify-center">
                 <Badge className="bg-white/20 hover:bg-white/30 text-white border-none uppercase font-black text-[9px] backdrop-blur-md px-3 py-1 flex items-center gap-1">
                   <CheckCircle2 size={12} /> Finalized
                 </Badge>
               </div>
             </div>
             
-            <CardContent className="pt-6 space-y-6 bg-white">
+            <CardContent className="pt-6 space-y-6 relative z-10">
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
-                  <div className="h-12 w-12 bg-rose-50 flex items-center justify-center rounded-xl shrink-0">
-                    <Calendar size={20} className="text-rose-600" />
+                <div className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/10 transition-colors">
+                  <div className="h-12 w-12 bg-white/20 flex items-center justify-center rounded-xl shrink-0 backdrop-blur-sm">
+                    <Calendar size={20} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tanggal Layanan</p>
-                    <p className="text-sm font-bold text-slate-800 mt-0.5">{formatTanggal(data.sk_tanggal_layanan)}</p>
+                    <p className="text-[9px] font-black text-rose-100 uppercase tracking-widest">Tanggal Layanan</p>
+                    <p className="text-sm font-bold text-white mt-0.5">{formatTanggal(data.sk_tanggal_layanan)}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
-                  <div className="h-12 w-12 bg-indigo-50 flex items-center justify-center rounded-xl shrink-0">
-                    <Clock size={20} className="text-indigo-600" />
+                <div className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/10 transition-colors">
+                  <div className="h-12 w-12 bg-white/20 flex items-center justify-center rounded-xl shrink-0 backdrop-blur-sm">
+                    <Clock size={20} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Waktu / Shift</p>
-                    <p className="text-sm font-bold text-slate-800 uppercase mt-0.5">{data.jam?.replace(/__/g, ' ')}</p>
+                    <p className="text-[9px] font-black text-rose-100 uppercase tracking-widest">Waktu / Shift</p>
+                    <p className="text-sm font-bold text-white uppercase mt-0.5">{data.jam?.replace(/__/g, ' ')}</p>
                   </div>
                 </div>
               </div>
