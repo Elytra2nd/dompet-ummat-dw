@@ -177,7 +177,7 @@ export default function DashboardPage() {
           
           {/* 3. MODUL CEPAT */}
           <div className="lg:col-span-2 space-y-4 md:space-y-6">
-            <h2 className="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2">
+            <h2 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
               <ShieldCheck className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" /> Modul Operasional
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

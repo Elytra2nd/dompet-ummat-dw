@@ -138,7 +138,7 @@ export default function LaporanIndividuPage() {
             <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2 text-slate-500 hover:text-indigo-600">
               <Link href="/reports"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Pusat Laporan</Link>
             </Button>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
               <Printer className="h-7 w-7 text-indigo-600 shrink-0" /> Laporan Individu Donatur
             </h1>
             <p className="mt-1 text-slate-500 text-sm">Buat laporan histori donasi siap cetak (A4) per donatur.</p>
@@ -148,7 +148,7 @@ export default function LaporanIndividuPage() {
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col gap-4">
                 <div className="flex-1 w-full relative" ref={searchRef}>
-                  <label className="block text-xs font-black uppercase text-slate-500 mb-2">Cari Donatur (Nama / No. HP)</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-2">Cari Donatur (Nama / No. HP)</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input 
@@ -179,7 +179,7 @@ export default function LaporanIndividuPage() {
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
                   <div className="w-full sm:w-32">
-                    <label className="block text-xs font-black uppercase text-slate-500 mb-2">Tahun</label>
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-2">Tahun</label>
                     <select 
                       className="w-full h-10 rounded-md border border-slate-200 px-3 text-sm"
                       value={selectedYear}
@@ -204,6 +204,18 @@ export default function LaporanIndividuPage() {
             </CardContent>
           </Card>
 
+          {isLoadingLaporan && (
+            <Card className="shadow-sm border-slate-200 mb-4">
+              <CardContent className="p-6 space-y-3">
+                <div className="h-4 w-48 bg-slate-100 rounded animate-pulse" />
+                <div className="h-3 w-full bg-slate-100 rounded animate-pulse" />
+                <div className="h-3 w-full bg-slate-100 rounded animate-pulse" />
+                <div className="h-3 w-3/4 bg-slate-100 rounded animate-pulse" />
+                <div className="h-3 w-full bg-slate-100 rounded animate-pulse" />
+                <div className="h-3 w-2/3 bg-slate-100 rounded animate-pulse" />
+              </CardContent>
+            </Card>
+          )}
           {laporan && (
             <div className="mb-4 flex justify-end">
               <Button onClick={handlePrint} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 shadow-lg" size="lg">

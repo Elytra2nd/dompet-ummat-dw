@@ -445,7 +445,7 @@ export default function SegmentDetailPage({
               {/* Profil Box */}
               <Card className="border-2 bg-white shadow-sm">
                 <CardHeader className="border-b bg-slate-50/50 py-4">
-                  <CardTitle className="text-sm font-black text-slate-700">Profil Segmen</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-700">Profil Segmen</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 p-6">
                   <div className="flex items-center gap-4 rounded-xl border border-slate-100 p-4">
@@ -480,7 +480,7 @@ export default function SegmentDetailPage({
               {/* Radar Chart */}
               <Card className="border-2 bg-white shadow-sm">
                 <CardHeader className="border-b bg-slate-50/50 py-4">
-                  <CardTitle className="text-sm font-black text-slate-700">Perbandingan vs Rata-rata</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-700">Perbandingan vs Rata-rata</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="h-[280px]">
@@ -512,13 +512,13 @@ export default function SegmentDetailPage({
             {/* Rekomendasi Strategi */}
             <Card className={`border-2 ${config.borderColor} bg-white shadow-sm`}>
               <CardHeader className={`border-b ${config.bgColor} py-4`}>
-                <CardTitle className={`flex items-center gap-2 text-sm font-black ${config.color}`}>
+                <CardTitle className={`flex items-center gap-2 text-sm font-bold ${config.color}`}>
                   <Lightbulb className="h-4 w-4" />
                   Rekomendasi Strategi
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <h3 className="text-lg font-black text-slate-800">{config.recommendation.title}</h3>
+                <h3 className="text-lg font-bold text-slate-800">{config.recommendation.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{config.recommendation.description}</p>
                 <div className="mt-4">
                   <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase text-slate-400">
@@ -539,7 +539,7 @@ export default function SegmentDetailPage({
             {/* Tabel Donatur */}
             <Card className="border-2 bg-white shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 py-4">
-                <CardTitle className="text-sm font-black text-slate-700">
+                <CardTitle className="text-sm font-bold text-slate-700">
                   Daftar Donatur ({totalDonatur.toLocaleString()})
                 </CardTitle>
                 <DropdownMenu>

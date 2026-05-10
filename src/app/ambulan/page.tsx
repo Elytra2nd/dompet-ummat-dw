@@ -99,7 +99,7 @@ export default function AmbulanExecutivePage() {
           <CardContent className="p-4 sm:p-5">
             <div className="flex justify-between items-start">
               <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Alokasi Biaya</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Alokasi Biaya</p>
                 <h3 className="text-lg sm:text-xl font-black mt-1 text-rose-600 tracking-tighter break-all">
                   {loading ? <Loader2 className="animate-spin h-5 w-5" /> : formatIDR(stats?.totalExp || 0)}
                 </h3>
@@ -115,7 +115,7 @@ export default function AmbulanExecutivePage() {
           <CardContent className="p-4 sm:p-5">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Aktivitas Terdata</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aktivitas Terdata</p>
                 <h3 className="text-2xl sm:text-3xl font-black mt-1 text-slate-900 tracking-tighter">
                   {loading ? '...' : (stats?.totalCount || 0)}
                   <span className="text-xs font-bold text-slate-400 ml-1">Log</span>
@@ -133,7 +133,7 @@ export default function AmbulanExecutivePage() {
           <CardContent className="p-4 sm:p-5 relative z-10">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Kesiapan Armada</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Kesiapan Armada</p>
                 <h3 className="text-lg sm:text-xl font-black mt-1 tracking-tighter text-yellow-400 flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-400 animate-pulse" /> OPTIMAL
                 </h3>
@@ -152,7 +152,7 @@ export default function AmbulanExecutivePage() {
           {/* Trend Layanan */}
           <Card className="border-none shadow-md rounded-2xl bg-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-700">
                 <TrendingUp size={16} className="text-rose-500" /> Tren Layanan Ambulans
               </CardTitle>
             </CardHeader>
@@ -182,7 +182,7 @@ export default function AmbulanExecutivePage() {
           {/* Distribusi Kategori Layanan (Donut) */}
           <Card className="border-none shadow-md rounded-2xl bg-white">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-700">
                 <BarChart3 size={16} className="text-violet-500" /> Distribusi Kategori Layanan
               </CardTitle>
             </CardHeader>
@@ -207,7 +207,7 @@ export default function AmbulanExecutivePage() {
                         <div key={i} className="flex items-center gap-2 text-xs">
                           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
                           <span className="truncate text-slate-600 font-medium">{item.name}</span>
-                          <span className="ml-auto font-black text-slate-800">{item.value}</span>
+                          <span className="ml-auto font-bold text-slate-800">{item.value}</span>
                         </div>
                       ))}
                     </div>
@@ -226,7 +226,7 @@ export default function AmbulanExecutivePage() {
           <Card className="border-none shadow-md rounded-2xl bg-white">
             <CardHeader className="pb-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
+                <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-700">
                   <Layers3 size={16} className="text-indigo-500" /> Analisis Multi-Dimensi
                 </CardTitle>
                 <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
@@ -263,7 +263,7 @@ export default function AmbulanExecutivePage() {
           <Card className="border-none shadow-md rounded-2xl bg-white">
           <CardHeader className="pb-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-700">
                 <MapPin size={16} className="text-emerald-500" /> Peta Distribusi Layanan
               </CardTitle>
               <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
@@ -301,7 +301,7 @@ export default function AmbulanExecutivePage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-            <h2 className="font-black uppercase text-xs tracking-[0.15em] text-slate-500">External Services</h2>
+            <h2 className="font-bold uppercase text-xs tracking-wider text-slate-500">External Services</h2>
           </div>
           <div className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 hover:border-emerald-500 transition-all shadow-sm group">
             <div className="flex gap-3 items-start flex-col sm:flex-row">
