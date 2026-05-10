@@ -269,9 +269,9 @@ export default function UserManagementPage() {
                       <TableCell className="text-center pr-6">
                         <div className="flex justify-end gap-2">
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            className="h-8 w-8 text-indigo-600 hover:bg-indigo-50"
                             onClick={() => handleOpenEdit(user)}
                             aria-label="Edit pengguna"
                           >
@@ -279,16 +279,16 @@ export default function UserManagementPage() {
                           </Button>
                           {user.email !== currentUserEmail ? (
                             <Button 
-                              variant="outline" 
+                              variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-red-600 border-red-200 hover:bg-red-50"
+                              className="h-8 w-8 text-red-600 hover:bg-red-50"
                               onClick={() => handleOpenDelete(user.id)}
                               aria-label="Hapus pengguna"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <Button disabled variant="outline" size="icon" className="h-8 w-8" title="Anda tidak bisa menghapus diri sendiri">
+                            <Button disabled variant="ghost" size="icon" className="h-8 w-8" title="Anda tidak bisa menghapus diri sendiri">
                               <Shield className="h-4 w-4 text-slate-400" />
                             </Button>
                           )}
