@@ -78,44 +78,21 @@ export async function POST(req: Request) {
       }
     })
 
-    // ── 4. Cek duplikasi ID dalam file sendiri ────────────────────────────────
-    const idCounts = new Map<string, number>()
-    candidates.forEach(c => {
-      const id = c.data.id_transaksi_donasi
-      idCounts.set(id, (idCounts.get(id) ?? 0) + 1)
-    })
-    const dupInFile = candidates.filter(c => (idCounts.get(c.data.id_transaksi_donasi) ?? 0) > 1)
-    dupInFile.forEach(c => {
-      errors.push({
-        rowNumber: c.rowNumber,
-        idField: c.data.id_transaksi_donasi,
-        field: 'id_transaksi_donasi',
-        value: c.data.id_transaksi_donasi,
-        rule: 'duplicate_in_file',
-        message: `ID transaksi "${c.data.id_transaksi_donasi}" muncul lebih dari sekali dalam file`,
-        severity: 'error',
-      })
-    })
+    const totalRows = candidates.length + errors.length
 
-    // ── 5. Validasi referensial ke DB (batch) ─────────────────────────────────
-    const validCandidates = candidates.filter(
-      c => (idCounts.get(c.data.id_transaksi_donasi) ?? 0) === 1
-    )
-
-    if (validCandidates.length > 0) {
+    if (candidates.length > 0) {
       // a. Cek nama_petugas
-      const uniquePetugas = [...new Set(validCandidates.map(c => c.data.nama_petugas))]
+      const uniquePetugas = [...new Set(candidates.map(c => c.data.nama_petugas))]
       const petugasValid = await prisma.dim_petugas.findMany({
         where: { nama_petugas: { in: uniquePetugas }, is_active: true },
         select: { nama_petugas: true, sk_petugas: true },
       })
       const petugasMap = new Map(petugasValid.map(p => [p.nama_petugas!, p.sk_petugas]))
 
-      validCandidates.forEach(c => {
+      candidates.forEach(c => {
         if (!petugasMap.has(c.data.nama_petugas)) {
           errors.push({
             rowNumber: c.rowNumber,
-            idField: c.data.id_transaksi_donasi,
             field: 'nama_petugas',
             value: c.data.nama_petugas,
             rule: 'ref_not_found',
@@ -124,37 +101,21 @@ export async function POST(req: Request) {
           })
         }
       })
-
-      // b. Cek duplikasi ID di DB — idempotent: skip saja (tidak dianggap error)
-      const allIds = validCandidates.map(c => c.data.id_transaksi_donasi)
-      const existingIds = await prisma.fact_donasi.findMany({
-        where: { id_transaksi_donasi: { in: allIds } },
-        select: { id_transaksi_donasi: true },
-      })
-      const existingSet = new Set(existingIds.map(e => e.id_transaksi_donasi))
     }
 
-    // ── 6. Jika ada error → return report (Q2: semua harus valid) ─────────────
-    const totalRows = candidates.length + errors.filter(e => e.rule !== 'duplicate_in_file').length
+    // ── 6. Jika ada error → return report ─────────────────────────────────────
     if (errors.length > 0) {
       return NextResponse.json({
         status: 'validation_failed',
         totalRows,
-        validRows: validCandidates.length,
-        errorRows: errors.length,
+        validRows: candidates.length - errors.filter(e => e.severity === 'error').length,
+        errorRows: errors.filter(e => e.severity === 'error').length,
         errors,
       })
     }
 
     // ── 7. Commit ke DB via $transaction ──────────────────────────────────────
-    // Filter baris yang ID-nya sudah ada di DB (skip/idempotent)
-    const allIds = validCandidates.map(c => c.data.id_transaksi_donasi)
-    const existingIds = await prisma.fact_donasi.findMany({
-      where: { id_transaksi_donasi: { in: allIds } },
-      select: { id_transaksi_donasi: true },
-    })
-    const existingSet = new Set(existingIds.map(e => e.id_transaksi_donasi))
-    const rowsToImport = validCandidates.filter(c => !existingSet.has(c.data.id_transaksi_donasi))
+    const rowsToImport = candidates
 
     let imported = 0
 
@@ -195,11 +156,12 @@ export async function POST(req: Request) {
       // Insert fact_donasi per batch 100
       for (const batch of chunk(rowsToImport, 100)) {
         await tx.fact_donasi.createMany({
-          data: batch.map(c => {
+          data: batch.map((c, idx) => {
             const tgl = parseDate(c.data.tanggal)!
             const donaturId = `IMP-${c.data.nama_donatur.replace(/\s+/g, '-').toUpperCase()}`
+            const generatedId = `DON-${Date.now()}-${imported + idx}`
             return {
-              id_transaksi_donasi: c.data.id_transaksi_donasi,
+              id_transaksi_donasi: generatedId,
               sk_donatur: donaturMap.get(donaturId) ?? null,
               sk_petugas: petugasMap.get(c.data.nama_petugas) ?? null,
               sk_tgl_bersih: generateSkDate(tgl),
@@ -216,7 +178,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       status: 'success',
       imported,
-      skipped: existingSet.size,
     })
   } catch (error: any) {
     console.error('IMPORT_DONASI_ERROR:', error)

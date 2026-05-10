@@ -41,7 +41,7 @@ export default function KelolaPertanyaanPage() {
   // Form State untuk Pertanyaan Baru
   const [newQuestion, setNewQuestion] = useState({
     kode_pertanyaan: '',
-    grup_pertanyaan: 'Ekonomi',
+    grup_pertanyaan: 'DATA KELUARGA',
     teks_pertanyaan: '',
   })
 
@@ -178,10 +178,12 @@ export default function KelolaPertanyaanPage() {
                       })
                     }
                   >
-                    <option value="Ekonomi">Ekonomi</option>
-                    <option value="Kesehatan">Kesehatan</option>
-                    <option value="Sosial">Sosial</option>
-                    <option value="Pendidikan">Pendidikan</option>
+                    <option value="DATA KELUARGA">DATA KELUARGA</option>
+                    <option value="KONDISI RUMAH">KONDISI RUMAH</option>
+                    <option value="KEPEMILIKAN BARANG">KEPEMILIKAN BARANG</option>
+                    <option value="KESEHATAN KELUARGA">KESEHATAN KELUARGA</option>
+                    <option value="TANGGUNGAN KEBUTUHAN HIDUP">TANGGUNGAN KEBUTUHAN HIDUP</option>
+                    <option value="INDIKATOR KEIMANAN">INDIKATOR KEIMANAN</option>
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-1">
@@ -225,14 +227,14 @@ export default function KelolaPertanyaanPage() {
           </CardHeader>
           <CardContent className="p-0">
             <Table>
-              <TableHeader className="bg-slate-50">
+              <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="w-[100px] font-bold">KODE</TableHead>
-                  <TableHead className="font-bold">GRUP</TableHead>
-                  <TableHead className="font-bold">
-                    INDIKATOR PENILAIAN
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-left pl-6">Kode</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left">Grup</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">
+                    Indikator Penilaian
                   </TableHead>
-                  <TableHead className="text-right font-bold">AKSI</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -257,18 +259,18 @@ export default function KelolaPertanyaanPage() {
                       key={q.sk_pertanyaan}
                       className="hover:bg-slate-50/50"
                     >
-                      <TableCell className="font-mono text-xs font-bold text-blue-600">
+                      <TableCell className="font-mono text-xs font-bold text-blue-600 pl-6 text-left">
                         {q.kode_pertanyaan}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left">
                         <span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600 uppercase">
                           {q.grup_pertanyaan}
                         </span>
                       </TableCell>
-                      <TableCell className="text-sm font-medium text-slate-700">
+                      <TableCell className="text-sm font-medium text-slate-700 text-left">
                         {q.teks_pertanyaan}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-center pr-6">
                         <Button
                           variant="ghost"
                           size="sm"

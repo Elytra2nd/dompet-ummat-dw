@@ -120,7 +120,7 @@ export default function ManajemenMustahikPage() {
             <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
           </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900 uppercase tracking-tighter">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
               <Users className="h-7 w-7 text-emerald-600 shrink-0" /> Database <span className="text-emerald-600">Mustahik</span>
             </h1>
             <div className="flex flex-wrap items-center gap-2">
@@ -170,9 +170,9 @@ export default function ManajemenMustahikPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500">ID & Kategori</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500">Profil & Lokasi</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left px-6">ID & Kategori</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">Profil & Lokasi</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -180,23 +180,23 @@ export default function ManajemenMustahikPage() {
                   <TableRow><TableCell colSpan={3} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-emerald-400" /></TableCell></TableRow>
                 ) : currentMustahik.map((m) => (
                   <TableRow key={m.sk_mustahik} className="group hover:bg-emerald-50/30 transition-colors">
-                    <TableCell>
-                      <p className="font-mono text-[10px] font-black text-emerald-600 leading-none mb-1">{m.id_mustahik}</p>
-                      <span className="px-1.5 py-0.5 text-[8px] font-black rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                    <TableCell className="px-6 text-left">
+                      <p className="font-mono text-[10px] font-semibold text-emerald-600 leading-none mb-1">{m.id_mustahik}</p>
+                      <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
                         {m.kategori_pm?.replace(/_/g, ' ')}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <p className="font-black text-slate-900 uppercase leading-none mb-1 tracking-tight">{m.nama}</p>
+                    <TableCell className="text-left">
+                      <p className="font-semibold text-slate-900 uppercase leading-none mb-1 tracking-tight">{m.nama}</p>
                       <div className="text-[10px] font-bold text-slate-400 flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="text-[8px] h-4 font-black bg-blue-50 text-blue-600 border-blue-200 uppercase">Score: {m.skoring}</Badge>
+                        <Badge variant="outline" className="text-[8px] h-4 font-semibold bg-blue-50 text-blue-600 border-blue-200 uppercase">Score: {m.skoring}</Badge>
                         <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-rose-500"/> {m.kabupaten_kota}</span>
                         {m.latitude && m.longitude && (
                           <Badge variant="secondary" className="text-[7px] h-3 bg-emerald-50 text-emerald-600 border-none px-1">LOKASI SIAP</Badge>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right pr-4">
+                    <TableCell className="text-center pr-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/mustahik/${m.id_mustahik}`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Detail & Histori">
@@ -220,7 +220,7 @@ export default function ManajemenMustahikPage() {
                             <AlertDialogHeader>
                               <div className="flex items-center gap-3 text-rose-600 mb-2">
                                 <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
-                                <AlertDialogTitle className="font-black text-xl">Nonaktifkan Mustahik?</AlertDialogTitle>
+                                <AlertDialogTitle className="font-semibold text-xl">Nonaktifkan Mustahik?</AlertDialogTitle>
                               </div>
                               <AlertDialogDescription className="font-medium text-slate-500 text-sm">
                                 Record <strong>{m.nama}</strong> akan dinonaktifkan. Histori (SCD Type 2) tetap aman di warehouse.

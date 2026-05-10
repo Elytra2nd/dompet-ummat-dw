@@ -36,7 +36,6 @@ export const KATEGORI_PENYAKIT = [
 // ─── IMPORT EXCEL CONSTANTS ───────────────────────────────────────────────────
 
 export const PENYALURAN_IMPORT_HEADERS = [
-  { key: 'id_transaksi',        label: 'ID Transaksi *',                required: true,  isNumber: false },
   { key: 'tanggal_berkas',      label: 'Tgl Berkas (DD/MM/YYYY) *',    required: true,  isNumber: false },
   { key: 'tanggal_disalurkan',  label: 'Tgl Disalurkan (DD/MM/YYYY) *',required: true,  isNumber: false },
   { key: 'id_mustahik',         label: 'ID Mustahik *',                required: true,  isNumber: false },

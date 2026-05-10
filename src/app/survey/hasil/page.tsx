@@ -134,7 +134,7 @@ export default function SurveyMainPage() {
           </Button>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
                 <ClipboardCheck className="h-7 w-7 text-indigo-600 shrink-0" />
                 Hasil <span className="text-indigo-600">Survey Kelayakan</span>
               </h1>
@@ -157,35 +157,35 @@ export default function SurveyMainPage() {
           <Card className="border-none shadow-sm bg-white rounded-2xl">
             <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
               <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Survey</span>
-              <span className="text-2xl sm:text-3xl font-black text-slate-800">{loading ? '-' : totalSurvey}</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-slate-800">{loading ? '-' : totalSurvey}</span>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm bg-emerald-50 rounded-2xl">
             <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 mb-1.5 opacity-80" />
               <span className="text-[9px] sm:text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest mb-1">Sangat Layak</span>
-              <span className="text-xl sm:text-2xl font-black text-emerald-700">{loading ? '-' : countSangatLayak}</span>
+              <span className="text-xl sm:text-2xl font-semibold text-emerald-700">{loading ? '-' : countSangatLayak}</span>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm bg-blue-50 rounded-2xl">
             <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
               <UserCheck className="h-5 w-5 text-blue-600 mb-1.5 opacity-80" />
               <span className="text-[9px] sm:text-[10px] font-bold text-blue-600/70 uppercase tracking-widest mb-1">Layak</span>
-              <span className="text-xl sm:text-2xl font-black text-blue-700">{loading ? '-' : countLayak}</span>
+              <span className="text-xl sm:text-2xl font-semibold text-blue-700">{loading ? '-' : countLayak}</span>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm bg-amber-50 rounded-2xl">
             <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
               <AlertTriangle className="h-5 w-5 text-amber-600 mb-1.5 opacity-80" />
               <span className="text-[9px] sm:text-[10px] font-bold text-amber-600/70 uppercase tracking-widest mb-1">Dipertimbangkan</span>
-              <span className="text-xl sm:text-2xl font-black text-amber-700">{loading ? '-' : countDipertimbangkan}</span>
+              <span className="text-xl sm:text-2xl font-semibold text-amber-700">{loading ? '-' : countDipertimbangkan}</span>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm bg-rose-50 rounded-2xl col-span-2 sm:col-span-1">
             <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
               <XCircle className="h-5 w-5 text-rose-600 mb-1.5 opacity-80" />
               <span className="text-[9px] sm:text-[10px] font-bold text-rose-600/70 uppercase tracking-widest mb-1">Tidak Layak</span>
-              <span className="text-xl sm:text-2xl font-black text-rose-700">{loading ? '-' : countTidakLayak}</span>
+              <span className="text-xl sm:text-2xl font-semibold text-rose-700">{loading ? '-' : countTidakLayak}</span>
             </CardContent>
           </Card>
         </div>
@@ -225,11 +225,11 @@ export default function SurveyMainPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500 pl-6">Mustahik & Reg</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500 text-center">Skor Akhir</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500 text-center">Status Kelayakan</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500">Rekomendasi Bantuan</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[200px] text-left pl-6">Mustahik & Reg</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px] text-center">Skor Akhir</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center">Status Kelayakan</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[200px] text-left">Rekomendasi Bantuan</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[140px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -247,8 +247,8 @@ export default function SurveyMainPage() {
                   </TableRow>
                 ) : currentSurveys.map((item) => (
                   <TableRow key={item.sk_survey} className="group hover:bg-indigo-50/30 transition-colors">
-                    <TableCell className="pl-6 py-4">
-                      <p className="font-black text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || 'N/A'}</p>
+                    <TableCell className="pl-6 py-4 text-left">
+                      <p className="font-semibold text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || 'N/A'}</p>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">
                           {item.no_register}
@@ -260,15 +260,15 @@ export default function SurveyMainPage() {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="inline-flex items-center justify-center min-w-[3rem] p-2 bg-slate-100 rounded-lg">
-                        <span className="text-lg font-black text-slate-700">{item.total_skor_sistem}</span>
+                        <span className="text-lg font-semibold text-slate-700">{item.total_skor_sistem}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className={`font-black text-[10px] px-3 py-1 rounded-lg ${KELAYAKAN_COLOR[item.kelayakan_sistem] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                      <Badge variant="outline" className={`font-semibold text-[10px] px-3 py-1 rounded-lg ${KELAYAKAN_COLOR[item.kelayakan_sistem] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                         {item.kelayakan_sistem?.replace(/_/g, ' ')}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-left">
                       <div className="flex items-start gap-2">
                         <ClipboardCheck className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
                         <p className="text-xs font-bold text-slate-600 max-w-[200px] leading-relaxed">
@@ -276,7 +276,7 @@ export default function SurveyMainPage() {
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right pr-4">
+                    <TableCell className="text-center pr-6">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/survey/hasil/${item.sk_survey}`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Detail Survey">
@@ -317,7 +317,7 @@ export default function SurveyMainPage() {
           <AlertDialogHeader>
             <div className="flex items-center gap-3 text-rose-600 mb-2">
               <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
-              <AlertDialogTitle className="font-black text-xl">Hapus Data Survey?</AlertDialogTitle>
+              <AlertDialogTitle className="font-semibold text-xl">Hapus Data Survey?</AlertDialogTitle>
             </div>
             <AlertDialogDescription className="font-medium text-slate-500 text-sm">
               Apakah Anda yakin ingin menghapus data survey kelayakan untuk <strong>{deletingItem?.dim_mustahik?.nama}</strong>? Tindakan ini akan menghapus data penilaian dari warehouse.

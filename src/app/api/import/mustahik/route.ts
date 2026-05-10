@@ -88,27 +88,20 @@ export async function POST(req: Request) {
     const existingNikSet = new Set(existingNiks.map(e => e.nik).filter(Boolean) as string[])
     const rowsToImport = validCandidates.filter(c => !existingNikSet.has(c.data.nik))
 
+    // Map human-readable → Prisma enum name
+    const KATEGORI_PM_MAP: Record<string, string> = {
+      'Fakir': 'Fakir', 'Miskin': 'Miskin', 'Amil': 'Amil',
+      'Muallaf': 'Muallaf', 'Riqab': 'Riqab', 'Gharimin': 'Gharimin',
+      'Fisabilillah': 'Fisabilillah', 'Ibnu Sabil': 'Ibnu_Sabil',
+    }
+
     let imported = 0
     await prisma.$transaction(async (tx) => {
-      // Ambil counter per prefix untuk auto-ID
-      const prefixCounters = new Map<string, number>()
-
       for (const item of rowsToImport) {
         const prefix = getPrefixByKategori(item.data.kategori_pm)
-
-        if (!prefixCounters.has(prefix)) {
-          const last = await tx.dim_mustahik.findFirst({
-            where: { id_mustahik: { startsWith: prefix } },
-            orderBy: { id_mustahik: 'desc' },
-            select: { id_mustahik: true },
-          })
-          const lastNum = last ? parseInt(last.id_mustahik.split('-').pop() ?? '0') : 0
-          prefixCounters.set(prefix, lastNum)
-        }
-
-        const next = (prefixCounters.get(prefix) ?? 0) + 1
-        prefixCounters.set(prefix, next)
-        const autoId = `${prefix}-${String(next).padStart(4, '0')}`
+        // Gunakan timestamp base36 + random number untuk menghindari race condition
+        const uniqueSuffix = Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+        const autoId = `${prefix}-${uniqueSuffix}`
 
         // Upsert lokasi jika ada koordinat
         let sk_lokasi: number | undefined
@@ -137,7 +130,7 @@ export async function POST(req: Request) {
             desa: item.data.desa ?? null,
             kelurahan_kecamatan: item.data.kelurahan_kecamatan ?? null,
             kabupaten_kota: item.data.kabupaten_kota,
-            kategori_pm: item.data.kategori_pm as any,
+            kategori_pm: (KATEGORI_PM_MAP[item.data.kategori_pm] || 'To_Be_Determined') as any,
             jumlah_jiwa: item.data.jumlah_jiwa,
             sk_lokasi: sk_lokasi ?? -1,
             is_active: true,

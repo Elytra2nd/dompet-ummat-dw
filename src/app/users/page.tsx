@@ -187,7 +187,7 @@ export default function UserManagementPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'ADMIN': return <Badge className="bg-indigo-500">Administrator</Badge>
-      case 'SURVEYOR': return <Badge className="bg-emerald-500">Relawan/Surveyor</Badge>
+      case 'SURVEYOR': return <Badge className="bg-emerald-500">Relawan / Petugas Survei</Badge>
       case 'STAFF': return <Badge className="bg-amber-500">Staff Internal</Badge>
       default: return <Badge variant="outline">{role}</Badge>
     }
@@ -198,7 +198,7 @@ export default function UserManagementPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-200">
               <Users className="h-6 w-6 text-white" />
             </div>
@@ -234,11 +234,11 @@ export default function UserManagementPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="w-[200px]">Nama Lengkap</TableHead>
-                  <TableHead className="hidden sm:table-cell">Email</TableHead>
-                  <TableHead>Role Hak Akses</TableHead>
-                  <TableHead className="hidden md:table-cell">Terdaftar Sejak</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead className="w-[250px] text-left px-6">Nama Lengkap</TableHead>
+                  <TableHead className="hidden sm:table-cell min-w-[200px] text-left">Email</TableHead>
+                  <TableHead className="min-w-[150px] text-left">Role Hak Akses</TableHead>
+                  <TableHead className="hidden md:table-cell min-w-[150px] text-left">Terdaftar Sejak</TableHead>
+                  <TableHead className="text-center w-[120px] pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -258,20 +258,20 @@ export default function UserManagementPage() {
                 ) : (
                   users.map((user) => (
                     <TableRow key={user.id} className="group hover:bg-slate-50/50">
-                      <TableCell className="font-semibold text-slate-900">{user.name}</TableCell>
-                      <TableCell className="text-slate-600 hidden sm:table-cell">{user.email}</TableCell>
-                      <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell className="text-slate-500 text-sm hidden md:table-cell">
+                      <TableCell className="font-semibold text-slate-900 px-6 text-left">{user.name}</TableCell>
+                      <TableCell className="text-slate-600 hidden sm:table-cell text-left">{user.email}</TableCell>
+                      <TableCell className="text-left">{getRoleBadge(user.role)}</TableCell>
+                      <TableCell className="text-slate-500 text-sm hidden md:table-cell text-left">
                         {new Date(user.createdAt).toLocaleDateString('id-ID', {
                           day: 'numeric', month: 'long', year: 'numeric'
                         })}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-center pr-6">
                         <div className="flex justify-end gap-2">
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            className="h-8 w-8 text-indigo-600 hover:bg-indigo-50"
                             onClick={() => handleOpenEdit(user)}
                             aria-label="Edit pengguna"
                           >
@@ -279,16 +279,16 @@ export default function UserManagementPage() {
                           </Button>
                           {user.email !== currentUserEmail ? (
                             <Button 
-                              variant="outline" 
+                              variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-red-600 border-red-200 hover:bg-red-50"
+                              className="h-8 w-8 text-red-600 hover:bg-red-50"
                               onClick={() => handleOpenDelete(user.id)}
                               aria-label="Hapus pengguna"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <Button disabled variant="outline" size="icon" className="h-8 w-8" title="Anda tidak bisa menghapus diri sendiri">
+                            <Button disabled variant="ghost" size="icon" className="h-8 w-8" title="Anda tidak bisa menghapus diri sendiri">
                               <Shield className="h-4 w-4 text-slate-400" />
                             </Button>
                           )}
@@ -360,7 +360,7 @@ export default function UserManagementPage() {
                   <SelectValue placeholder="Pilih Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SURVEYOR">Relawan / Surveyor (Akses Terbatas)</SelectItem>
+                  <SelectItem value="SURVEYOR">Relawan / Petugas Survei (Akses Terbatas)</SelectItem>
                   <SelectItem value="STAFF">Staff Internal</SelectItem>
                   <SelectItem value="ADMIN">Administrator (Akses Penuh)</SelectItem>
                 </SelectContent>

@@ -305,13 +305,13 @@ export default function DonasiKeluarPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="font-bold text-[10px] uppercase px-6 w-48">ID & Domain</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase">Mustahik</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase hidden md:table-cell">Kategori</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase hidden md:table-cell">Jenis</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase">Status</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase">Dana Tersalur</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase text-center">Aksi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase px-6 w-[200px] text-left">ID & Domain</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase min-w-[200px] text-left">Mustahik</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase hidden md:table-cell min-w-[150px] text-left">Kategori</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase hidden md:table-cell min-w-[120px] text-left">Jenis</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase min-w-[100px] text-left">Status</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase min-w-[150px] text-right">Dana Tersalur</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase w-[120px] text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -331,33 +331,33 @@ export default function DonasiKeluarPage() {
                 ) : (
                   paginated.map((item) => (
                     <TableRow key={item.sk_fakta_penyaluran} className="hover:bg-amber-50/30 transition-colors">
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-6 py-4 text-left">
                         <p className="font-bold text-xs text-slate-900">{toDisplay(item.domain_program)}</p>
                         <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left">
                         <p className="font-bold text-sm text-slate-800">{item.dim_mustahik?.nama ?? 'UMUM'}</p>
                         <p className="text-[9px] font-semibold text-amber-600 uppercase tracking-wider">
                           {toDisplay(item.dim_mustahik?.kategori_pm ?? '')}
                         </p>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
+                      <TableCell className="hidden md:table-cell text-left">
                         <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50 font-bold text-[9px] uppercase">
                           {toDisplay(item.kategori_program)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm font-semibold text-slate-600 hidden md:table-cell">
+                      <TableCell className="text-sm font-semibold text-slate-600 hidden md:table-cell text-left">
                         {toDisplay(item.jenis_bantuan)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left">
                         <Badge variant="outline" className={`font-bold text-[9px] uppercase ${STATUS_COLOR[toDisplay(item.status_pengajuan)] ?? 'bg-slate-50 text-slate-500'}`}>
                           {toDisplay(item.status_pengajuan)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-black text-sm text-slate-900">
+                      <TableCell className="font-semibold text-sm text-slate-900 text-right pr-4">
                         {formatIDR(item.dana_tersalur)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Button
                             variant="ghost" size="icon"
@@ -560,7 +560,7 @@ export default function DonasiKeluarPage() {
               <Trash2 className="h-5 w-5" /> Konfirmasi Hapus
             </AlertDialogTitle>
             <AlertDialogDescription className="text-slate-600">
-              Transaksi <span className="font-black text-slate-900">{deleteTarget?.id_transaksi}</span> akan dihapus
+              Transaksi <span className="font-semibold text-slate-900">{deleteTarget?.id_transaksi}</span> akan dihapus
               secara permanen dari data warehouse. Tindakan ini <span className="font-bold text-red-600">tidak dapat dibatalkan</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -582,7 +582,7 @@ export default function DonasiKeluarPage() {
       <Dialog open={!!detailItem} onOpenChange={(open) => { if (!open) setDetailItem(null) }}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-black uppercase text-amber-900 tracking-tight">
+            <DialogTitle className="flex items-center gap-2 font-semibold uppercase text-amber-900 tracking-tight">
               <Receipt className="h-5 w-5 text-amber-600" /> Detail Transaksi Keluar
             </DialogTitle>
           </DialogHeader>
@@ -595,7 +595,7 @@ export default function DonasiKeluarPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Dana Tersalur</p>
-                  <p className="font-black text-xl text-amber-700 mt-1">{formatIDR(detailItem.dana_tersalur)}</p>
+                  <p className="font-semibold text-xl text-amber-700 mt-1">{formatIDR(detailItem.dana_tersalur)}</p>
                 </div>
               </div>
 

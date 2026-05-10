@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Info,
   SearchX,
+  ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -107,25 +108,28 @@ export default function SegmentasiPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* Header */}
-      <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
+      <div className="mb-6 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-bold hover:bg-slate-50">
+            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard</Link>
+          </Button>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="mb-2 flex items-center gap-2">
                 {data && (
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-emerald-700">
                     {data.clustering.rating.label}
                   </span>
                 )}
                 {data?.timestamp && (
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                     {new Date(data.timestamp).toLocaleDateString('id-ID', {
                       day: 'numeric', month: 'long', year: 'numeric',
                     })}
                   </span>
                 )}
               </div>
-              <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-900">
+              <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
                 <BrainCircuit className="h-8 w-8 text-emerald-600" />
                 Segmentasi <span className="text-emerald-600">Donatur</span>
               </h1>
@@ -181,7 +185,7 @@ export default function SegmentasiPage() {
                 </div>
                 <CardContent className="relative z-10 p-6">
                   <p className="text-sm font-bold uppercase tracking-tight opacity-90">Total Donatur</p>
-                  <h3 className="mt-2 text-3xl font-black">{data.total_donatur.toLocaleString()}</h3>
+                  <h3 className="mt-2 text-3xl font-semibold">{data.total_donatur.toLocaleString()}</h3>
                   <p className="mt-1 text-[10px] font-bold uppercase opacity-70">donatur aktif teranalisis</p>
                 </CardContent>
               </Card>
@@ -193,7 +197,7 @@ export default function SegmentasiPage() {
                     <p className="text-sm font-bold uppercase tracking-tighter text-slate-500">Donatur Premium</p>
                     <div className="rounded-lg bg-emerald-50 p-2"><Crown className="h-4 w-4 text-emerald-600" /></div>
                   </div>
-                  <h3 className="mt-4 text-2xl font-black text-slate-900">{premiumCount.toLocaleString()}</h3>
+                  <h3 className="mt-4 text-2xl font-semibold text-slate-900">{premiumCount.toLocaleString()}</h3>
                   <p className="mt-1 text-[10px] font-bold uppercase text-emerald-600">
                     Champions + Setia
                   </p>
@@ -207,7 +211,7 @@ export default function SegmentasiPage() {
                     <p className="text-sm font-bold uppercase tracking-tighter text-slate-500">Perlu Perhatian</p>
                     <div className="rounded-lg bg-orange-50 p-2"><AlertTriangle className="h-4 w-4 text-orange-600" /></div>
                   </div>
-                  <h3 className="mt-4 text-2xl font-black text-slate-900">{riskCount.toLocaleString()}</h3>
+                  <h3 className="mt-4 text-2xl font-semibold text-slate-900">{riskCount.toLocaleString()}</h3>
                   <p className="mt-1 text-[10px] font-bold uppercase text-orange-600">
                     Berisiko + Tidak Aktif + Hilang
                   </p>
@@ -232,19 +236,19 @@ export default function SegmentasiPage() {
                       <MetricTooltip metricKey="silhouette">
                         <span className="font-bold text-slate-500 uppercase">Silhouette</span>
                       </MetricTooltip>
-                      <span className="font-black text-slate-800">{data.clustering.silhouette.toFixed(4)}</span>
+                      <span className="font-semibold text-slate-800">{data.clustering.silhouette.toFixed(4)}</span>
                     </div>
                     <div className="flex items-center justify-between text-[10px]">
                       <MetricTooltip metricKey="dbi">
                         <span className="font-bold text-slate-500 uppercase">DBI</span>
                       </MetricTooltip>
-                      <span className="font-black text-slate-800">{data.clustering.davies_bouldin.toFixed(4)}</span>
+                      <span className="font-semibold text-slate-800">{data.clustering.davies_bouldin.toFixed(4)}</span>
                     </div>
                     <div className="flex items-center justify-between text-[10px]">
                       <MetricTooltip metricKey="chi">
                         <span className="font-bold text-slate-500 uppercase">CHI</span>
                       </MetricTooltip>
-                      <span className="font-black text-slate-800">{data.clustering.calinski_harabasz.toFixed(2)}</span>
+                      <span className="font-semibold text-slate-800">{data.clustering.calinski_harabasz.toFixed(2)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -258,7 +262,7 @@ export default function SegmentasiPage() {
               {/* Donut Chart */}
               <Card className="border-2 bg-white shadow-sm lg:col-span-1">
                 <CardHeader className="border-b bg-slate-50/50 py-4">
-                  <CardTitle className="flex items-center gap-2 text-sm font-black text-slate-700">
+                  <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <BrainCircuit className="h-4 w-4 text-emerald-500" />
                     Komposisi Segmen
                   </CardTitle>
@@ -304,7 +308,7 @@ export default function SegmentasiPage() {
                           />
                           <span className="font-semibold text-slate-600">{s.label}</span>
                         </div>
-                        <span className="font-black text-slate-800">{s.percentage}%</span>
+                        <span className="font-semibold text-slate-800">{s.percentage}%</span>
                       </div>
                     ))}
                   </div>
@@ -314,12 +318,12 @@ export default function SegmentasiPage() {
               {/* Segment Cards Grid */}
               <div className="lg:col-span-2">
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="flex items-center gap-2 text-lg font-black text-slate-800">
+                  <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
                     <Users className="h-5 w-5 text-emerald-500" />
                     Segmen Donatur
                   </h2>
                   <Link href="/segmentasi/perbandingan">
-                    <Button variant="ghost" className="text-[10px] font-black uppercase text-slate-400 hover:text-emerald-600">
+                    <Button variant="ghost" className="text-[10px] font-semibold uppercase text-slate-400 hover:text-emerald-600">
                       Lihat Perbandingan <ArrowRight className="ml-1 h-3 w-3" />
                     </Button>
                   </Link>
@@ -372,7 +376,7 @@ function ConversionFunnel({ segments, total }: { segments: FunnelSegment[]; tota
     <Card className="border-2 bg-white shadow-sm">
       <CardHeader className="border-b bg-slate-50/50 py-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-sm font-black text-slate-700">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <SearchX className="h-4 w-4 text-emerald-500" />
             Distribusi & Konversi Segmen
           </CardTitle>
@@ -397,12 +401,12 @@ function ConversionFunnel({ segments, total }: { segments: FunnelSegment[]; tota
                     className="h-full rounded-lg transition-all duration-500 flex items-center pl-3"
                     style={{ width: barWidth, backgroundColor: color + '33', borderLeft: `3px solid ${color}` }}
                   >
-                    <span className="text-[10px] font-black" style={{ color }}>
+                    <span className="text-[10px] font-semibold" style={{ color }}>
                       {s.count.toLocaleString()}
                     </span>
                   </div>
                 </div>
-                <span className="w-10 shrink-0 text-[10px] font-black text-slate-600 text-right">
+                <span className="w-10 shrink-0 text-[10px] font-semibold text-slate-600 text-right">
                   {s.percentage}%
                 </span>
                 <span className={`w-2 h-2 rounded-full shrink-0 ${isHealth ? 'bg-emerald-400' : 'bg-rose-400'}`} title={isHealth ? 'Segmen sehat' : 'Perlu perhatian'} />

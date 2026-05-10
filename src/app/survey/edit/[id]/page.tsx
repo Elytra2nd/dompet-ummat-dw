@@ -1,4 +1,4 @@
-import SurveyForm from '@/components/survey/SurveyForm'
+import SurveyEditForm from '@/components/survey/SurveyEditForm'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ClipboardCheck } from 'lucide-react'
 import Link from 'next/link'
@@ -39,7 +39,7 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
       </div>
 
       <div className="mx-auto max-w-7xl px-8">
-        <SurveyForm id_survey={surveyId} />
+        <SurveyEditForm id_survey={surveyId} />
       </div>
     </div>
   )

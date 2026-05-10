@@ -27,7 +27,7 @@ export async function GET(req: Request) {
         },
         take: limit,
         skip: (page - 1) * limit,
-        orderBy: { nama_lengkap: 'asc' },
+        orderBy: { sk_donatur: 'desc' },
       }),
       prisma.dim_donatur.count({
         where: {
@@ -56,18 +56,10 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { nama_donatur, no_hp, alamat, kategori_donatur, perusahaan } = body
 
-    // Ambil record terakhir untuk increment ID bisnis
-    const lastRecord = await prisma.dim_donatur.findFirst({
-      orderBy: { sk_donatur: 'desc' },
-      select: { id_donatur: true }
-    })
-
-    const lastIdNumber = lastRecord?.id_donatur 
-      ? parseInt(lastRecord.id_donatur.split('.').pop() || '0')
-      : 0
-
     const year = new Date().getFullYear().toString().substring(2);
-    const id_donatur = `DU-${year}01.${(lastIdNumber + 1).toString().padStart(3, '0')}`
+    // Menggunakan timestamp + random string untuk menghindari race condition Unique Constraint
+    const uniqueHash = Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const id_donatur = `DU-${year}01.${uniqueHash}`
 
     const newDonatur = await prisma.dim_donatur.create({
       data: {
@@ -107,19 +99,8 @@ export async function PUT(req: Request) {
       // Ambil business key asli (tanpa suffix versi jika sudah ada)
       const baseId = oldRecord.id_donatur.replace(/-v\d+$/, '')
 
-      // Hitung jumlah versi yang sudah ada untuk business key ini
-      const existingVersions = await tx.dim_donatur.findMany({
-        where: {
-          OR: [
-            { id_donatur: baseId },
-            { id_donatur: { startsWith: `${baseId}-v` } },
-          ],
-        },
-        select: { id_donatur: true },
-      })
-      // Versi baru = total existing + 1 (v1 = id asli, v2, v3, dst.)
-      const nextVersion = existingVersions.length + 1
-      const newIdDonatur = `${baseId}-v${nextVersion}`
+      // Versi baru = menggunakan timestamp untuk menghindari race condition antar transaksi
+      const newIdDonatur = `${baseId}-v${Date.now()}`
 
       const now = new Date()
       const nextSecond = new Date(now.getTime() + 1000)
@@ -129,7 +110,7 @@ export async function PUT(req: Request) {
           id_donatur: newIdDonatur,
           nama_lengkap: nama_donatur,
           kontak_utama: no_hp,
-          alamat: alamat,
+          alamat: alamat || '-',
           perusahaan: perusahaan || '-',
           tipe: kategori_donatur,
           is_active: true,

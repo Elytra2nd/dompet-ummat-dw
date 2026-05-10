@@ -33,28 +33,32 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { nama, nik, alamat, kabupaten_kota, kategori_pm, skoring, latitude, longitude } = body
 
-    // 1. Buat record lokasi baru di dim_lokasi
-    const lokasi = await prisma.dim_lokasi.create({
-      data: {
-        provinsi: "Kalimantan Barat",
-        kabupaten_kota: kabupaten_kota,
-        latitude: latitude,
-        longitude: longitude,
-      }
-    })
+    const newMustahik = await prisma.$transaction(async (tx) => {
+      // 1. Buat record lokasi baru di dim_lokasi
+      const lokasi = await tx.dim_lokasi.create({
+        data: {
+          provinsi: "Kalimantan Barat",
+          kabupaten_kota: kabupaten_kota,
+          latitude: latitude,
+          longitude: longitude,
+        }
+      })
 
-    // 2. Buat record mustahik dan hubungkan ke sk_lokasi baru
-    const newMustahik = await prisma.dim_mustahik.create({
-      data: {
-        id_mustahik: `MST-${Date.now()}`, // Generate ID sederhana
-        nama,
-        nik,
-        alamat,
-        kategori_pm,
-        skoring,
-        sk_lokasi: lokasi.sk_lokasi,
-        is_active: true,
-      }
+      // 2. Buat record mustahik dan hubungkan ke sk_lokasi baru
+      const mustahik = await tx.dim_mustahik.create({
+        data: {
+          id_mustahik: `MST-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`, // Generate ID dengan timestamp unik
+          nama,
+          nik,
+          alamat,
+          kategori_pm,
+          skoring,
+          sk_lokasi: lokasi.sk_lokasi,
+          is_active: true,
+        }
+      })
+      
+      return mustahik
     })
 
     return NextResponse.json(newMustahik)
@@ -67,63 +71,81 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json()
-    const { sk_mustahik, nama, nik, alamat, kabupaten_kota, kategori_pm, skoring, latitude, longitude } = body
+    const {
+      sk_mustahik,
+      nama, nik, kk,
+      gender, no_hp,
+      alamat, desa, kelurahan_kecamatan, kabupaten_kota, provinsi,
+      kategori_pm, skoring, jumlah_jiwa,
+      latitude, longitude,
+    } = body
 
-    // 1. Cari data lama untuk proses historisasi (SCD Type 2)
-    const oldData = await prisma.dim_mustahik.findUnique({
-      where: { sk_mustahik }
-    })
+    // Map human-readable → Prisma enum name
+    const KATEGORI_PM_MAP: Record<string, string> = {
+      'Fakir': 'Fakir', 'Miskin': 'Miskin', 'Amil': 'Amil',
+      'Muallaf': 'Muallaf', 'Riqab': 'Riqab', 'Gharimin': 'Gharimin',
+      'Fisabilillah': 'Fisabilillah', 'Ibnu Sabil': 'Ibnu_Sabil',
+    }
 
-    if (!oldData) throw new Error("Data tidak ditemukan")
+    // Gunakan Transaction agar tidak ada partial commit (orphaned data)
+    const updatedMustahik = await prisma.$transaction(async (tx) => {
+      // 1. Cari data lama untuk proses historisasi (SCD Type 2)
+      const oldData = await tx.dim_mustahik.findUnique({
+        where: { sk_mustahik }
+      })
 
-    // 2. Ambil business key asli (tanpa suffix versi jika sudah ada)
-    const baseId = oldData.id_mustahik.replace(/-v\d+$/, '')
+      if (!oldData) throw new Error("Data tidak ditemukan")
 
-    // 3. Hitung jumlah versi yang sudah ada untuk business key ini
-    const existingVersions = await prisma.dim_mustahik.findMany({
-      where: {
-        OR: [
-          { id_mustahik: baseId },
-          { id_mustahik: { startsWith: `${baseId}-v` } },
-        ],
-      },
-      select: { id_mustahik: true },
-    })
-    const nextVersion = existingVersions.length + 1
-    const newIdMustahik = `${baseId}-v${nextVersion}`
+      // 2. Ambil business key asli (tanpa suffix versi jika sudah ada)
+      const baseId = oldData.id_mustahik.replace(/-v\d+$/, '')
 
-    // 4. Nonaktifkan record lama
-    await prisma.dim_mustahik.update({
-      where: { sk_mustahik },
-      data: {
-        is_active: false,
-        valid_to: new Date()
-      }
-    })
+      // 3. Versi baru = menggunakan timestamp untuk menghindari race condition antar transaksi
+      const newIdMustahik = `${baseId}-v${Date.now()}`
 
-    // 5. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
-    const lokasiBaru = await prisma.dim_lokasi.create({
-      data: {
-        provinsi: "Kalimantan Barat",
-        kabupaten_kota: kabupaten_kota,
-        latitude: latitude,
-        longitude: longitude,
-      }
-    })
+      // 4. Nonaktifkan record lama
+      await tx.dim_mustahik.update({
+        where: { sk_mustahik },
+        data: {
+          is_active: false,
+          valid_to: new Date()
+        }
+      })
 
-    // 6. Buat record mustahik baru sebagai versi terbaru (Active) dengan ID unik
-    const updatedMustahik = await prisma.dim_mustahik.create({
-      data: {
-        id_mustahik: newIdMustahik,
-        nama,
-        nik,
-        alamat,
-        kategori_pm,
-        skoring,
-        sk_lokasi: lokasiBaru.sk_lokasi,
-        is_active: true,
-        valid_from: new Date(),
-      }
+      // 5. Buat record lokasi baru (karena koordinat/wilayah mungkin berubah)
+      const lokasiBaru = await tx.dim_lokasi.create({
+        data: {
+          provinsi: provinsi || "Kalimantan Barat",
+          kabupaten_kota: kabupaten_kota || null,
+          kecamatan: kelurahan_kecamatan || null,
+          desa_kelurahan: desa || null,
+          latitude: latitude || null,
+          longitude: longitude || null,
+        }
+      })
+
+      // 6. Buat record mustahik baru sebagai versi terbaru (Active) dengan ID unik
+      const mustahikBaru = await tx.dim_mustahik.create({
+        data: {
+          id_mustahik: newIdMustahik,
+          nama,
+          nik: nik || null,
+          kk: kk || null,
+          gender: gender === 'L' ? 'L' : gender === 'P' ? 'P' : 'To_Be_Determined',
+          no_hp: no_hp || null,
+          alamat,
+          desa: desa || null,
+          kelurahan_kecamatan: kelurahan_kecamatan || null,
+          kabupaten_kota: kabupaten_kota || null,
+          kategori_pm: (KATEGORI_PM_MAP[kategori_pm] || kategori_pm || 'To_Be_Determined') as any,
+          skoring: skoring ?? null,
+          jumlah_jiwa: jumlah_jiwa || null,
+          sk_lokasi: lokasiBaru.sk_lokasi,
+          is_active: true,
+          valid_from: new Date(),
+        }
+      })
+      
+      return mustahikBaru
     })
 
     return NextResponse.json(updatedMustahik)

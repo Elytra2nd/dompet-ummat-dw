@@ -38,7 +38,6 @@ export const IMPORT_ENUM_PROGRAM_INDUK = [
 ] as const
 
 export const DONASI_IMPORT_HEADERS = [
-  { key: 'id_transaksi_donasi', label: 'ID Transaksi *',          required: true,  isNumber: false },
   { key: 'tanggal',             label: 'Tanggal (DD/MM/YYYY) *',  required: true,  isNumber: false },
   { key: 'nama_donatur',        label: 'Nama Donatur *',          required: true,  isNumber: false },
   { key: 'tipe_donatur',        label: 'Tipe Donatur *',          required: true,  isNumber: false },

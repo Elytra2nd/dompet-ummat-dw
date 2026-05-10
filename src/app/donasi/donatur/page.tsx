@@ -69,9 +69,13 @@ export default function ManajemenDonaturPage() {
   const fetchDonatur = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/donasi/donatur?limit=1000')
+      const res = await fetch('/api/donasi/donatur?limit=1000', { cache: 'no-store' })
       const json = await res.json()
-      if (json.data && Array.isArray(json.data)) setDonatur(json.data)
+      if (json.data && Array.isArray(json.data)) {
+        // Sort by latest (sk_donatur) descending manually on client just in case
+        const sorted = json.data.sort((a: Donatur, b: Donatur) => b.sk_donatur - a.sk_donatur);
+        setDonatur(sorted);
+      }
     } catch (e) {
       toast.error('Gagal memuat data dari warehouse')
     } finally {
@@ -167,9 +171,9 @@ export default function ManajemenDonaturPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500">ID & Tipe</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500">Profil Donatur</TableHead>
-                  <TableHead className="font-black text-[10px] uppercase text-slate-500 text-right pr-6">Aksi</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left px-6">ID & Tipe</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">Profil Donatur</TableHead>
+                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -177,14 +181,14 @@ export default function ManajemenDonaturPage() {
                   <TableRow><TableCell colSpan={3} className="h-40 text-center"><Loader2 className="mx-auto animate-spin text-indigo-400" /></TableCell></TableRow>
                 ) : currentDonatur.map((d) => (
                   <TableRow key={d.sk_donatur} className="group hover:bg-indigo-50/30 transition-colors">
-                    <TableCell>
-                      <p className="font-mono text-[10px] font-black text-indigo-400 leading-none mb-1">{d.id_donatur}</p>
-                      <span className="px-1.5 py-0.5 text-[8px] font-black rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                    <TableCell className="px-6 text-left">
+                      <p className="font-mono text-[10px] font-semibold text-indigo-400 leading-none mb-1">{d.id_donatur}</p>
+                      <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
                         {d.tipe?.replace('_', ' ')}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <p className="font-black text-slate-900 uppercase leading-none mb-1 tracking-tight">{d.nama_lengkap}</p>
+                    <TableCell className="text-left">
+                      <p className="font-semibold text-slate-900 uppercase leading-none mb-1 tracking-tight">{d.nama_lengkap}</p>
                       <div className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
                         <Phone className="h-3 w-3 text-emerald-500"/> {d.kontak_utama}
                       </div>
@@ -194,7 +198,7 @@ export default function ManajemenDonaturPage() {
                           </div>
                       )}
                     </TableCell>
-                    <TableCell className="text-right pr-4">
+                    <TableCell className="text-center pr-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/donasi/donatur/${d.id_donatur}`}>
                           <Button 
@@ -223,17 +227,17 @@ export default function ManajemenDonaturPage() {
                             <AlertDialogHeader>
                               <div className="flex items-center gap-3 text-rose-600 mb-2">
                                 <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
-                                <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Hapus Donatur?</AlertDialogTitle>
+                                <AlertDialogTitle className="font-semibold text-xl uppercase tracking-tighter">Hapus Donatur?</AlertDialogTitle>
                               </div>
                               <AlertDialogDescription className="font-medium text-slate-500 text-sm">
                                 Anda akan menonaktifkan <strong>{d.nama_lengkap}</strong>. Histori tetap ada di Warehouse namun tidak aktif operasional.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">
-                              <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px]">Batal</AlertDialogCancel>
+                              <AlertDialogCancel className="rounded-xl font-semibold uppercase text-[10px]">Batal</AlertDialogCancel>
                               <AlertDialogAction 
                                 onClick={() => handleDelete(d.sk_donatur, d.nama_lengkap)}
-                                className="bg-rose-600 hover:bg-rose-700 rounded-xl font-black uppercase text-[10px]"
+                                className="bg-rose-600 hover:bg-rose-700 rounded-xl font-semibold uppercase text-[10px]"
                               >
                                 Ya, Nonaktifkan
                               </AlertDialogAction>

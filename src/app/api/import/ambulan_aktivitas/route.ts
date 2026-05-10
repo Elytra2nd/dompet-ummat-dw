@@ -71,46 +71,21 @@ export async function POST(req: Request) {
       }
     })
 
-    const idCounts = new Map<string, number>()
-    candidates.forEach(c => {
-      const id = c.data.id_transaksi
-      idCounts.set(id, (idCounts.get(id) ?? 0) + 1)
-    })
-    const dupInFile = candidates.filter(c => (idCounts.get(c.data.id_transaksi) ?? 0) > 1)
-    dupInFile.forEach(c => {
-      errors.push({
-        rowNumber: c.rowNumber,
-        idField: c.data.id_transaksi,
-        field: 'id_transaksi',
-        value: c.data.id_transaksi,
-        rule: 'duplicate_in_file',
-        message: `ID transaksi "${c.data.id_transaksi}" muncul lebih dari sekali dalam file`,
-        severity: 'error',
-      })
-    })
-
-    const validCandidates = candidates.filter(
-      c => (idCounts.get(c.data.id_transaksi) ?? 0) === 1
-    )
-
-    const totalRows = candidates.length + errors.filter(e => e.rule !== 'duplicate_in_file').length
+    const totalRows = candidates.length + errors.length
     if (errors.length > 0) {
       return NextResponse.json({
         status: 'validation_failed',
         totalRows,
-        validRows: validCandidates.length,
-        errorRows: errors.length,
+        validRows: candidates.length - errors.filter(e => e.severity === 'error').length,
+        errorRows: errors.filter(e => e.severity === 'error').length,
         errors,
       })
     }
 
-    const allIds = validCandidates.map(c => c.data.id_transaksi)
-    const existingIds = await prisma.fact_aktivitas_ambulan.findMany({
-      where: { id_transaksi: { in: allIds } },
-      select: { id_transaksi: true },
-    })
-    const existingSet = new Set(existingIds.map(e => e.id_transaksi))
-    const rowsToImport = validCandidates.filter(c => !existingSet.has(c.data.id_transaksi))
+    // All candidates are valid — IDs are auto-generated
+    const rowsToImport = candidates
+
+
 
     let imported = 0
 
@@ -145,9 +120,11 @@ export async function POST(req: Request) {
             'Lainnya': 'Lainnya'
           }
 
+          const generatedId = `EXP-AMB-${Date.now()}-${imported + batch.indexOf(c)}`
+
           await tx.fact_aktivitas_ambulan.create({
             data: {
-              id_transaksi: c.data.id_transaksi,
+              id_transaksi: generatedId,
               sk_tanggal_aktivitas: sk_tanggal,
               jam: shiftMap[c.data.jam] || 'To_Be_Determined',
               armada: armadaMap[c.data.armada] || 'Lainnya',
@@ -165,7 +142,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       status: 'success',
       imported,
-      skipped: existingSet.size,
     })
   } catch (error: any) {
     console.error('IMPORT_AMBULAN_AKTIVITAS_ERROR:', error)

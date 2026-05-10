@@ -31,7 +31,6 @@ describe('Enum Consistency with Prisma Schema', () => {
   it('valid tipe_donatur should pass donasi validation', () => {
     PRISMA_TIPE_DONATUR.forEach(tipe => {
       const { errors } = validateDonasiRow({
-        id_transaksi_donasi: 'TRX-TEST',
         tanggal: '15/04/2024',
         nama_donatur: 'Test User',
         tipe_donatur: tipe,
@@ -80,7 +79,6 @@ describe('Enum Consistency with Prisma Schema', () => {
   it('all metode_bayar values should pass donasi validation', () => {
     PRISMA_METODE_BAYAR.forEach(metode => {
       const { errors } = validateDonasiRow({
-        id_transaksi_donasi: 'TRX-TEST',
         tanggal: '15/04/2024',
         nama_donatur: 'Test User',
         tipe_donatur: 'Individu',
@@ -109,7 +107,6 @@ describe('Financial Precision', () => {
   it('donasi nominal validation should reject floating point amounts', () => {
     // Classic floating point: 0.1 + 0.2 = 0.30000000000000004
     const { errors } = validateDonasiRow({
-      id_transaksi_donasi: 'TRX-FP',
       tanggal: '15/04/2024',
       nama_donatur: 'Test User',
       tipe_donatur: 'Individu',
@@ -144,7 +141,6 @@ describe('Financial Precision', () => {
 
 describe('Validation Idempotency', () => {
   const row = {
-    id_transaksi_donasi: 'TRX-IDEMP',
     tanggal: '15/04/2024',
     nama_donatur: 'Ahmad Fauzi',
     tipe_donatur: 'Individu',
@@ -183,7 +179,6 @@ describe('Validation Idempotency', () => {
 describe('API Contract — Expected Response Shapes', () => {
   it('validateDonasiRow parsed output should have all required fields', () => {
     const { parsed } = validateDonasiRow({
-      id_transaksi_donasi: 'TRX-001',
       tanggal: '15/04/2024',
       nama_donatur: 'Test User',
       tipe_donatur: 'Individu',
@@ -193,7 +188,6 @@ describe('API Contract — Expected Response Shapes', () => {
       nama_petugas: 'Petugas',
     }, 1)
 
-    expect(parsed).toHaveProperty('id_transaksi_donasi')
     expect(parsed).toHaveProperty('tanggal')
     expect(parsed).toHaveProperty('nama_donatur')
     expect(parsed).toHaveProperty('tipe_donatur')
@@ -285,6 +279,6 @@ describe('Error Recovery — Partial Batch Handling', () => {
     // Then validate valid row — should still pass
     const { parsed } = validateDonasiRow(validRow, 2)
     expect(parsed).not.toBeNull()
-    expect(parsed!.id_transaksi_donasi).toBe('TRX-VALID')
+    expect(parsed!.nama_donatur).toBe('Valid User')
   })
 })

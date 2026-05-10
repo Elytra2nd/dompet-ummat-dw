@@ -157,7 +157,7 @@ export default function AmbulanExecutivePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[260px]">
+              <div className="h-[220px]">
                 {analytics.trend?.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={analytics.trend}>
@@ -187,7 +187,7 @@ export default function AmbulanExecutivePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[260px] flex items-center">
+              <div className="h-[220px] flex items-center">
                 {analytics.kategori?.length > 0 ? (
                   <div className="flex w-full items-center gap-4">
                     <div className="w-[160px] h-[200px] flex-shrink-0">
@@ -219,46 +219,48 @@ export default function AmbulanExecutivePage() {
         </div>
       )}
 
-      {/* OLAP 3D CUBE SLICE & DICE */}
-      {analytics?.cube && (
-        <Card className="border-none shadow-md rounded-2xl bg-white">
-          <CardHeader className="pb-2">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
-                <Layers3 size={16} className="text-indigo-500" /> OLAP Cube — Slice & Dice
-              </CardTitle>
-              <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
-                {(['tahun', 'armada', 'kategori'] as CubeSlice[]).map(s => (
-                  <button key={s} onClick={() => setCubeSlice(s)}
-                    className={`rounded-md px-3 py-1.5 text-xs font-bold capitalize transition-all ${cubeSlice === s ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
-                    {s === 'tahun' ? 'Waktu' : s === 'armada' ? 'Armada' : 'Layanan'}
-                  </button>
-                ))}
+      {/* OLAP & SOLAP ROW */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* OLAP 3D CUBE SLICE & DICE */}
+        {analytics?.cube && (
+          <Card className="border-none shadow-md rounded-2xl bg-white">
+            <CardHeader className="pb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
+                  <Layers3 size={16} className="text-indigo-500" /> OLAP Cube — Slice & Dice
+                </CardTitle>
+                <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1 shadow-sm">
+                  {(['tahun', 'armada', 'kategori'] as CubeSlice[]).map(s => (
+                    <button key={s} onClick={() => setCubeSlice(s)}
+                      className={`rounded-md px-3 py-1.5 text-[10px] sm:text-xs font-bold capitalize transition-all ${cubeSlice === s ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
+                      {s === 'tahun' ? 'Waktu' : s === 'armada' ? 'Armada' : 'Layanan'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Aggregasi jumlah layanan berdasarkan dimensi <strong className="text-indigo-600">{cubeSlice}</strong></p>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[280px]">
-              {cubeAgg.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={cubeAgg} layout="vertical" barSize={18}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
-                    <YAxis type="category" dataKey="name" width={140} axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 10, fontWeight: 700 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" fill="#6366f1" radius={[0, 6, 6, 0]} animationDuration={800} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : <p className="text-sm text-slate-400 text-center pt-20">Tidak ada data untuk ditampilkan</p>}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <p className="text-xs text-slate-400 mt-1">Aggregasi jumlah layanan berdasarkan dimensi <strong className="text-indigo-600">{cubeSlice}</strong></p>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[240px]">
+                {cubeAgg.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={cubeAgg} layout="vertical" barSize={18}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                      <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
+                      <YAxis type="category" dataKey="name" width={140} axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 10, fontWeight: 700 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="value" fill="#6366f1" radius={[0, 6, 6, 0]} animationDuration={800} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-slate-400 text-center pt-20">Data cube kosong</p>}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* SOLAP Spatial Drill-Down */}
-      {analytics?.spatial && analytics.spatial.length > 0 && (
-        <Card className="border-none shadow-md rounded-2xl bg-white">
+        {/* SOLAP Spatial Drill-Down */}
+        {analytics?.spatial && analytics.spatial.length > 0 && (
+          <Card className="border-none shadow-md rounded-2xl bg-white">
           <CardHeader className="pb-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="text-sm font-black flex items-center gap-2 text-slate-700">
@@ -278,7 +280,7 @@ export default function AmbulanExecutivePage() {
             <p className="text-xs text-slate-400 mt-1">Distribusi layanan ambulans per wilayah (level: <strong className="text-emerald-600">{spatialLevel}</strong>)</p>
           </CardHeader>
           <CardContent>
-            <div className="h-[280px]">
+            <div className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={spatialAgg} layout="vertical" barSize={16}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
@@ -292,28 +294,29 @@ export default function AmbulanExecutivePage() {
           </CardContent>
         </Card>
       )}
+      </div>
 
-      {/* CORE PATHWAYS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* CORE PATHWAYS & QUICK LOGS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
         <div className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
             <h2 className="font-black uppercase text-xs tracking-[0.15em] text-slate-500">External Services</h2>
           </div>
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 sm:p-7 hover:border-emerald-500 transition-all shadow-sm group">
-            <div className="flex gap-4 items-start">
-              <div className="h-12 w-12 sm:h-14 sm:w-14 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-2xl shrink-0 group-hover:scale-110 transition-transform">
-                <HandHeart size={26} />
+          <div className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 hover:border-emerald-500 transition-all shadow-sm group">
+            <div className="flex gap-3 items-start flex-col sm:flex-row">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-2xl shrink-0 group-hover:scale-110 transition-transform">
+                <HandHeart size={22} />
               </div>
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">Fakta Layanan Pasien</h3>
-                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">Data interaksi eksternal mencakup pasien, status ekonomi, dan geolokasi.</p>
-                <div className="pt-3 flex flex-col sm:flex-row gap-2">
-                  <Link href="/ambulan/monitoring" className="flex-1 sm:flex-none">
-                    <Button className="w-full sm:w-auto bg-slate-800 text-white font-bold text-[10px] tracking-widest hover:bg-slate-700 shadow-md h-10 rounded-xl">Buka Monitoring</Button>
+              <div className="space-y-1 flex-1 min-w-0">
+                <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">Fakta Layanan Pasien</h3>
+                <p className="text-slate-500 text-[11px] leading-relaxed">Data interaksi eksternal mencakup pasien, status ekonomi, dan geolokasi.</p>
+                <div className="pt-2 flex flex-col gap-2">
+                  <Link href="/ambulan/monitoring">
+                    <Button className="w-full bg-slate-800 text-white font-bold text-[10px] tracking-widest hover:bg-slate-700 shadow-md h-9 rounded-xl">Buka Monitoring</Button>
                   </Link>
-                  <Link href="/ambulan/layanan" className="flex-1 sm:flex-none">
-                    <Button variant="outline" className="w-full sm:w-auto border-2 border-emerald-600 text-emerald-600 font-bold text-[10px] tracking-widest hover:bg-emerald-50 h-10 rounded-xl">Catat Layanan Baru</Button>
+                  <Link href="/ambulan/layanan">
+                    <Button variant="outline" className="w-full border-2 border-emerald-600 text-emerald-600 font-bold text-[10px] tracking-widest hover:bg-emerald-50 h-9 rounded-xl">Catat Layanan Baru</Button>
                   </Link>
                 </div>
               </div>
@@ -326,37 +329,40 @@ export default function AmbulanExecutivePage() {
             <div className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />
             <h2 className="font-black uppercase text-xs tracking-[0.15em] text-slate-500">Internal Operational</h2>
           </div>
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 sm:p-7 hover:border-rose-500 transition-all shadow-sm group">
-            <div className="flex gap-4 items-start">
-              <div className="h-12 w-12 sm:h-14 sm:w-14 bg-rose-50 text-rose-600 flex items-center justify-center rounded-2xl shrink-0 group-hover:scale-110 transition-transform">
-                <Activity size={26} />
+          <div className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 hover:border-rose-500 transition-all shadow-sm group">
+            <div className="flex gap-3 items-start flex-col sm:flex-row">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-rose-50 text-rose-600 flex items-center justify-center rounded-2xl shrink-0 group-hover:scale-110 transition-transform">
+                <Activity size={22} />
               </div>
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight group-hover:text-rose-600 transition-colors">Log Biaya & Aktivitas</h3>
-                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">Pencatatan beban operasional armada: BBM, servis, ganti oli, pemeliharaan.</p>
-                <div className="pt-3 flex flex-col sm:flex-row gap-2">
-                  <Link href="/ambulan/riwayat" className="flex-1 sm:flex-none">
-                    <Button className="w-full sm:w-auto bg-slate-800 text-white font-bold text-[10px] tracking-widest hover:bg-slate-700 shadow-md h-10 rounded-xl">Cek Riwayat Biaya</Button>
+              <div className="space-y-1 flex-1 min-w-0">
+                <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight group-hover:text-rose-600 transition-colors">Log Biaya & Aktivitas</h3>
+                <p className="text-slate-500 text-[11px] leading-relaxed">Pencatatan beban operasional armada: BBM, servis, ganti oli, pemeliharaan.</p>
+                <div className="pt-2 flex flex-col gap-2">
+                  <Link href="/ambulan/riwayat">
+                    <Button className="w-full bg-slate-800 text-white font-bold text-[10px] tracking-widest hover:bg-slate-700 shadow-md h-9 rounded-xl">Cek Riwayat Biaya</Button>
                   </Link>
-                  <Link href="/ambulan/aktivitas" className="flex-1 sm:flex-none">
-                    <Button variant="outline" className="w-full sm:w-auto border-2 border-rose-600 text-rose-600 font-bold text-[10px] tracking-widest hover:bg-rose-50 h-10 rounded-xl">Catat Biaya Internal</Button>
+                  <Link href="/ambulan/aktivitas">
+                    <Button variant="outline" className="w-full border-2 border-rose-600 text-rose-600 font-bold text-[10px] tracking-widest hover:bg-rose-50 h-9 rounded-xl">Catat Biaya Internal</Button>
                   </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* QUICK LOGS */}
-      <Card className="border-none shadow-md rounded-2xl bg-white overflow-hidden">
-        <CardHeader className="border-b border-slate-100 py-4 bg-slate-50/50 px-4 sm:px-6">
-          <CardTitle className="text-xs font-black uppercase tracking-[0.15em] text-slate-500 flex items-center gap-2">
-            <History size={15} className="text-indigo-500" /> Log Aktivitas Terakhir
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y divide-slate-100">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <div className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
+            <h2 className="font-black uppercase text-xs tracking-[0.15em] text-slate-500">Live Tracker</h2>
+          </div>
+          <Card className="border-none shadow-md rounded-2xl bg-white overflow-hidden flex flex-col h-full lg:max-h-[240px]">
+            <CardHeader className="border-b border-slate-100 py-3 bg-slate-50/50 px-4">
+              <CardTitle className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 flex items-center gap-2">
+                <History size={14} className="text-indigo-500" /> Log Aktivitas Terakhir
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 overflow-y-auto custom-scrollbar flex-1">
+              <div className="divide-y divide-slate-100">
             {loading && (
               <div className="p-8 text-center flex flex-col items-center gap-2">
                 <Loader2 size={22} className="text-slate-300 animate-spin" />
@@ -391,9 +397,11 @@ export default function AmbulanExecutivePage() {
                 <ArrowRight size={15} className="text-slate-300 shrink-0" />
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }
