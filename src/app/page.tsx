@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import DonationStats from '@/components/donasi/DonationStats'
 import ProgramStats from '@/components/donasi/ProgramStats'
@@ -111,14 +112,14 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${loading ? 'bg-slate-100 text-slate-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                <Badge size="sm" variant="outline" className={loading ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}>
                   {loading ? (
                     <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Menghubungkan...</>
                   ) : 'Sistem Online'}
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest">
+                </Badge>
+                <Badge size="sm" variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
                   Analisis AI Aktif
-                </span>
+                </Badge>
               </div>
               <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 leading-tight">
                 Dashboard <span className="text-emerald-600 font-extrabold">Amil</span> Analitik
@@ -182,7 +183,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               <Link href="/donasi/donatur">
-                <Card className="hover:border-indigo-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
+                <Card className="hover:border-indigo-400 transition-all group cursor-pointer border shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
                     <div className="flex items-start justify-between">
                       <div className="p-3 bg-indigo-50 rounded-xl group-hover:bg-indigo-600 transition-colors">
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                       </div>
                       <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-indigo-600 transition-all group-hover:translate-x-1" />
                     </div>
-                    <h3 className="mt-4 font-black text-lg text-slate-900">Database Donatur</h3>
+                    <h3 className="mt-4 font-bold text-base text-slate-900">Database Donatur</h3>
                     <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
                       Kelola data profil dan riwayat donasi setiap donatur.
                     </p>
@@ -199,7 +200,7 @@ export default function DashboardPage() {
               </Link>
 
               <Link href="/mustahik/spasial">
-                <Card className="hover:border-red-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
+                <Card className="hover:border-red-400 transition-all group cursor-pointer border shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
                     <div className="flex items-start justify-between">
                       <div className="p-3 bg-red-50 rounded-xl group-hover:bg-red-600 transition-colors">
@@ -207,7 +208,7 @@ export default function DashboardPage() {
                       </div>
                       <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-red-600 transition-all group-hover:translate-x-1" />
                     </div>
-                    <h3 className="mt-4 font-black text-lg text-slate-900">Pemetaan Spasial</h3>
+                    <h3 className="mt-4 font-bold text-base text-slate-900">Pemetaan Spasial</h3>
                     <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
                       Analisis sebaran mustahik berbasis koordinat GIS.
                     </p>
@@ -221,7 +222,7 @@ export default function DashboardPage() {
           {/* 4. AKTIVITAS TERKINI */}
           <Card className="border shadow-sm bg-white overflow-hidden flex flex-col h-full rounded-xl">
             <CardHeader className="bg-slate-50/50 border-b py-4">
-              <CardTitle className="text-xs md:text-sm font-black flex items-center gap-2 text-slate-700 uppercase tracking-wider">
+              <CardTitle className="text-xs md:text-sm font-bold flex items-center gap-2 text-slate-700 uppercase tracking-wider">
                 <TrendingUp className="h-4 w-4 text-emerald-500" /> Aktivitas Terkini
               </CardTitle>
             </CardHeader>
@@ -250,9 +251,9 @@ export default function DashboardPage() {
                           </p>
                         )}
                         <div className="flex items-center justify-between mt-2">
-                          <span className={`text-[9px] font-black border px-1.5 py-0.5 rounded-md uppercase ${badge.color}`}>
+                          <Badge size="sm" variant="outline" className={badge.color}>
                             {badge.label}
-                          </span>
+                          </Badge>
                           <span className="text-[9px] text-slate-400 font-bold flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {timeAgo(log.createdAt)}
                           </span>
@@ -264,7 +265,7 @@ export default function DashboardPage() {
               </div>
             </CardContent>
             <div className="p-3 bg-slate-50/30 border-t text-center mt-auto">
-              <Button variant="ghost" asChild className="w-full text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-all">
+              <Button variant="ghost" asChild className="w-full text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-all">
                 <Link href="/users">Audit Full Logs</Link>
               </Button>
             </div>

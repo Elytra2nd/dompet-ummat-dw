@@ -174,7 +174,7 @@ export default function DetailLayananAmbulanPage() {
                 </div>
                 <div>
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Kondisi Ekonomi</p>
-                  <Badge className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-none rounded-lg font-black text-[10px] uppercase px-3 py-1 shadow-sm">
+                  <Badge size="sm" variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                     {data.dim_pasien_ambulan?.status_ekonomi || 'NON-SUBSIDI'}
                   </Badge>
                 </div>
@@ -204,11 +204,10 @@ export default function DetailLayananAmbulanPage() {
           </div>
 
           {/* CARD LOGISTIK UNIT */}
-          <Card className="border-none rounded-3xl bg-white shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-300">
-            <CardHeader className="bg-slate-900 text-white py-5 px-6 relative overflow-hidden">
-               <Truck className="absolute right-4 top-1/2 -translate-y-1/2 w-24 h-24 text-white opacity-5" />
-               <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 relative z-10 text-slate-300">
-                  <div className="p-1.5 bg-slate-800 rounded-lg"><Truck size={14} className="text-rose-400" /></div>
+          <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+            <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6 relative overflow-hidden">
+               <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+                  <div className="p-1.5 bg-rose-50 rounded-lg"><Truck size={14} className="text-rose-600" /></div>
                   Logistik & Operasional Armada
                </CardTitle>
             </CardHeader>

@@ -31,7 +31,7 @@ const SpatialMustahikMap = dynamic(
       <div className="flex h-[500px] w-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white text-slate-400">
         <div className="text-center">
           <Loader2 className="mb-4 h-8 w-8 animate-spin text-indigo-500 mx-auto" />
-          <p className="font-bold uppercase tracking-tighter text-xs">Memuat peta...</p>
+          <p className="font-bold uppercase tracking-wider text-xs text-slate-400">Memuat peta...</p>
         </div>
       </div>
     )

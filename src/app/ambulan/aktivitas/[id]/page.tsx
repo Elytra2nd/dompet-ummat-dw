@@ -128,18 +128,18 @@ export default function DetailAktivitasPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* KOLOM UTAMA */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none shadow-xl rounded-3xl bg-white overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-            <CardHeader className="bg-gradient-to-br from-slate-900 to-black text-white p-8 relative overflow-hidden">
-              <DollarSign className="absolute -bottom-10 -right-10 w-48 h-48 text-white opacity-[0.03] transform -rotate-12 group-hover:scale-110 transition-transform duration-500" />
+          <Card className="border border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
+            <CardHeader className="bg-rose-600 text-white p-6 sm:p-8 relative overflow-hidden">
+              <DollarSign className="absolute -bottom-8 -right-8 w-40 h-40 text-white opacity-[0.06] transform -rotate-12" />
               <div className="flex justify-between items-center relative z-10">
-                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-rose-100">
                   Ringkasan Pengeluaran
                 </CardTitle>
-                <Badge className="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3 py-1 font-black uppercase text-[9px] backdrop-blur-md rounded-lg">
+                <Badge size="sm" className="bg-white/20 text-white border-white/30">
                   {data.kategori_aktivitas?.replace(/_/g, ' ')}
                 </Badge>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black mt-6 tracking-tighter italic text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)] relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight text-white relative z-10">
                 {formatIDR(data.biaya_operasional || 0)}
               </h2>
             </CardHeader>

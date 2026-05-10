@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import {
   ArrowLeft, User, MapPin, ShieldAlert,
-  History, Calendar, Info, LineChart
+  History, Calendar, Info, LineChart, Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -39,9 +39,9 @@ export default function DetailMustahikPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="text-center space-y-4">
-        <div className="h-10 w-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Profiling Mustahik...</p>
+      <div className="text-center space-y-3">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500 mx-auto" />
+        <p className="font-bold text-slate-400 uppercase text-xs tracking-wider">Memuat data...</p>
       </div>
     </div>
   )

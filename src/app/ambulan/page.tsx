@@ -313,10 +313,10 @@ export default function AmbulanExecutivePage() {
                 <p className="text-slate-500 text-[11px] leading-relaxed">Data interaksi eksternal mencakup pasien, status ekonomi, dan geolokasi.</p>
                 <div className="pt-2 flex flex-col gap-2">
                   <Link href="/ambulan/monitoring">
-                    <Button className="w-full bg-slate-800 text-white font-bold text-[10px] tracking-widest hover:bg-slate-700 shadow-md h-9 rounded-xl">Buka Monitoring</Button>
+                    <Button className="w-full bg-slate-800 text-white font-semibold text-xs hover:bg-slate-700 shadow-sm h-9 rounded-xl">Buka Monitoring</Button>
                   </Link>
                   <Link href="/ambulan/layanan">
-                    <Button variant="outline" className="w-full border-2 border-emerald-600 text-emerald-600 font-bold text-[10px] tracking-widest hover:bg-emerald-50 h-9 rounded-xl">Catat Layanan Baru</Button>
+                    <Button variant="outline" className="w-full border border-emerald-600 text-emerald-600 font-semibold text-xs hover:bg-emerald-50 h-9 rounded-xl">Catat Layanan Baru</Button>
                   </Link>
                 </div>
               </div>
@@ -339,10 +339,10 @@ export default function AmbulanExecutivePage() {
                 <p className="text-slate-500 text-[11px] leading-relaxed">Pencatatan beban operasional armada: BBM, servis, ganti oli, pemeliharaan.</p>
                 <div className="pt-2 flex flex-col gap-2">
                   <Link href="/ambulan/riwayat">
-                    <Button className="w-full bg-slate-800 text-white font-bold text-[10px] tracking-widest hover:bg-slate-700 shadow-md h-9 rounded-xl">Cek Riwayat Biaya</Button>
+                    <Button className="w-full bg-slate-800 text-white font-semibold text-xs hover:bg-slate-700 shadow-sm h-9 rounded-xl">Cek Riwayat Biaya</Button>
                   </Link>
                   <Link href="/ambulan/aktivitas">
-                    <Button variant="outline" className="w-full border-2 border-rose-600 text-rose-600 font-bold text-[10px] tracking-widest hover:bg-rose-50 h-9 rounded-xl">Catat Biaya Internal</Button>
+                    <Button variant="outline" className="w-full border border-rose-600 text-rose-600 font-semibold text-xs hover:bg-rose-50 h-9 rounded-xl">Catat Biaya Internal</Button>
                   </Link>
                 </div>
               </div>
