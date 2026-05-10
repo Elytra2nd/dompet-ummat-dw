@@ -86,10 +86,10 @@ export default function ManajemenMustahikPage() {
     try {
       const res = await fetch(`/api/mustahik/index?sk=${sk}`, { method: 'DELETE' })
       if (res.ok) {
-        toast.success(`Record ${nama} telah dinonaktifkan di warehouse`)
+        toast.success(`Data ${nama} telah dinonaktifkan`)
         fetchMustahik()
       }
-    } catch (e) { toast.error('Gagal menonaktifkan record') }
+    } catch (e) { toast.error('Gagal menonaktifkan data') }
   }
 
   const kategoriOptions = useMemo(() => {
@@ -192,7 +192,7 @@ export default function ManajemenMustahikPage() {
                         <Badge variant="outline" className="text-[8px] h-4 font-semibold bg-blue-50 text-blue-600 border-blue-200 uppercase">Score: {m.skoring}</Badge>
                         <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-rose-500"/> {m.kabupaten_kota}</span>
                         {m.latitude && m.longitude && (
-                          <Badge variant="secondary" className="text-[7px] h-3 bg-emerald-50 text-emerald-600 border-none px-1">SPATIAL READY</Badge>
+                          <Badge variant="secondary" className="text-[7px] h-3 bg-emerald-50 text-emerald-600 border-none px-1">LOKASI SIAP</Badge>
                         )}
                       </div>
                     </TableCell>

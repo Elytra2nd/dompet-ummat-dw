@@ -170,7 +170,7 @@ export default function RiwayatAktivitasPage() {
                 Log Aktivitas & <span className="text-rose-600">Biaya</span>
               </h1>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 mt-1">
-                Internal Operational Tracking • BIDA Warehouse
+                Internal Operational Tracking • BIDA Analytics
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -351,7 +351,7 @@ export default function RiwayatAktivitasPage() {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 italic font-medium uppercase text-xs">Tidak ada log aktivitas ditemukan.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 italic font-medium uppercase text-xs">Tidak ada catatan aktivitas.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -362,7 +362,7 @@ export default function RiwayatAktivitasPage() {
             {loading && !data ? (
               <div className="py-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" /></div>
             ) : filteredLogs.length === 0 ? (
-              <div className="py-10 text-center text-slate-400 italic text-sm">Tidak ada log aktivitas ditemukan.</div>
+              <div className="py-10 text-center text-slate-400 italic text-sm">Tidak ada catatan aktivitas.</div>
             ) : (
               currentLogs.map((log: any) => (
                 <div key={log.sk_fakta_aktivitas_ambulan} className="p-4 hover:bg-slate-50">

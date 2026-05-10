@@ -59,11 +59,10 @@ function StarRating({ stars }: { stars: number }) {
   )
 }
 
-// Educational tooltip — penjelasan singkat saat hover (#28)
 const METRIC_TIPS: Record<string, string> = {
-  silhouette: '0.5–0.7 = Bagus, > 0.7 = Sangat Bagus. Mengukur seberapa mirip anggota dalam cluster dibanding cluster lain.',
-  dbi: 'Semakin kecil semakin baik (< 1 ideal). Mengukur rasio jarak intra-cluster vs inter-cluster.',
-  chi: 'Semakin besar semakin baik. Rasio dispersi antar-cluster terhadap dispersi intra-cluster.',
+  silhouette: 'Nilai 0–1: semakin tinggi semakin baik. Mengukur kerapatan pengelompokan.',
+  dbi: 'Semakin kecil semakin baik. Mengukur ketajaman batas antar kelompok.',
+  chi: 'Semakin tinggi semakin baik. Mengukur kepadatan kelompok yang terbentuk.',
 }
 
 function MetricTooltip({ metricKey, children }: { metricKey: string; children: React.ReactNode }) {
@@ -169,8 +168,8 @@ export default function SegmentasiPage() {
         {loading && !data && (
           <div className="flex flex-col items-center justify-center gap-4 py-20">
             <Loader2 className="h-12 w-12 animate-spin text-emerald-500" />
-            <p className="text-sm font-bold text-slate-500">Menjalankan analisis segmentasi...</p>
-            <p className="text-xs text-slate-400">Menghitung RFM, normalisasi, dan clustering</p>
+            <p className="text-sm font-bold text-slate-500">Menganalisis data donatur...</p>
+            <p className="text-xs text-slate-400">Memproses dan mengelompokkan berdasarkan perilaku donasi</p>
           </div>
         )}
 

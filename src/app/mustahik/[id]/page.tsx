@@ -90,7 +90,7 @@ export default function DetailMustahikPage() {
           <Card className="border border-blue-200 bg-blue-50 rounded-2xl shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-[10px] font-black uppercase flex items-center gap-2 text-blue-800">
-                <History size={14} /> Data Lineage Detail
+                <History size={14} /> Riwayat Perubahan Data
               </CardTitle>
             </CardHeader>
             <CardContent>

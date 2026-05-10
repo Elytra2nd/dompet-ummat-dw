@@ -28,7 +28,7 @@ function formatRupiah(value: number): string {
 
 // Status label untuk a11y — teks di samping warna (#29)
 const SEGMENT_STATUS: Record<string, { text: string; badgeClass: string }> = {
-  champions: { text: 'Excellent', badgeClass: 'bg-emerald-100 text-emerald-700' },
+  champions: { text: 'Terbaik', badgeClass: 'bg-emerald-100 text-emerald-700' },
   loyal: { text: 'Baik', badgeClass: 'bg-blue-100 text-blue-700' },
   potential: { text: 'Potensial', badgeClass: 'bg-teal-100 text-teal-700' },
   new_donors: { text: 'Baru', badgeClass: 'bg-indigo-100 text-indigo-700' },
@@ -78,15 +78,15 @@ export function SegmentCard({ segment }: SegmentCardProps) {
           {/* Mini Stats */}
           <div className="mt-3 grid grid-cols-3 gap-2 pt-3 border-t border-slate-100">
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Terakhir</p>
-              <p className="text-xs font-black text-slate-700">{segment.avg_recency}hr</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase">Hari Terakhir</p>
+              <p className="text-xs font-black text-slate-700">{segment.avg_recency}h</p>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Frekuensi</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase">Jumlah Donasi</p>
               <p className="text-xs font-black text-slate-700">{segment.avg_frequency}x</p>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Donasi</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase">Rata-rata</p>
               <p className="text-xs font-black text-slate-700">{formatRupiah(segment.avg_monetary)}</p>
             </div>
           </div>
