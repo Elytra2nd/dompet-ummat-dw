@@ -2,11 +2,20 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  ArrowLeft, Truck, User, MapPin, Clock, 
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import {
+  ArrowLeft, Truck, User, MapPin, Clock,
   Calendar, ShieldCheck, Printer, Activity, CheckCircle2
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -65,6 +74,20 @@ export default function DetailLayananAmbulanPage() {
           </Button>
         </div>
       </div>
+
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/ambulan">Layanan Ambulan</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{data.id_transaksi}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* KOLOM KIRI: STATUS & INFO UTAMA */}

@@ -394,7 +394,7 @@ export default function AmbulanExecutivePage() {
                     )}
                   </p>
                 </div>
-                <ArrowRight size={15} className="text-slate-300 shrink-0" />
+                <ArrowRight size={16} className="text-slate-300 shrink-0" />
               </div>
             ))}
               </div>

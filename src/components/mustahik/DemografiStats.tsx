@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { Loader2 } from 'lucide-react'
 
 type WilayahItem = { label: string; total: number }
 type GenderItem = { name: string; value: number; raw: string }
@@ -119,7 +120,7 @@ function DemografiWilayah() {
   }, [data])
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-8 h-full border border-slate-100 transition-all">
+    <div className="bg-white rounded-xl shadow-sm p-8 h-full border border-slate-100 transition-all">
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900">
@@ -154,7 +155,7 @@ function DemografiWilayah() {
 
       {loading ? (
         <div className="h-[240px] flex flex-col items-center justify-center gap-2">
-          <div className="w-8 h-8 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sinkronisasi...</p>
         </div>
       ) : (

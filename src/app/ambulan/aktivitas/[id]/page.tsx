@@ -2,21 +2,29 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ArrowLeft, 
-  Truck, 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  Printer, 
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import {
+  ArrowLeft,
+  Truck,
+  Calendar,
+  Clock,
+  DollarSign,
+  Printer,
   AlertCircle,
   FileText,
   Activity
 } from 'lucide-react'
-import Link from 'next/link'
 import { toast } from 'sonner'
 
 export default function DetailAktivitasPage() {
@@ -102,6 +110,20 @@ export default function DetailAktivitasPage() {
           </Button>
         </div>
       </div>
+
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/ambulan/riwayat">Riwayat Aktivitas</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{data.id_transaksi}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* KOLOM UTAMA */}

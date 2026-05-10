@@ -154,7 +154,7 @@ export default function SegmentasiPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-8 px-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
         {/* Error */}
         {error && (
           <Card className="border-2 border-red-200 bg-red-50">

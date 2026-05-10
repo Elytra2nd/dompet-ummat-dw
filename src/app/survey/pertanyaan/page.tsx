@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   Table,
   TableBody,
@@ -229,12 +230,12 @@ export default function KelolaPertanyaanPage() {
             <Table>
               <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[150px] text-left pl-6">Kode</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[200px] text-left">Grup</TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 min-w-[300px] text-left">
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-left pl-6">Kode</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[200px] text-left">Grup</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[300px] text-left">
                     Indikator Penilaian
                   </TableHead>
-                  <TableHead className="font-semibold text-[10px] uppercase text-slate-500 w-[120px] text-center pr-6">Aksi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[120px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -246,11 +247,12 @@ export default function KelolaPertanyaanPage() {
                   </TableRow>
                 ) : filteredQuestions.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="h-24 text-center text-slate-500"
-                    >
-                      Belum ada data kriteria survey.
+                    <TableCell colSpan={4}>
+                      <EmptyState
+                        asTableRow={false}
+                        title="Belum ada data kriteria survey"
+                        description="Tambahkan pertanyaan baru untuk memulai penilaian kelayakan."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

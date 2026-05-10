@@ -1,5 +1,13 @@
 import SurveyEditForm from '@/components/survey/SurveyEditForm'
 import { Button } from '@/components/ui/button'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { ArrowLeft, ClipboardCheck } from 'lucide-react'
 import Link from 'next/link'
 
@@ -11,7 +19,7 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-8 py-6">
-          <div className="mb-2 flex items-center gap-4">
+          <div className="mb-4 flex flex-col gap-3">
             <Button
               variant="ghost"
               size="sm"
@@ -22,6 +30,19 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
                 <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Hasil Survey
               </Link>
             </Button>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href="/survey/hasil">Survey Kelayakan</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Edit Survey</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

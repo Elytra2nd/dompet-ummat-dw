@@ -267,7 +267,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
               )}
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5 sm:col-span-2">
+                <div className="space-y-2 sm:col-span-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">Nama Lengkap <span className="text-rose-500">*</span></Label>
                   <Input
                     placeholder="Nama lengkap mustahik"
@@ -278,7 +278,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">NIK (KTP)</Label>
                   <Input
                     placeholder="16 digit NIK"
@@ -290,7 +290,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">No. WhatsApp</Label>
                   <Input
                     placeholder="08..."
@@ -301,7 +301,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">Gender</Label>
                   <select
                     className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500"
@@ -314,7 +314,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">Kategori PM (Asnaf)</Label>
                   <select
                     className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500"
@@ -327,7 +327,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">Jumlah Jiwa dalam KK</Label>
                   <Input
                     type="number" min={1} placeholder="1"
@@ -338,7 +338,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">Program</Label>
                   <select
                     className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500"
@@ -351,7 +351,7 @@ export default function SurveyForm({ id_survey }: { id_survey?: string }) {
                   </select>
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
+                <div className="space-y-2 sm:col-span-2">
                   <Label className="text-xs font-bold text-slate-600 uppercase">Kabupaten / Kota</Label>
                   <Input
                     placeholder="Contoh: Kota Pontianak"
@@ -507,7 +507,7 @@ function StepEkonomi({ data, setData }: { data: any; setData: any }) {
           { label: 'Pendapatan Bulanan', key: 'pendapatan_bulanan' },
           { label: 'Pengeluaran Bulanan', key: 'pengeluaran_bulanan' },
         ].map(({ label, key }) => (
-          <div key={key} className="space-y-1.5">
+          <div key={key} className="space-y-2">
             <Label className="text-xs font-bold text-slate-600 uppercase">{label}</Label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>

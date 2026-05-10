@@ -342,7 +342,7 @@ export default function DonasiKeluarPage() {
                         </p>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-left">
-                        <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50 font-bold text-[9px] uppercase">
+                        <Badge size="sm" variant="outline" className="border-amber-200 text-amber-700 bg-amber-50">
                           {toDisplay(item.kategori_program)}
                         </Badge>
                       </TableCell>
@@ -350,7 +350,7 @@ export default function DonasiKeluarPage() {
                         {toDisplay(item.jenis_bantuan)}
                       </TableCell>
                       <TableCell className="text-left">
-                        <Badge variant="outline" className={`font-bold text-[9px] uppercase ${STATUS_COLOR[toDisplay(item.status_pengajuan)] ?? 'bg-slate-50 text-slate-500'}`}>
+                        <Badge size="sm" variant="outline" className={STATUS_COLOR[toDisplay(item.status_pengajuan)] ?? 'bg-slate-50 text-slate-500'}>
                           {toDisplay(item.status_pengajuan)}
                         </Badge>
                       </TableCell>
@@ -421,10 +421,10 @@ export default function DonasiKeluarPage() {
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-2 items-center">
-                    <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50 font-bold text-[9px]">
+                    <Badge size="sm" variant="outline" className="border-amber-200 text-amber-700 bg-amber-50">
                       {toDisplay(item.domain_program)}
                     </Badge>
-                    <Badge variant="outline" className={`font-bold text-[9px] ${STATUS_COLOR[toDisplay(item.status_pengajuan)] ?? ''}`}>
+                    <Badge size="sm" variant="outline" className={STATUS_COLOR[toDisplay(item.status_pengajuan)] ?? ''}>
                       {toDisplay(item.status_pengajuan)}
                     </Badge>
                     <span className="font-bold text-sm text-slate-900 ml-auto">{formatIDR(item.dana_tersalur)}</span>
@@ -628,7 +628,7 @@ export default function DonasiKeluarPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase">Status Pengajuan</p>
-                  <p className="mt-1"><Badge variant="outline" className={`font-bold text-[9px] uppercase ${STATUS_COLOR[toDisplay(detailItem.status_pengajuan)] ?? 'bg-slate-50 text-slate-500'}`}>{toDisplay(detailItem.status_pengajuan)}</Badge></p>
+                  <p className="mt-1"><Badge size="sm" variant="outline" className={STATUS_COLOR[toDisplay(detailItem.status_pengajuan)] ?? 'bg-slate-50 text-slate-500'}>{toDisplay(detailItem.status_pengajuan)}</Badge></p>
                 </div>
               </div>
             </div>

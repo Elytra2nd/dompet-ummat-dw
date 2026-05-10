@@ -2,11 +2,30 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  ArrowLeft, Building2, History, Wallet, MapPin, User, Search
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import {
+  ArrowLeft, Building2, History, Wallet, MapPin, User, Search, Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -49,9 +68,24 @@ export default function DetailDonaturPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 bg-slate-50 min-h-screen font-sans">
-      <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white">
-        <ArrowLeft size={16} /> Kembali ke Daftar
-      </Button>
+      <div className="space-y-3">
+        <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white">
+          <ArrowLeft size={16} /> Kembali ke Daftar
+        </Button>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/donasi/donatur">Donatur</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{donatur.nama}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* KIRI: PROFIL UTAMA */}
@@ -78,7 +112,7 @@ export default function DetailDonaturPage() {
                   <div className="p-2 bg-slate-100 rounded-lg"><MapPin size={16} className="text-slate-600" /></div>
                   <div>
                     <p className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">Alamat</p>
-                    <p className="text-sm font-bold text-slate-800 leading-tight">{donatur.alamat || 'N/A'}</p>
+                    <p className="text-sm font-bold text-slate-800 leading-tight">{donatur.alamat || '-'}</p>
                   </div>
                 </div>
               </div>
@@ -111,45 +145,64 @@ export default function DetailDonaturPage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr className="text-[10px] font-black uppercase text-slate-900">
-                      <th className="p-4 border-r">Tgl. Transaksi</th>
-                      <th className="p-4 border-r">Program Penyaluran</th>
-                      <th className="p-4 border-r">No. Referensi</th>
-                      <th className="p-4 text-right">Jumlah Donasi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {donatur.fact_donasi?.length > 0 ? (
+                <Table>
+                  <TableHeader className="bg-slate-50 border-b border-slate-200">
+                    <TableRow className="hover:bg-slate-50">
+                      <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Tgl. Transaksi</TableHead>
+                      <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Program Penyaluran</TableHead>
+                      <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">No. Referensi</TableHead>
+                      <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">Jumlah Donasi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <>
+                        {[...Array(5)].map((_, i) => (
+                          <TableRow key={i} className="hover:bg-slate-50">
+                            <TableCell className="p-4"><Skeleton className="h-4 w-20" /></TableCell>
+                            <TableCell className="p-4"><Skeleton className="h-4 w-32" /></TableCell>
+                            <TableCell className="p-4"><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell className="p-4 text-right"><Skeleton className="h-4 w-28 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))}
+                      </>
+                    ) : donatur.fact_donasi?.length > 0 ? (
                       donatur.fact_donasi.map((txn: any, i: number) => (
-                        <tr key={i} className="border-b hover:bg-emerald-50 transition-colors">
-                          <td className="p-4 font-bold text-slate-700">
+                        <TableRow key={i} className="hover:bg-emerald-50">
+                          <TableCell className="font-bold text-slate-700">
                             {formatTanggalDW(txn.sk_tgl_bersih)}
-                          </td>
-                          <td className="p-4">
+                          </TableCell>
+                          <TableCell>
                             <p className="font-black uppercase text-xs text-slate-800 leading-tight">
                               {txn.dim_program_donasi?.nama_program || 'PROGRAM UMUM'}
                             </p>
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                               {txn.id_transaksi_donasi}
                             </p>
-                          </td>
-                          <td className="p-4">
-                             <Badge variant="outline" className="text-[9px] font-black border-2 border-slate-200 bg-white uppercase">
-                               {txn.no_ref || 'TRX-INTERNAL'}
-                             </Badge>
-                          </td>
-                          <td className="p-4 text-right font-black text-slate-900 bg-slate-50/50">
+                          </TableCell>
+                          <TableCell>
+                            <Badge size="sm" variant="outline" className="bg-white border-slate-200">
+                              {txn.no_ref || '-'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-black text-slate-900 bg-slate-50/50">
                             Rp {Number(txn.nominal_valid).toLocaleString('id-ID')}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))
                     ) : (
-                      <tr><td colSpan={4} className="p-16 text-center font-black text-slate-300 uppercase tracking-widest">Belum ada riwayat donasi</td></tr>
+                      <TableRow>
+                        <TableCell colSpan={4}>
+                          <EmptyState
+                            asTableRow={false}
+                            title="Belum ada riwayat donasi"
+                            description="Data donasi akan tampil setelah melakukan transaksi."
+                          />
+                        </TableCell>
+                      </TableRow>
                     )}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
