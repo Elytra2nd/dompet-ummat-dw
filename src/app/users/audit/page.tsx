@@ -8,6 +8,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  Breadcrumb, BreadcrumbList, BreadcrumbItem,
+  BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import Link from 'next/link'
 import Pagination from '@/components/ui/pagination-numbered'
 
@@ -99,11 +104,24 @@ export default function AuditLogPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* HEADER BAR */}
-      <div className="mb-6 border-b bg-white shadow-sm">
+      <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
-          <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-semibold hover:bg-slate-50">
-            <Link href="/users"><ArrowLeft className="mr-2 h-4 w-4" /> Manajemen User</Link>
-          </Button>
+          <div className="mb-4 space-y-3">
+            <Button variant="ghost" size="sm" asChild className="text-slate-500 font-semibold hover:bg-slate-50 -ml-2">
+              <Link href="/users"><ArrowLeft className="mr-2 h-4 w-4" /> Manajemen User</Link>
+            </Button>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild><Link href="/users">Users</Link></BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Audit Trail</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
@@ -187,8 +205,8 @@ export default function AuditLogPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
               </div>
             ) : currentLogs.length === 0 ? (
-              <div className="text-center py-16 text-slate-400 font-medium text-sm">
-                Belum ada log aktivitas yang tercatat.
+              <div className="py-16 px-4">
+                <EmptyState title="Belum ada log aktivitas" description="Aktivitas pengguna akan tercatat secara otomatis." />
               </div>
             ) : (
               <>

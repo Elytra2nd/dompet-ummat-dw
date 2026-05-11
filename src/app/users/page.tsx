@@ -198,7 +198,7 @@ export default function UserManagementPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-200">
               <Users className="h-6 w-6 text-white" />
             </div>
@@ -215,7 +215,7 @@ export default function UserManagementPage() {
 
       {/* Global Alerts */}
       {errorMsg && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-3 animate-in slide-in-from-top-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg flex items-center gap-3 animate-in slide-in-from-top-2">
           <AlertTriangle className="h-5 w-5" />
           <span className="font-medium">{errorMsg}</span>
         </div>
@@ -269,26 +269,26 @@ export default function UserManagementPage() {
                       <TableCell className="text-center pr-6">
                         <div className="flex justify-end gap-2">
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            className="h-8 w-8 text-indigo-600 hover:bg-indigo-50"
                             onClick={() => handleOpenEdit(user)}
                             aria-label="Edit pengguna"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           {user.email !== currentUserEmail ? (
-                            <Button 
-                              variant="outline" 
-                              size="icon" 
-                              className="h-8 w-8 text-red-600 border-red-200 hover:bg-red-50"
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-rose-600 hover:bg-rose-50"
                               onClick={() => handleOpenDelete(user.id)}
                               aria-label="Hapus pengguna"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <Button disabled variant="outline" size="icon" className="h-8 w-8" title="Anda tidak bisa menghapus diri sendiri">
+                            <Button disabled variant="ghost" size="icon" className="h-8 w-8" aria-label="Tidak bisa menghapus akun sendiri">
                               <Shield className="h-4 w-4 text-slate-400" />
                             </Button>
                           )}
@@ -383,7 +383,7 @@ export default function UserManagementPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-red-600 flex items-center gap-2">
+            <DialogTitle className="text-rose-600 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" /> Hapus Pengguna
             </DialogTitle>
             <DialogDescription className="pt-2">

@@ -4,6 +4,7 @@ import { useState, useEffect, use, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
   Clock,
@@ -444,7 +445,7 @@ export default function SegmentDetailPage({
               {/* Profil Box */}
               <Card className="border-2 bg-white shadow-sm">
                 <CardHeader className="border-b bg-slate-50/50 py-4">
-                  <CardTitle className="text-sm font-black text-slate-700">Profil Segmen</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-700">Profil Segmen</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 p-6">
                   <div className="flex items-center gap-4 rounded-xl border border-slate-100 p-4">
@@ -479,7 +480,7 @@ export default function SegmentDetailPage({
               {/* Radar Chart */}
               <Card className="border-2 bg-white shadow-sm">
                 <CardHeader className="border-b bg-slate-50/50 py-4">
-                  <CardTitle className="text-sm font-black text-slate-700">Perbandingan vs Rata-rata</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-700">Perbandingan vs Rata-rata</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="h-[280px]">
@@ -511,13 +512,13 @@ export default function SegmentDetailPage({
             {/* Rekomendasi Strategi */}
             <Card className={`border-2 ${config.borderColor} bg-white shadow-sm`}>
               <CardHeader className={`border-b ${config.bgColor} py-4`}>
-                <CardTitle className={`flex items-center gap-2 text-sm font-black ${config.color}`}>
+                <CardTitle className={`flex items-center gap-2 text-sm font-bold ${config.color}`}>
                   <Lightbulb className="h-4 w-4" />
                   Rekomendasi Strategi
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <h3 className="text-lg font-black text-slate-800">{config.recommendation.title}</h3>
+                <h3 className="text-lg font-bold text-slate-800">{config.recommendation.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{config.recommendation.description}</p>
                 <div className="mt-4">
                   <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase text-slate-400">
@@ -538,7 +539,7 @@ export default function SegmentDetailPage({
             {/* Tabel Donatur */}
             <Card className="border-2 bg-white shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 py-4">
-                <CardTitle className="text-sm font-black text-slate-700">
+                <CardTitle className="text-sm font-bold text-slate-700">
                   Daftar Donatur ({totalDonatur.toLocaleString()})
                 </CardTitle>
                 <DropdownMenu>
@@ -606,7 +607,7 @@ export default function SegmentDetailPage({
                   {showAdvanced && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                       <div>
-                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Donasi Min (Rp)</label>
+                        <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Minimum Donasi (Rp)</label>
                         <input
                           type="number"
                           placeholder="e.g. 1000000"
@@ -694,21 +695,21 @@ export default function SegmentDetailPage({
                                 onChange={toggleSelectAll}
                               />
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('nama_lengkap')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('nama_lengkap')}>
                               <span className="inline-flex items-center gap-1">Nama <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500">Tipe</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500">Kontak WA</th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('recency')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500">Tipe</th>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500">Kontak WA</th>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('recency')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Terakhir (hari) <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('frequency')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('frequency')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Frekuensi <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('monetary')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('monetary')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Total Donasi <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
-                            <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('rfm_score')}>
+                            <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right cursor-pointer hover:text-emerald-600 select-none" onClick={() => handleSort('rfm_score')}>
                               <span className="inline-flex items-center gap-1 justify-end w-full">Skor <ArrowUpDown className="h-3 w-3" /></span>
                             </th>
                           </tr>
@@ -768,16 +769,16 @@ export default function SegmentDetailPage({
                                       {formatPhoneDisplay(wa)}
                                     </a>
                                   ) : (
-                                    <span className="text-[11px] text-slate-300 italic">tidak tersedia</span>
+                                    <span className="text-[11px] text-slate-300">-</span>
                                   )}
                                 </td>
                                 <td className="px-4 py-3 text-right text-slate-600">{d.recency.toLocaleString()}</td>
                                 <td className="px-4 py-3 text-right text-slate-600">{d.frequency}x</td>
                                 <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatRupiah(d.monetary)}</td>
                                 <td className="px-4 py-3 text-right">
-                                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${config.bgColor} ${config.color}`}>
+                                  <Badge size="sm" className={`${config.bgColor} ${config.color}`}>
                                     {d.rfm_score}
-                                  </span>
+                                  </Badge>
                                 </td>
                               </tr>
                             )

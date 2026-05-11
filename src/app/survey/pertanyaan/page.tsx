@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   Table,
   TableBody,
@@ -41,7 +42,7 @@ export default function KelolaPertanyaanPage() {
   // Form State untuk Pertanyaan Baru
   const [newQuestion, setNewQuestion] = useState({
     kode_pertanyaan: '',
-    grup_pertanyaan: 'Ekonomi',
+    grup_pertanyaan: 'DATA KELUARGA',
     teks_pertanyaan: '',
   })
 
@@ -178,10 +179,12 @@ export default function KelolaPertanyaanPage() {
                       })
                     }
                   >
-                    <option value="Ekonomi">Ekonomi</option>
-                    <option value="Kesehatan">Kesehatan</option>
-                    <option value="Sosial">Sosial</option>
-                    <option value="Pendidikan">Pendidikan</option>
+                    <option value="DATA KELUARGA">DATA KELUARGA</option>
+                    <option value="KONDISI RUMAH">KONDISI RUMAH</option>
+                    <option value="KEPEMILIKAN BARANG">KEPEMILIKAN BARANG</option>
+                    <option value="KESEHATAN KELUARGA">KESEHATAN KELUARGA</option>
+                    <option value="TANGGUNGAN KEBUTUHAN HIDUP">TANGGUNGAN KEBUTUHAN HIDUP</option>
+                    <option value="INDIKATOR KEIMANAN">INDIKATOR KEIMANAN</option>
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-1">
@@ -225,14 +228,14 @@ export default function KelolaPertanyaanPage() {
           </CardHeader>
           <CardContent className="p-0">
             <Table>
-              <TableHeader className="bg-slate-50">
+              <TableHeader className="bg-slate-50/80">
                 <TableRow>
-                  <TableHead className="w-[150px] font-bold text-left px-6">KODE</TableHead>
-                  <TableHead className="w-[200px] font-bold text-left">GRUP</TableHead>
-                  <TableHead className="min-w-[300px] font-bold text-left">
-                    INDIKATOR PENILAIAN
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-left pl-6">Kode</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[200px] text-left">Grup</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[300px] text-left">
+                    Indikator Penilaian
                   </TableHead>
-                  <TableHead className="w-[120px] text-center font-bold pr-6">AKSI</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[120px] text-center pr-6">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -244,11 +247,12 @@ export default function KelolaPertanyaanPage() {
                   </TableRow>
                 ) : filteredQuestions.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="h-24 text-center text-slate-500"
-                    >
-                      Belum ada data kriteria survey.
+                    <TableCell colSpan={4}>
+                      <EmptyState
+                        asTableRow={false}
+                        title="Belum ada data kriteria survey"
+                        description="Tambahkan pertanyaan baru untuk memulai penilaian kelayakan."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -257,7 +261,7 @@ export default function KelolaPertanyaanPage() {
                       key={q.sk_pertanyaan}
                       className="hover:bg-slate-50/50"
                     >
-                      <TableCell className="font-mono text-xs font-bold text-blue-600 px-6 text-left">
+                      <TableCell className="font-mono text-xs font-bold text-blue-600 pl-6 text-left">
                         {q.kode_pertanyaan}
                       </TableCell>
                       <TableCell className="text-left">

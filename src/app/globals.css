@@ -3,9 +3,17 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
-/* 1. GLOBAL VARIABLES */
+/* 1. GLOBAL VARIABLES & DESIGN TOKENS */
 :root {
   --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+  /* DESIGN TOKENS — Module Accents */
+  --color-donatur: #059669; /* emerald-600 */
+  --color-mustahik: #4f46e5; /* indigo-600 */
+  --color-ambulan: #e11d48; /* rose-600 */
+  --color-destructive-text: #e11d48; /* rose-600 */
+  --color-destructive-bg: #fdf2f8; /* rose-50 */
+  --color-destructive-border: #fbcfe8; /* rose-200 */
   
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

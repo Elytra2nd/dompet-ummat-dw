@@ -328,7 +328,7 @@ export function AddMustahikFormContent() {
               <ClipboardList className="h-8 w-8 text-emerald-600" /> {isEditing ? 'Update Data Mustahik' : 'Registrasi Entitas Baru'}
             </h1>
             <p className="text-sm font-medium text-slate-500">
-              Sistem Informasi Geospasial (SOLAP Ready)
+              Pemetaan Lokasi
             </p>
           </div>
         </div>
@@ -579,7 +579,7 @@ export function AddMustahikFormContent() {
                         <div>
                           <p className="text-[10px] font-black text-rose-600 uppercase">Geolokasi</p>
                           <p className="font-mono text-sm font-bold text-slate-700 mt-1">{formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}</p>
-                          <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100 mt-2 text-[10px]">SPATIAL LOCKED</Badge>
+                          <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100 mt-2 text-[10px]">LOKASI TERKUNCI</Badge>
                         </div>
                       </div>
                     )}
@@ -623,8 +623,8 @@ export function AddMustahikFormContent() {
                 disabled={loading || !isGeoLocked}
                 className="font-bold bg-emerald-600 hover:bg-emerald-700 h-11 px-8 min-w-[180px] shadow-lg shadow-emerald-200"
               >
-                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />} 
-                {isEditing ? 'Simpan Perubahan' : 'Push to Warehouse'}
+                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                {isEditing ? 'Simpan Perubahan' : 'Simpan ke Sistem'}
               </Button>
             )}
           </div>

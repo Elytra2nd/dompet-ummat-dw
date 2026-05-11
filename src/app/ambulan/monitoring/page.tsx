@@ -5,14 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
+import { EmptyState } from '@/components/ui/empty-state'
+import {
   Activity, MapPin, User, Truck, Clock, Search, ArrowLeft,
   AlertCircle, Filter, RefreshCw, Plus, Edit3, Trash2, X, Save, Eye,
   ChevronLeft, ChevronRight,
   Loader2
 } from 'lucide-react'
-import { 
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -150,7 +151,7 @@ export default function MonitoringAmbulanPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans text-slate-900">
       {/* HEADER BAR */}
-      <div className="mb-6 border-b bg-white shadow-sm">
+      <div className="mb-8 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-slate-500 font-semibold hover:bg-slate-50">
             <Link href="/ambulan"><ArrowLeft className="mr-2 h-4 w-4" /> Dashboard Ambulan</Link>
@@ -312,7 +313,7 @@ export default function MonitoringAmbulanPage() {
                   currentItems.map((item) => (
                     <TableRow key={item.sk_fakta_layanan_ambulan} className="hover:bg-slate-50/80 transition-colors border-b last:border-0 group">
                       <TableCell className="px-6 text-left">
-                        <Badge variant="outline" className="mb-1 font-semibold text-[9px] bg-rose-50 text-rose-700 border-rose-200 px-2 py-0.5 rounded-lg">
+                        <Badge size="sm" variant="outline" className="mb-1 bg-rose-50 text-rose-700 border-rose-200">
                           {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
                         </Badge>
                         <p className="text-[10px] font-mono font-semibold text-slate-400 tracking-tighter uppercase">{item.id_transaksi}</p>
@@ -361,7 +362,15 @@ export default function MonitoringAmbulanPage() {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-slate-400 font-medium italic uppercase text-xs">Belum ada data fakta ditemukan.</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <EmptyState
+                        asTableRow={false}
+                        title="Belum ada layanan ambulan"
+                        description="Tambahkan data layanan baru untuk memulai monitoring."
+                      />
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -372,13 +381,18 @@ export default function MonitoringAmbulanPage() {
             {loading && data.length === 0 ? (
               <div className="py-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" /></div>
             ) : currentItems.length === 0 ? (
-              <div className="py-10 text-center text-slate-400 italic text-sm">Belum ada data.</div>
+              <div className="p-8">
+                <EmptyState
+                  title="Belum ada layanan ambulan"
+                  description="Tambahkan data layanan baru untuk memulai monitoring."
+                />
+              </div>
             ) : (
               currentItems.map((item) => (
                 <div key={item.sk_fakta_layanan_ambulan} className="p-4 hover:bg-slate-50">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <Badge className="mb-1 bg-rose-50 text-rose-700 border-none text-[9px] font-bold uppercase rounded-sm">
+                      <Badge size="sm" className="mb-1 bg-rose-50 text-rose-700 border-none">
                         {item.kategori_layanan?.replace(/_/g, ' ') || 'Umum'}
                       </Badge>
                       <p className="font-bold text-slate-900 truncate uppercase">{item.dim_pasien_ambulan?.nama_pasien || 'PASIEN UMUM'}</p>
@@ -390,12 +404,12 @@ export default function MonitoringAmbulanPage() {
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Link href={`/ambulan/${item.sk_fakta_layanan_ambulan}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail"><Eye size={15} /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail"><Eye size={16} /></Button>
                       </Link>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" onClick={() => startEdit(item)}><Edit3 size={15} /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" aria-label="Edit layanan" onClick={() => startEdit(item)}><Edit3 size={16} /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus data"><Trash2 size={15} /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus data"><Trash2 size={16} /></Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>

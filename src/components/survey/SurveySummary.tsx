@@ -92,7 +92,7 @@ export default function SurveySummary({ score, status }: SurveySummaryProps) {
             {status}
           </Badge>
 
-          <div className="w-full space-y-1.5">
+          <div className="w-full space-y-2">
             <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
               <span>Kelayakan</span>
               <span>{score.toFixed(0)}%</span>

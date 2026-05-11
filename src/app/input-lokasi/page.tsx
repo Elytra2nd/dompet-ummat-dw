@@ -28,7 +28,7 @@ export default function InputLokasiPage() {
   }, [])
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-8 font-sans">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 md:p-8 font-sans">
       <header className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           Input Geospasial <span className="text-emerald-600">Dompet Ummat</span>

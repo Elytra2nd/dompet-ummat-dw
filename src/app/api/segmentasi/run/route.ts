@@ -136,7 +136,7 @@ export async function POST() {
     const msg = error instanceof Error ? error.message : String(error)
     console.error('SEGMENTASI_RUN_ERROR:', msg)
     return NextResponse.json(
-      { error: 'Gagal menjalankan analisis segmentasi' },
+      { error: 'Gagal menganalisis data donatur' },
       { status: 500 }
     )
   } finally {

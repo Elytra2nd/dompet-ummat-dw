@@ -2,12 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  ArrowLeft, Truck, User, MapPin, Clock, 
-  Calendar, ShieldCheck, Printer, Activity 
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import {
+  ArrowLeft, Truck, User, MapPin, Clock,
+  Calendar, ShieldCheck, CheckCircle2, Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -34,148 +43,183 @@ export default function DetailLayananAmbulanPage() {
   }, [id])
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen font-black text-slate-400 animate-pulse uppercase tracking-widest">
-      Parsing Fact Record...
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-rose-500" />
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Memuat data layanan...</p>
+      </div>
     </div>
   )
 
-  if (!data) return <div className="p-10 text-center font-bold">Data Not Found</div>
-
-  return (
-    <div className="p-4 md:p-8 space-y-6 bg-slate-50 min-h-screen font-sans">
-      <div className="flex justify-between items-center">
-        <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white border-2 border-transparent hover:border-slate-200">
-          <ArrowLeft size={16} /> Kembali ke Monitoring
-        </Button>
-        <Button onClick={() => window.print()} className="bg-slate-800 text-white font-bold uppercase text-[10px] tracking-widest rounded-xl px-6 hover:bg-slate-700">
-          <Printer size={14} className="mr-2" /> Print Audit Log
+  if (!data) return (
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="text-center">
+        <p className="text-sm font-bold text-slate-700">Data layanan tidak ditemukan</p>
+        <Button variant="outline" size="sm" onClick={() => router.back()} className="mt-4">
+          <ArrowLeft size={14} className="mr-1.5" /> Kembali
         </Button>
       </div>
+    </div>
+  )
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* KOLOM KIRI: STATUS & INFO UTAMA */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="border border-slate-200 rounded-2xl shadow-lg bg-white">
-            <CardHeader className="bg-rose-600 text-white border-b border-rose-700 rounded-t-2xl">
-              <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <Activity size={16} /> Detail Transaksi
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="text-center pb-4 border-b-2 border-dashed border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase">ID Layanan</p>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tighter">{data.id_transaksi}</h2>
-                <Badge className="mt-2 bg-emerald-100 text-emerald-700 border-none uppercase font-black text-[9px]">Status: Finalized</Badge>
-              </div>
+  return (
+    <div className="min-h-screen bg-slate-50/50 font-sans">
+      {/* TOP NAV BAR */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 space-y-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="-ml-2 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-900"
+          >
+            <ArrowLeft size={14} className="mr-1.5" /> Kembali ke Daftar
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/ambulan">Layanan Ambulan</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="font-semibold text-slate-700">{data.id_transaksi}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 bg-slate-100 flex items-center justify-center rounded-xl">
-                    <Calendar size={18} className="text-slate-600" />
-                  </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        {/* PROFILE HEADER */}
+        <Card className="border border-slate-200 shadow-sm overflow-hidden bg-white">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row gap-6">
+              {/* Info */}
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase">Tanggal Layanan</p>
-                    <p className="text-sm font-bold text-slate-800">{formatTanggal(data.sk_tanggal_layanan)}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 bg-slate-100 flex items-center justify-center rounded-xl">
-                    <Clock size={18} className="text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase">Waktu / Shift</p>
-                    <p className="text-sm font-bold text-slate-800 uppercase">{data.jam?.replace(/__/g, ' ')}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-slate-700 rounded-2xl bg-slate-800 text-white shadow-sm">
-            <CardContent className="pt-6">
-               <div className="flex items-start gap-3">
-                  <ShieldCheck className="text-emerald-400 shrink-0" />
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-emerald-500">Warehouse Integrity</p>
-                    <p className="text-[11px] font-medium text-slate-300 leading-relaxed mt-1 italic">
-                      Data ini bersifat persisten. Perubahan pada dimensi master tidak akan mengubah ID Transaksi ini guna menjaga akurasi laporan historis.
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                      {data.id_transaksi}
+                    </h1>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">
+                      ID Layanan Ambulan
                     </p>
                   </div>
-               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* KOLOM KANAN: RINCIAN DIMENSI */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CARD PASIEN */}
-            <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm">
-              <CardHeader className="border-b border-slate-200 py-3 bg-slate-50 rounded-t-2xl">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <User size={14} className="text-blue-600" /> Dimensi Pasien
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-3">
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Nama Pasien</p>
-                  <p className="font-black text-slate-800 uppercase">{data.dim_pasien_ambulan?.nama_pasien || 'UMUM'}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Kondisi Ekonomi</p>
-                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 rounded-lg font-black text-[9px] uppercase">
-                    {data.dim_pasien_ambulan?.status_ekonomi || 'NON-SUBSIDI'}
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 whitespace-nowrap">
+                    <CheckCircle2 size={12} className="mr-1" /> Finalized
                   </Badge>
                 </div>
-              </CardContent>
-            </Card>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Catatan Data Warehouse: Data ini bersifat persisten. Perubahan pada dimensi master tidak akan mengubah ID Transaksi ini guna menjaga akurasi laporan historis.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* CARD LOKASI */}
-            <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm">
-              <CardHeader className="border-b border-slate-200 py-3 bg-slate-50 rounded-t-2xl">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <MapPin size={14} className="text-rose-600" /> Dimensi Lokasi
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-3">
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Wilayah Tujuan</p>
-                  <p className="font-black text-slate-800 uppercase">{data.dim_lokasi?.kabupaten_kota || 'PONTIANAK'}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Area Spesifik</p>
-                  <p className="text-xs font-bold text-slate-600 uppercase">{data.dim_lokasi?.kecamatan || 'Kecamatan Terkait'}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* CARD LOGISTIK UNIT */}
-          <Card className="border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
-            <CardHeader className="bg-slate-800 text-white rounded-t-2xl">
-               <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <Truck size={14} className="text-rose-400" /> Logistik & Operasional Armada
-               </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-               <div className="grid grid-cols-1 md:grid-cols-3">
-                  <div className="p-6 border-b md:border-b-0 md:border-r border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase">Unit Armada</p>
-                    <p className="text-sm font-black text-slate-800 mt-1 uppercase">{data.armada?.split('__')[0].replace(/_/g, ' ')}</p>
-                  </div>
-                  <div className="p-6 border-b md:border-b-0 md:border-r border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase">Kategori Layanan</p>
-                    <p className="text-sm font-black text-rose-600 mt-1 uppercase">{data.kategori_layanan?.replace(/_/g, ' ')}</p>
-                  </div>
-                  <div className="p-6">
-                    <p className="text-[9px] font-black text-slate-400 uppercase">Nomor Plat (Metadata)</p>
-                    <p className="text-sm font-bold text-slate-800 mt-1">{data.armada?.split('__')[1] || '-'}</p>
-                  </div>
-               </div>
+        {/* QUICK STATS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Layanan</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">{formatTanggal(data.sk_tanggal_layanan)}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Waktu / Shift</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 uppercase">{data.jam?.replace(/__/g, ' ')}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 uppercase">{data.kategori_layanan?.replace(/_/g, ' ')}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Status</p>
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                Aktif
+              </Badge>
             </CardContent>
           </Card>
         </div>
+
+        {/* INFO CARDS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* CARD PASIEN */}
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardHeader className="border-b border-slate-200 bg-slate-50/50 py-4 px-6">
+              <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+                <div className="p-1.5 bg-blue-50 rounded-lg"><User size={14} className="text-blue-600" /></div>
+                Dimensi Pasien
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Pasien</p>
+                <p className="text-base font-bold text-slate-900">{data.dim_pasien_ambulan?.nama_pasien || 'UMUM'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Kondisi Ekonomi</p>
+                <Badge size="sm" variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  {data.dim_pasien_ambulan?.status_ekonomi || 'NON-SUBSIDI'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CARD LOKASI */}
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardHeader className="border-b border-slate-200 bg-slate-50/50 py-4 px-6">
+              <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+                <div className="p-1.5 bg-rose-50 rounded-lg"><MapPin size={14} className="text-rose-600" /></div>
+                Dimensi Lokasi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Wilayah Tujuan</p>
+                <p className="text-base font-bold text-slate-900">{data.dim_lokasi?.kabupaten_kota || 'PONTIANAK'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Area Spesifik</p>
+                <p className="text-sm font-semibold text-slate-700">{data.dim_lokasi?.kecamatan || 'Kecamatan Terkait'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* CARD LOGISTIK UNIT */}
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6">
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+              <div className="p-1.5 bg-rose-50 rounded-lg"><Truck size={14} className="text-rose-600" /></div>
+              Logistik & Operasional Armada
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+              <div className="p-6 hover:bg-slate-50 transition-colors">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unit Armada</p>
+                <p className="text-base font-bold text-slate-900 mt-2 uppercase">{data.armada?.split('__')[0].replace(/_/g, ' ')}</p>
+              </div>
+              <div className="p-6 hover:bg-slate-50 transition-colors">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Kategori Layanan</p>
+                <p className="text-base font-bold text-slate-900 mt-2 uppercase">{data.kategori_layanan?.replace(/_/g, ' ')}</p>
+              </div>
+              <div className="p-6 hover:bg-slate-50 transition-colors">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor Plat (Metadata)</p>
+                <p className="text-base font-semibold text-slate-700 mt-2 font-mono bg-slate-100 w-max px-2 py-1 rounded-md">{data.armada?.split('__')[1] || '-'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

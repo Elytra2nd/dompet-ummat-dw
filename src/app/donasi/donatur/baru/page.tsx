@@ -74,7 +74,7 @@ function AddDonaturFormContent() {
       const result = await res.json()
 
       if (res.ok) {
-        toast.success(isEditing ? 'Versi data terbaru disimpan (SCD Type 2)' : 'Donatur baru terdaftar')
+        toast.success(isEditing ? 'Data berhasil diperbarui' : 'Donatur baru terdaftar')
         router.push('/donasi/donatur')
       } else {
         toast.error(result.error || 'Gagal menyimpan data')
@@ -98,7 +98,7 @@ function AddDonaturFormContent() {
               <Heart className="h-8 w-8 text-indigo-600" /> {isEditing ? 'Update Profil' : 'Registrasi Baru'} <span className="text-indigo-600">Donatur</span>
             </h1>
             <p className="text-sm font-medium text-slate-500">
-              {isEditing ? 'Pembaruan ini menggunakan SCD Type 2, riwayat lama tetap tersimpan.' : 'Masukkan entitas donatur ke dalam sistem Data Warehouse.'}
+              {isEditing ? 'Riwayat perubahan akan tersimpan otomatis.' : 'Daftarkan donatur baru ke dalam sistem.'}
             </p>
           </div>
         </div>
@@ -114,15 +114,15 @@ function AddDonaturFormContent() {
           <CardContent className="pt-6">
             <form onSubmit={handleSave} className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-xs font-bold uppercase text-slate-500">Nama Lengkap / Instansi</Label>
-                <Input required className="h-12 font-bold text-lg" value={formData.nama_donatur} onChange={(e) => setFormData({...formData, nama_donatur: e.target.value})} />
+                <Label className="text-xs font-bold uppercase text-slate-600">Nama Lengkap / Instansi</Label>
+                <Input required className="h-11" value={formData.nama_donatur} onChange={(e) => setFormData({...formData, nama_donatur: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase text-slate-500">No. WhatsApp / Kontak</Label>
+                <Label className="text-xs font-bold uppercase text-slate-600">No. WhatsApp / Kontak</Label>
                 <Input required className="h-10" value={formData.no_hp} onChange={(e) => setFormData({...formData, no_hp: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase text-slate-500">Kategori</Label>
+                <Label className="text-xs font-bold uppercase text-slate-600">Kategori</Label>
                 <select 
                   className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500"
                   value={formData.kategori_donatur}
@@ -134,17 +134,17 @@ function AddDonaturFormContent() {
                 </select>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-xs font-bold uppercase text-slate-500">Instansi / Perusahaan (Opsional)</Label>
+                <Label className="text-xs font-bold uppercase text-slate-600">Instansi / Perusahaan (Opsional)</Label>
                 <Input className="h-10" placeholder="Contoh: PT. ABC / Komunitas XYZ" value={formData.perusahaan} onChange={(e) => setFormData({...formData, perusahaan: e.target.value})} />
               </div>
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-xs font-bold uppercase text-slate-500">Alamat Lengkap</Label>
+                <Label className="text-xs font-bold uppercase text-slate-600">Alamat Lengkap</Label>
                 <Input className="h-10" value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} />
               </div>
               <div className="md:col-span-2 pt-4">
-                <Button type="submit" disabled={loading} className="w-full h-14 bg-indigo-600 font-black text-lg uppercase tracking-wider hover:bg-indigo-700 shadow-lg">
-                  {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Save className="mr-2 h-5 w-5" />}
-                  {isEditing ? 'Simpan Perubahan' : 'Push to Warehouse'}
+                <Button type="submit" disabled={loading} className="w-full h-11 bg-indigo-600 font-bold text-sm hover:bg-indigo-700">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {isEditing ? 'Simpan Perubahan' : 'Simpan Donatur'}
                 </Button>
               </div>
             </form>

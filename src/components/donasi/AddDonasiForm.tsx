@@ -89,7 +89,7 @@ export default function AddDonasiForm() {
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 uppercase">
+              <Label className="text-xs font-bold text-slate-600 uppercase">
                 Cari Donatur
               </Label>
               <DonaturSelector
@@ -100,7 +100,7 @@ export default function AddDonasiForm() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase">
+                <Label className="text-xs font-bold text-slate-600 uppercase">
                   Jenis Donasi
                 </Label>
                 <select
@@ -118,7 +118,7 @@ export default function AddDonasiForm() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 uppercase">
+                <Label className="text-xs font-bold text-slate-600 uppercase">
                   Metode Pembayaran
                 </Label>
                 <select
@@ -141,7 +141,7 @@ export default function AddDonasiForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+              <Label className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
                 <Landmark className="h-3 w-3" /> Bank Tujuan / Kas Penerimaan
               </Label>
               <select
@@ -163,7 +163,7 @@ export default function AddDonasiForm() {
 
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="pt-6">
-            <Label className="text-xs font-bold text-slate-500 uppercase">
+            <Label className="text-xs font-bold text-slate-600 uppercase">
               Keterangan / Doa Donatur (Opsional)
             </Label>
             <Textarea
@@ -212,12 +212,12 @@ export default function AddDonasiForm() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-16 w-full bg-indigo-600 text-lg font-black shadow-lg shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95"
+                className="h-11 w-full bg-indigo-600 text-sm font-bold shadow-lg shadow-indigo-100 transition-all hover:bg-indigo-700 active:scale-95"
               >
                 {loading ? (
-                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Save className="mr-2 h-6 w-6" />
+                  <Save className="mr-2 h-4 w-4" />
                 )}
                 CATAT DONASI
               </Button>

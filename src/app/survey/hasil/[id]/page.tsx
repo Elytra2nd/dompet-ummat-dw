@@ -10,6 +10,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -132,12 +140,25 @@ export default function SurveyDetailPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-16 font-sans">
       {/* ── Back Navigation (Full Width) ── */}
-      <div className="bg-white border-b px-4 sm:px-8 py-3">
+      <div className="bg-white border-b px-4 sm:px-8 py-3 space-y-3">
         <Button variant="ghost" size="sm" asChild className="text-slate-500 font-bold px-0 hover:bg-transparent hover:text-slate-800">
           <Link href="/survey/hasil">
             <ArrowLeft className="mr-1.5 h-4 w-4" /> Kembali ke Riwayat
           </Link>
         </Button>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/survey/hasil">Survey Kelayakan</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{data?.survey.no_register || 'Detail'}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       <div className="mx-auto max-w-4xl px-4 sm:px-8 py-8 space-y-6">

@@ -183,7 +183,7 @@ export default function ReportsPage() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-white">
       <RefreshCw className="h-10 w-10 text-emerald-600 animate-spin" />
-      <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">Mempersiapkan Insight Warehouse...</p>
+      <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">Memuat data laporan...</p>
     </div>
   )
 
@@ -386,10 +386,10 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
             <Card className="bg-emerald-900 text-white border-none shadow-xl rounded-xl">
-               <CardHeader><CardTitle className="text-xs font-semibold uppercase text-emerald-400">Warehouse Insight</CardTitle></CardHeader>
+               <CardHeader><CardTitle className="text-xs font-semibold uppercase text-emerald-400">Ringkasan Data</CardTitle></CardHeader>
                <CardContent className="space-y-5">
                   <div>
-                    <p className="text-[9px] font-semibold uppercase text-emerald-500">SCD Tracking</p>
+                    <p className="text-[9px] font-semibold uppercase text-emerald-500">Riwayat Perubahan</p>
                     <p className="text-2xl font-bold">{donaturData?.insights.total_historical_changes} <span className="text-sm font-normal text-emerald-300">Histori</span></p>
                   </div>
                   <div>
@@ -607,7 +607,7 @@ export default function ReportsPage() {
                       <div className="text-center w-36">
                         <p className="text-[9px] text-slate-400 mb-8">Mengetahui,</p>
                         <div className="border-b border-slate-400 mb-1" />
-                        <p className="text-[8px] font-bold text-slate-600 uppercase">Kepala Divisi BIDA</p>
+                        <p className="text-xs font-bold text-slate-600 uppercase">Kepala Divisi BIDA</p>
                       </div>
                     </div>
                   </div>

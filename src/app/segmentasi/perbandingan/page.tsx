@@ -3,6 +3,14 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
   BarChart3,
   Loader2,
   ArrowLeft,
@@ -150,11 +158,11 @@ export default function PerbandinganPage() {
 
   const PERBANDINGAN_SCHEMA: ExportColumn[] = [
     { header: 'Segmen', key: 'label', width: 20 },
-    { header: 'Donatur', key: 'count', width: 12, format: 'number' },
-    { header: '%', key: 'percentage', width: 8, format: 'number' },
-    { header: 'Avg Terakhir (hr)', key: 'avg_recency', width: 18, format: 'number' },
-    { header: 'Avg Frekuensi', key: 'avg_frequency', width: 16, format: 'number' },
-    { header: 'Avg Donasi (Rp)', key: 'avg_monetary', width: 20, format: 'rupiah' },
+    { header: 'Jumlah Donatur', key: 'count', width: 12, format: 'number' },
+    { header: 'Persentase', key: 'percentage', width: 8, format: 'number' },
+    { header: 'Hari Terakhir Donasi', key: 'avg_recency', width: 18, format: 'number' },
+    { header: 'Frekuensi Donasi', key: 'avg_frequency', width: 16, format: 'number' },
+    { header: 'Rata-rata Donasi (Rp)', key: 'avg_monetary', width: 20, format: 'rupiah' },
     { header: 'Total Kontribusi (Rp)', key: 'total_monetary', width: 24, format: 'rupiah' },
   ]
 
@@ -172,7 +180,7 @@ export default function PerbandinganPage() {
     try {
       const blob = await exportExcel({
         title: 'Perbandingan Segmen Donatur',
-        subtitle: 'Ringkasan RFM & kontribusi per segmen',
+        subtitle: 'Ringkasan profil dan kontribusi per segmen',
         columns: PERBANDINGAN_SCHEMA,
         rows: exportRows,
       })
@@ -187,7 +195,7 @@ export default function PerbandinganPage() {
     try {
       const blob = exportPDF({
         title: 'Perbandingan Segmen Donatur',
-        subtitle: 'Ringkasan RFM & kontribusi per segmen — BIDA Analytics',
+        subtitle: 'Ringkasan profil dan kontribusi per segmen — BIDA Analytics',
         columns: PERBANDINGAN_SCHEMA,
         rows: exportRows,
         landscape: true,
@@ -211,11 +219,11 @@ export default function PerbandinganPage() {
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans">
       {/* Header */}
       <div className="mb-8 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-8 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/segmentasi" className="mb-4 inline-flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors">
             <ArrowLeft className="h-3 w-3" /> Kembali ke Overview
           </Link>
-          <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-900">
+          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
             <BarChart3 className="h-8 w-8 text-emerald-600" />
             Perbandingan <span className="text-emerald-600">Segmen</span>
           </h1>
@@ -225,13 +233,13 @@ export default function PerbandinganPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-6 px-8">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
         {/* Bar Charts */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Jumlah Donatur */}
           <Card className="border-2 bg-white shadow-sm">
             <CardHeader className="border-b bg-slate-50/50 py-4">
-              <CardTitle className="flex items-center gap-2 text-sm font-black text-slate-700">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-700">
                 <TrendingUp className="h-4 w-4 text-emerald-500" />
                 Jumlah Donatur per Segmen
               </CardTitle>
@@ -261,7 +269,7 @@ export default function PerbandinganPage() {
           {/* Kontribusi Donasi */}
           <Card className="border-2 bg-white shadow-sm">
             <CardHeader className="border-b bg-slate-50/50 py-4">
-              <CardTitle className="flex items-center gap-2 text-sm font-black text-slate-700">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-700">
                 <BarChart3 className="h-4 w-4 text-emerald-500" />
                 Total Kontribusi per Segmen
               </CardTitle>
@@ -292,7 +300,7 @@ export default function PerbandinganPage() {
         {/* Tabel Ringkasan */}
         <Card className="border-2 bg-white shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 py-4">
-            <CardTitle className="text-sm font-black text-slate-700">Ringkasan Semua Segmen</CardTitle>
+            <CardTitle className="text-sm font-bold text-slate-700">Ringkasan Semua Segmen</CardTitle>
             <div className="flex gap-2">
               <button
                 onClick={handleExportExcel}
@@ -308,49 +316,47 @@ export default function PerbandinganPage() {
               </button>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b bg-slate-50 text-left">
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500">Segmen</th>
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Donatur</th>
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">%</th>
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Avg Terakhir</th>
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Avg Frekuensi</th>
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Avg Donasi</th>
-                    <th className="px-4 py-3 font-bold uppercase text-slate-500 text-right">Total Kontribusi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {segments.map((s, i) => (
-                    <tr key={s.key} className={`border-b transition-colors hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-25'}`}>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SEGMENT_COLORS[s.key] }} />
-                          <Link href={`/segmentasi/${s.key}`} className="font-bold text-slate-800 hover:text-emerald-600 transition-colors">
-                            {SEGMENT_CONFIGS[s.key]?.label || s.label}
-                          </Link>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right font-black text-slate-800">{s.count.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right text-slate-500">{s.percentage}%</td>
-                      <td className="px-4 py-3 text-right text-slate-600">{s.avg_recency} hari</td>
-                      <td className="px-4 py-3 text-right text-slate-600">{s.avg_frequency}x</td>
-                      <td className="px-4 py-3 text-right text-slate-600">{formatRupiah(s.avg_monetary)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-slate-800">{formatRupiah(s.total_monetary)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-slate-50">
+                <TableRow className="hover:bg-slate-50">
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Segmen</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">Donatur</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">%</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">Avg Terakhir</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">Avg Frekuensi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">Avg Donasi</TableHead>
+                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right">Total Kontribusi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {segments.map((s) => (
+                  <TableRow key={s.key} className="hover:bg-slate-50 transition-colors">
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: SEGMENT_COLORS[s.key] }} />
+                        <Link href={`/segmentasi/${s.key}`} className="font-semibold text-slate-800 hover:text-emerald-600 transition-colors text-sm">
+                          {SEGMENT_CONFIGS[s.key]?.label || s.label}
+                        </Link>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right font-bold text-slate-800 tabular-nums">{s.count.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-slate-500 tabular-nums">{s.percentage}%</TableCell>
+                    <TableCell className="text-right text-slate-600 tabular-nums">{s.avg_recency} hari</TableCell>
+                    <TableCell className="text-right text-slate-600 tabular-nums">{s.avg_frequency}x</TableCell>
+                    <TableCell className="text-right text-slate-600 tabular-nums">{formatRupiah(s.avg_monetary)}</TableCell>
+                    <TableCell className="text-right font-semibold text-slate-800 tabular-nums">{formatRupiah(s.total_monetary)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
         {/* Insight Box */}
-        <Card className="border-2 border-emerald-200 bg-emerald-50/50 shadow-sm">
+        <Card className="border border-emerald-200 bg-emerald-50/50 shadow-sm">
           <CardHeader className="border-b border-emerald-100 py-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-black text-emerald-800">
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-emerald-800">
               <Info className="h-4 w-4" />
               Insight Otomatis
             </CardTitle>

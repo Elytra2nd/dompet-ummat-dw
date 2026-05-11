@@ -162,12 +162,12 @@ export default function DashboardPage() {
         {/* Modul operasional + audit log */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           <div className="lg:col-span-2 space-y-4 md:space-y-6">
-            <h2 className="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2">
+            <h2 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
               <ShieldCheck className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" /> Modul Operasional
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Link href="/donasi/donatur">
-                <Card className="hover:border-indigo-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
+                <Card className="hover:border-indigo-400 transition-all group cursor-pointer border shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
                     <div className="flex items-start justify-between">
                       <div className="p-3 bg-indigo-50 rounded-xl group-hover:bg-indigo-600 transition-colors">
@@ -175,15 +175,15 @@ export default function DashboardPage() {
                       </div>
                       <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-indigo-600 transition-all group-hover:translate-x-1" />
                     </div>
-                    <h3 className="mt-4 font-black text-lg text-slate-900">Database Donatur</h3>
+                    <h3 className="mt-4 font-bold text-base text-slate-900">Database Donatur</h3>
                     <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
-                      Manajemen profil Muzakki melalui skema tabel dimensi.
+                      Kelola data profil dan riwayat donasi setiap donatur.
                     </p>
                   </CardContent>
                 </Card>
               </Link>
               <Link href="/mustahik/spasial">
-                <Card className="hover:border-red-400 transition-all group cursor-pointer border-2 shadow-none bg-white h-full">
+                <Card className="hover:border-red-400 transition-all group cursor-pointer border shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
                     <div className="flex items-start justify-between">
                       <div className="p-3 bg-red-50 rounded-xl group-hover:bg-red-600 transition-colors">
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                       </div>
                       <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-red-600 transition-all group-hover:translate-x-1" />
                     </div>
-                    <h3 className="mt-4 font-black text-lg text-slate-900">Pemetaan Spasial</h3>
+                    <h3 className="mt-4 font-bold text-base text-slate-900">Pemetaan Spasial</h3>
                     <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed mt-1">
                       Analisis sebaran mustahik berbasis koordinat GIS.
                     </p>
@@ -203,7 +203,7 @@ export default function DashboardPage() {
 
           <Card className="border shadow-sm bg-white overflow-hidden flex flex-col h-full rounded-xl">
             <CardHeader className="bg-slate-50/50 border-b py-4">
-              <CardTitle className="text-xs md:text-sm font-black flex items-center gap-2 text-slate-700 uppercase tracking-wider">
+              <CardTitle className="text-xs md:text-sm font-bold flex items-center gap-2 text-slate-700 uppercase tracking-wider">
                 <TrendingUp className="h-4 w-4 text-emerald-500" /> Aktivitas Terkini
               </CardTitle>
             </CardHeader>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
               </div>
             </CardContent>
             <div className="p-3 bg-slate-50/30 border-t text-center mt-auto">
-              <Button variant="ghost" asChild className="w-full text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-all">
+              <Button variant="ghost" asChild className="w-full text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-all">
                 <Link href="/users">Audit Full Logs</Link>
               </Button>
             </div>

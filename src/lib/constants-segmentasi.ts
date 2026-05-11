@@ -24,7 +24,7 @@ export const SEGMENT_CONFIGS: Record<string, SegmentConfig> = {
   champions: {
     key: 'champions',
     label: 'Donatur Utama',
-    description: 'Baru berdonasi, sering, dan nominal besar. Aset terpenting organisasi.',
+    description: 'Lama berdonasi, sering, dan nominal besar. Aset terpenting organisasi.',
     color: 'text-emerald-700',
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-200',

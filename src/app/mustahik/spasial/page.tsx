@@ -49,7 +49,7 @@ const SpatialMustahikMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[500px] w-full items-center justify-center rounded-2xl border-2 border-dashed bg-white text-slate-400">
+      <div className="flex h-[500px] w-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white text-slate-400">
         <div className="text-center">
           <div className="mb-4 h-10 w-10 animate-spin rounded-full border-b-2 border-indigo-600 mx-auto" />
           <p className="font-bold uppercase tracking-tighter text-xs">Menginisialisasi Engine Spasial...</p>
