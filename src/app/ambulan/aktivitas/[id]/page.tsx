@@ -20,10 +20,9 @@ import {
   Calendar,
   Clock,
   DollarSign,
-  Printer,
   AlertCircle,
   FileText,
-  Activity
+  Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -51,7 +50,7 @@ export default function DetailAktivitasPage() {
         const detail = allData.recentLogs?.find(
           (item: any) => item.sk_fakta_aktivitas_ambulan.toString() === params.id
         )
-        
+
         if (detail) {
           setData(detail)
         } else {
@@ -71,165 +70,179 @@ export default function DetailAktivitasPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <Activity className="h-10 w-10 animate-pulse text-rose-500" />
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Memuat Dokumen Finansial...</p>
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-rose-500" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Memuat data aktivitas...</p>
+        </div>
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div className="p-10 text-center min-h-screen font-bold text-slate-500">
-        <p>Data Transaksi Tidak Ditemukan.</p>
-        <Button asChild variant="outline" className="mt-6 rounded-xl"><Link href="/ambulan/riwayat">Kembali ke Riwayat</Link></Button>
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="text-center">
+          <p className="text-sm font-bold text-slate-700">Data aktivitas tidak ditemukan</p>
+          <Button variant="outline" size="sm" onClick={() => router.back()} className="mt-4">
+            <ArrowLeft size={14} className="mr-1.5" /> Kembali
+          </Button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6 bg-slate-50/50 min-h-screen font-sans text-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* HEADER NAV */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" aria-label="Kembali" onClick={() => router.back()} className="rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-slate-100 transition-all">
-            <ArrowLeft size={18} className="text-slate-700" />
+    <div className="min-h-screen bg-slate-50/50 font-sans">
+      {/* TOP NAV BAR */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 space-y-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="-ml-2 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-900"
+          >
+            <ArrowLeft size={14} className="mr-1.5" /> Kembali ke Daftar
           </Button>
-          <div>
-            <h1 className="text-xl font-black uppercase tracking-tight text-slate-900">
-              Detail Transaksi <span className="text-rose-600">Aktivitas</span>
-            </h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-              ID: {data.id_transaksi}
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button variant="outline" onClick={() => window.print()} className="flex-1 md:flex-initial bg-white/80 backdrop-blur-sm uppercase text-[10px] font-bold tracking-widest h-10 px-6 hover:shadow-md transition-all">
-            <Printer size={16} className="mr-2" /> Cetak Log
-          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/ambulan/riwayat">Riwayat Aktivitas</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="font-semibold text-slate-700">{data.id_transaksi}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
 
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/ambulan/riwayat">Riwayat Aktivitas</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{data.id_transaksi}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* KOLOM UTAMA */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
-            <CardHeader className="bg-rose-600 text-white p-6 sm:p-8 relative overflow-hidden">
-              <DollarSign className="absolute -bottom-8 -right-8 w-40 h-40 text-white opacity-[0.06] transform -rotate-12" />
-              <div className="flex justify-between items-center relative z-10">
-                <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-rose-100">
+        {/* PROFILE HEADER */}
+        <Card className="border border-slate-200 shadow-sm overflow-hidden bg-white">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row gap-6 justify-between items-start">
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                  {formatIDR(data.biaya_operasional || 0)}
+                </h1>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">
                   Ringkasan Pengeluaran
-                </CardTitle>
-                <Badge size="sm" className="bg-white/20 text-white border-white/30">
-                  {data.kategori_aktivitas?.replace(/_/g, ' ')}
-                </Badge>
+                </p>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight text-white relative z-10">
-                {formatIDR(data.biaya_operasional || 0)}
-              </h2>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors">
-                    <div className="p-3 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Truck size={20}/></div>
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Armada Penanggungjawab</p>
-                      <p className="font-black text-slate-900 uppercase text-sm">{data.armada?.replace(/_/g, ' ')}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors">
-                    <div className="p-3 bg-rose-50 rounded-xl text-rose-600 shrink-0"><Calendar size={20}/></div>
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tanggal Aktivitas</p>
-                      <p className="font-black text-slate-900 text-sm">{data.sk_tanggal_aktivitas}</p>
-                    </div>
-                  </div>
-                </div>
+              <Badge className="bg-rose-50 text-rose-700 border-rose-200">
+                {data.kategori_aktivitas?.replace(/_/g, ' ')}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors">
-                    <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 shrink-0"><Clock size={20}/></div>
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Waktu Operasional</p>
-                      <p className="font-black text-slate-900 uppercase text-sm">{data.jam?.replace(/__/g, ' ').replace(/_/g, ':')}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors">
-                    <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 shrink-0"><AlertCircle size={20}/></div>
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Data</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="relative flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                        </span>
-                        <p className="font-black text-slate-900 uppercase text-xs">Verified in Warehouse</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* QUICK STATS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Aktivitas</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900">{data.sk_tanggal_aktivitas}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Waktu Operasional</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 uppercase">{data.jam?.replace(/__/g, ' ').replace(/_/g, ':')}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Armada</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 uppercase">{data.armada?.replace(/_/g, ' ')}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Status</p>
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                Verified
+              </Badge>
             </CardContent>
           </Card>
         </div>
 
-        {/* KOLOM SAMPING (SIDEBAR INFO) */}
-        <div className="space-y-6">
-          <Card className="border-none shadow-md rounded-3xl bg-white relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-rose-500 to-indigo-600"></div>
-            <CardContent className="p-6">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <FileText size={14} className="text-indigo-500" /> Audit Trail
-              </h4>
-              <div className="relative pl-6 space-y-6 before:absolute before:inset-y-0 before:left-2.5 before:w-0.5 before:bg-slate-200 before:rounded-full">
-                <div className="relative">
-                   <div className="absolute -left-6 top-1 h-3 w-3 rounded-full border-2 border-indigo-500 bg-white shadow-sm z-10"></div>
-                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                     <p className="text-[10px] font-black text-slate-900 uppercase">Data Created</p>
-                     <p className="text-[9px] font-medium text-slate-500 mt-0.5">System generated via Input Form</p>
-                   </div>
+        {/* INFO CARDS GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* KOLOM UTAMA */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border border-slate-200 shadow-sm bg-white">
+              <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6">
+                <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+                  <div className="p-1.5 bg-rose-50 rounded-lg"><DollarSign size={14} className="text-rose-600" /></div>
+                  Detail Operasional
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Armada Penanggungjawab</p>
+                    <p className="text-base font-bold text-slate-900">{data.armada?.replace(/_/g, ' ')}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Aktivitas</p>
+                    <p className="text-base font-bold text-slate-900">{data.sk_tanggal_aktivitas}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Waktu Operasional</p>
+                    <p className="text-base font-bold text-slate-900">{data.jam?.replace(/__/g, ' ').replace(/_/g, ':')}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori</p>
+                    <p className="text-base font-bold text-slate-900">{data.kategori_aktivitas?.replace(/_/g, ' ')}</p>
+                  </div>
                 </div>
-                
-                <div className="relative">
-                   <div className="absolute -left-6 top-1 h-3 w-3 rounded-full border-2 border-emerald-500 bg-white shadow-sm z-10"></div>
-                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                     <p className="text-[10px] font-black text-slate-900 uppercase">SK Metadata</p>
-                     <p className="text-[9px] font-mono font-bold text-slate-500 mt-0.5 tracking-tighter break-all">FACT_AKTIVITAS_ID_{data.sk_fakta_aktivitas_ambulan}</p>
-                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="border-none shadow-md rounded-3xl bg-gradient-to-br from-rose-50 to-white relative overflow-hidden group hover:shadow-rose-100 transition-shadow">
-            <div className="absolute top-0 right-0 p-4 opacity-[0.02] group-hover:opacity-5 transition-opacity">
-              <AlertCircle className="w-32 h-32 text-rose-500" />
-            </div>
-            <CardContent className="p-6 relative z-10">
-              <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <AlertCircle size={14} className="animate-pulse" /> Peringatan Keamanan
-              </h4>
-              <p className="text-xs text-rose-700/80 font-medium leading-relaxed">
-                Data ini merupakan bagian dari tabel fakta keuangan. Perubahan data akan dicatat ke dalam audit log sistem analitik secara otomatis.
-              </p>
-            </CardContent>
-          </Card>
+          {/* KOLOM SAMPING (SIDEBAR INFO) */}
+          <div className="space-y-6">
+            <Card className="border border-slate-200 shadow-sm bg-white">
+              <CardContent className="p-6">
+                <h4 className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <FileText size={14} className="text-slate-500" /> Metadata
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">SK Fakta</p>
+                    <p className="text-sm font-mono font-semibold text-slate-700 break-all">FACT_AKTIVITAS_{data.sk_fakta_aktivitas_ambulan}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Status Verifikasi</p>
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      </span>
+                      <p className="text-sm font-semibold text-slate-700">Verified in Warehouse</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-slate-200 shadow-sm bg-white">
+              <CardContent className="p-6">
+                <h4 className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <AlertCircle size={14} className="text-rose-500" /> Catatan Audit
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Data ini merupakan bagian dari tabel fakta keuangan. Perubahan data akan dicatat ke dalam audit log sistem analitik secara otomatis.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
