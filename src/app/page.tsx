@@ -1,24 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  Users, 
-  HeartHandshake, 
-  Map as MapIcon, 
-  ArrowRight,
-  TrendingUp,
-  ShieldCheck,
-  Loader2,
-  PlusCircle,
-  Clock
+import {
+  Users, HeartHandshake, Map as MapIcon, ArrowRight,
+  TrendingUp, ShieldCheck, Loader2, PlusCircle, Clock
 } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import FilterBar, {
+  type FilterState,
+  buildDefaultFilter,
+} from '@/components/donasi/FilterBar'
 import DonationStats from '@/components/donasi/DonationStats'
+import TrendChart from '@/components/donasi/TrendChart'
 import ProgramStats from '@/components/donasi/ProgramStats'
 import DemografiStats from '@/components/mustahik/DemografiStats'
+import ProgramFilterBar from '@/components/donasi/ProgramFilterBar'
+import { type ProgramFilter, PROGRAM_FILTER_DEFAULT } from '@/components/donasi/FilterBar'
+import dynamic from 'next/dynamic'
 
 interface AuditLog {
   id: string
@@ -37,8 +37,7 @@ function timeAgo(dateStr: string): string {
   if (minutes < 60) return `${minutes} menit lalu`
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours} jam lalu`
-  const days = Math.floor(hours / 24)
-  return `${days} hari lalu`
+  return `${Math.floor(hours / 24)} hari lalu`
 }
 
 function actionBadge(action: string): { label: string; color: string } {
@@ -51,42 +50,35 @@ function actionBadge(action: string): { label: string; color: string } {
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
-    totalDonasi: 0,
-    jumlahDonatur: 0,
-    jumlahMustahik: 0,
-    pertumbuhan: 0,
-    danaTersalur: 0,
-    layananAmbulan: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  // ── Global filter state — dikontrol di Page, di-pass ke semua chart ──
+  const [availableYears, setAvailableYears] = useState<string[]>([])
+  const [appliedFilter, setAppliedFilter] = useState<FilterState>(buildDefaultFilter())
+  const [programFilter, setProgramFilter] = useState<ProgramFilter>(PROGRAM_FILTER_DEFAULT)
+
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [logsLoading, setLogsLoading] = useState(true)
 
+  // Fetch daftar tahun untuk dropdown FilterBar
   useEffect(() => {
-    async function fetchDashboardStats() {
+    const fetchYears = async () => {
       try {
-        const response = await fetch('/api/stats')
-        const data = await response.json()
-        
-        if (data) {
-          setStats({
-            totalDonasi: data.totalDonasi || 0,
-            jumlahDonatur: data.jumlahDonatur || 0,
-            jumlahMustahik: data.jumlahMustahik || 0,
-            pertumbuhan: data.pertumbuhan || 0,
-            layananAmbulan: data.layananAmbulan || 0,
-            danaTersalur: data.danaTersalur || 0
-          })
-        }
-      } catch (error) {
-        console.error("Gagal memuat data:", error)
-      } finally {
-        setLoading(false)
+        const res = await fetch('/api/donasi/tahun')
+        if (!res.ok) return
+        const data = await res.json()
+        const years: string[] = Array.isArray(data) ? data : data.years ?? []
+        const min: string | null = Array.isArray(data) ? data[0] ?? null : data.minYear ?? null
+        const max: string | null = Array.isArray(data) ? data[data.length - 1] ?? null : data.maxYear ?? null
+        setAvailableYears(years)
+        setAppliedFilter(buildDefaultFilter(min, max))
+      } catch (err) {
+        console.error('Gagal memuat tahun:', err)
       }
     }
+    fetchYears()
+  }, [])
 
-    async function fetchAuditLogs() {
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
       try {
         const res = await fetch('/api/users/audit')
         if (res.ok) {
@@ -99,27 +91,29 @@ export default function DashboardPage() {
         setLogsLoading(false)
       }
     }
-
-    fetchDashboardStats()
     fetchAuditLogs()
   }, [])
 
+  const handleResetFilter = () => {
+    const min = availableYears[0] ?? null
+    const max = availableYears[availableYears.length - 1] ?? null
+    setAppliedFilter(buildDefaultFilter(min, max))
+  }
+
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-12 font-sans">
-      {/* 1. HERO / GREETING SECTION */}
+      {/* HERO */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge size="sm" variant="outline" className={loading ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}>
-                  {loading ? (
-                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Menghubungkan...</>
-                  ) : 'Sistem Online'}
-                </Badge>
-                <Badge size="sm" variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                  Analisis AI Aktif
-                </Badge>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest">
+                  OLAP Core Connected
+                </span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest">
+                  SVM AI Active
+                </span>
               </div>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
                 Dashboard <span className="text-emerald-600 font-bold">Amil</span> Analitik
@@ -128,18 +122,12 @@ export default function DashboardPage() {
                 Sistem pendukung keputusan berbasis <span className="text-slate-900">Data Warehouse</span> untuk optimalisasi penghimpunan ZISWAF.
               </p>
             </div>
-            
-            {/* Quick Actions - Mobile Grid */}
             <div className="grid grid-cols-1 sm:flex gap-3">
               <Button asChild variant="outline" className="w-full sm:w-auto border-2 font-bold py-6 md:py-2">
-                <Link href="/donasi/masuk">
-                  <PlusCircle className="mr-2 h-4 w-4" /> Input Transaksi
-                </Link>
+                <Link href="/donasi/masuk"><PlusCircle className="mr-2 h-4 w-4" /> Input Transaksi</Link>
               </Button>
               <Button asChild className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100 font-bold py-6 md:py-2 transition-all">
-                <Link href="/ambulan/layanan">
-                  <HeartHandshake className="mr-2 h-4 w-4" /> Layanan Utama
-                </Link>
+                <Link href="/ambulan/layanan"><HeartHandshake className="mr-2 h-4 w-4" /> Layanan Utama</Link>
               </Button>
             </div>
           </div>
@@ -147,41 +135,37 @@ export default function DashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
-        
-        {/* 2. STATS OVERVIEW */}
+
+        {/* ── GLOBAL FILTER BAR — mengontrol semua chart di bawah ── */}
+        <FilterBar
+          appliedFilter={appliedFilter}
+          availableYears={availableYears}
+          onApply={setAppliedFilter}
+          onReset={handleResetFilter}
+        />
+        <ProgramFilterBar programFilter={programFilter} onChange={setProgramFilter} />
+
+        {/* KPI Cards */}
         <section>
-          {loading ? (
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i} className="h-24 md:h-32 border-2 border-slate-100 bg-white shadow-none animate-pulse flex items-center justify-center">
-                   <div className="h-4 w-12 bg-slate-100 rounded" />
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <DonationStats 
-              totalDonasi={stats.totalDonasi}
-              jumlahDonatur={stats.jumlahDonatur}
-              jumlahMustahik={stats.jumlahMustahik}
-              pertumbuhan={stats.pertumbuhan}
-              danaTersalur={stats.danaTersalur}
-            />
-          )}
+          <DonationStats appliedFilter={appliedFilter} programFilter={programFilter} />
         </section>
 
-        <ProgramStats />
+        {/* Grafik Tren | Program Chart — berdampingan */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TrendChart appliedFilter={appliedFilter} programFilter={programFilter} />
+          <ProgramStats appliedFilter={appliedFilter} programFilter={programFilter} />
+        </section>
 
-        <DemografiStats />
+        {/* Demografi — full width */}
+        <DemografiStats appliedFilter={appliedFilter} programFilter={programFilter} />
 
+        {/* Modul operasional + audit log */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          
-          {/* 3. MODUL CEPAT */}
           <div className="lg:col-span-2 space-y-4 md:space-y-6">
             <h2 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
               <ShieldCheck className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" /> Modul Operasional
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
               <Link href="/donasi/donatur">
                 <Card className="hover:border-indigo-400 transition-all group cursor-pointer border shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
@@ -198,7 +182,6 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </Link>
-
               <Link href="/mustahik/spasial">
                 <Card className="hover:border-red-400 transition-all group cursor-pointer border shadow-none bg-white h-full">
                   <CardContent className="p-5 md:p-6">
@@ -215,11 +198,9 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </Link>
-
             </div>
           </div>
 
-          {/* 4. AKTIVITAS TERKINI */}
           <Card className="border shadow-sm bg-white overflow-hidden flex flex-col h-full rounded-xl">
             <CardHeader className="bg-slate-50/50 border-b py-4">
               <CardTitle className="text-xs md:text-sm font-bold flex items-center gap-2 text-slate-700 uppercase tracking-wider">
@@ -242,18 +223,14 @@ export default function DashboardPage() {
                     const badge = actionBadge(log.action)
                     return (
                       <div key={log.id} className="p-4 hover:bg-slate-50 transition-colors">
-                        <p className="text-[11px] font-bold text-slate-800 leading-tight">
-                          {log.detail || log.action}
-                        </p>
+                        <p className="text-[11px] font-bold text-slate-800 leading-tight">{log.detail || log.action}</p>
                         {log.user && (
                           <p className="text-[10px] text-slate-400 font-medium mt-0.5">
                             oleh {log.user.name || log.user.email}
                           </p>
                         )}
                         <div className="flex items-center justify-between mt-2">
-                          <Badge size="sm" variant="outline" className={badge.color}>
-                            {badge.label}
-                          </Badge>
+                          <span className={`text-[9px] font-black border px-1.5 py-0.5 rounded-md uppercase ${badge.color}`}>{badge.label}</span>
                           <span className="text-[9px] text-slate-400 font-bold flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {timeAgo(log.createdAt)}
                           </span>
@@ -270,7 +247,6 @@ export default function DashboardPage() {
               </Button>
             </div>
           </Card>
-
         </div>
       </div>
     </div>

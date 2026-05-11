@@ -27,12 +27,33 @@ const icon = L.icon({
 
 const BAR_COLORS = ['#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#059669', '#047857'];
 
-interface MapProps {
-    points: any[];
+// Filter waktu sudah dihandle di page.tsx (server-side).
+// MustahikMap hanya bertanggung jawab untuk filter kategori & drill down spasial.
+interface MustahikPoint {
+    id: string | number;
+    nama: string;
+    lat: number;
+    lng: number;
+    kategori: string;
+    provinsi: string;
+    kabupaten: string;
+    kecamatan: string;
+    desa: string;
+    alamat: string;
+    tanggal?: string | null;
 }
 
-// Komponen helper untuk menganimasi kamera peta (flyToBounds) ke titik-titik yang tersaring
-function MapUpdater({ points, defaultCenter }: { points: any[], defaultCenter: [number, number] }) {
+interface MapProps {
+    points: MustahikPoint[];
+}
+
+function MapUpdater({
+    points,
+    defaultCenter,
+}: {
+    points: MustahikPoint[];
+    defaultCenter: [number, number];
+}) {
     const map = useMap();
 
     useEffect(() => {
@@ -41,7 +62,6 @@ function MapUpdater({ points, defaultCenter }: { points: any[], defaultCenter: [
             return;
         }
 
-        // Kumpulkan semua titik koordinat yang valid (bukan NaN)
         const validPoints = points.filter(p => !isNaN(p.lat) && !isNaN(p.lng));
         if (validPoints.length === 0) return;
 
@@ -61,60 +81,61 @@ function MapUpdater({ points, defaultCenter }: { points: any[], defaultCenter: [
 
 export default function MustahikMap({ points }: MapProps) {
     const defaultCenter: [number, number] = [-0.0263, 109.3425];
-    
-    // --- STATE FILTER ---
+
     const [selectedKategori, setSelectedKategori] = useState("Semua");
-    
-    // --- STATE DRILL DOWN OLAP ---
     const [drillLevel, setDrillLevel] = useState<'nasional' | 'provinsi' | 'kabupaten' | 'kecamatan'>('nasional');
     const [selectedProv, setSelectedProv] = useState<string | null>(null);
     const [selectedKab, setSelectedKab] = useState<string | null>(null);
     const [selectedKec, setSelectedKec] = useState<string | null>(null);
 
-    // --- LOGIKA FILTER DATA ---
+    // Reset drill down saat data baru datang (filter waktu berubah di page.tsx)
+    useEffect(() => {
+        setDrillLevel('nasional');
+        setSelectedProv(null);
+        setSelectedKab(null);
+        setSelectedKec(null);
+    }, [points]);
+
     const filteredPoints = useMemo(() => {
         let p = points;
+
         if (selectedKategori !== "Semua") {
             p = p.filter(x => x.kategori === selectedKategori);
         }
-        
-        // Filter spasial berdasarkan drill down
+
         if (drillLevel === 'provinsi' && selectedProv) {
             p = p.filter(x => x.provinsi === selectedProv);
         } else if (drillLevel === 'kabupaten' && selectedProv && selectedKab) {
             p = p.filter(x => x.provinsi === selectedProv && x.kabupaten === selectedKab);
         } else if (drillLevel === 'kecamatan' && selectedProv && selectedKab && selectedKec) {
-            p = p.filter(x => x.provinsi === selectedProv && x.kabupaten === selectedKab && x.kecamatan === selectedKec);
+            p = p.filter(x =>
+                x.provinsi === selectedProv &&
+                x.kabupaten === selectedKab &&
+                x.kecamatan === selectedKec
+            );
         }
-        
+
         return p;
     }, [points, selectedKategori, drillLevel, selectedProv, selectedKab, selectedKec]);
 
-    // --- PROSES DATA UNTUK CHART ---
     const chartData = useMemo(() => {
         const aggregation: Record<string, number> = {};
-        
+
         filteredPoints.forEach((p) => {
             let label = "";
-            if (drillLevel === 'nasional') {
-                label = p.provinsi;
-            } else if (drillLevel === 'provinsi') {
-                label = p.kabupaten;
-            } else if (drillLevel === 'kabupaten') {
-                label = p.kecamatan;
-            } else if (drillLevel === 'kecamatan') {
-                label = p.desa;
-            }
-            
+            if (drillLevel === 'nasional') label = p.provinsi;
+            else if (drillLevel === 'provinsi') label = p.kabupaten;
+            else if (drillLevel === 'kabupaten') label = p.kecamatan;
+            else if (drillLevel === 'kecamatan') label = p.desa;
+
             if (!label || label === "Tidak Diketahui" || label === "") label = "Lainnya";
-            
             aggregation[label] = (aggregation[label] || 0) + 1;
         });
 
         return Object.entries(aggregation)
             .map(([wilayah, jumlahMustahik]) => ({ wilayah, jumlahMustahik }))
             .sort((a, b) => b.jumlahMustahik - a.jumlahMustahik)
-            .slice(0, 7); 
+            .slice(0, 7);
     }, [filteredPoints, drillLevel]);
 
     const kategoriList = useMemo(() => {
@@ -122,12 +143,13 @@ export default function MustahikMap({ points }: MapProps) {
         return ["Semua", ...Array.from(set)];
     }, [points]);
 
-    // Handler untuk klik bar pada chart
     const handleBarClick = (data: any) => {
-        // Recharts <Bar onClick> memberikan data bar yang di-klik secara langsung
-        const clickedWilayah = data?.wilayah || data?.payload?.wilayah || (data?.activePayload && data?.activePayload[0]?.payload?.wilayah);
-        
-        if (!clickedWilayah || clickedWilayah === "Lainnya") return; // Hindari drill down jika nilainya 'Lainnya'
+        const clickedWilayah =
+            data?.wilayah ||
+            data?.payload?.wilayah ||
+            (data?.activePayload && data?.activePayload[0]?.payload?.wilayah);
+
+        if (!clickedWilayah || clickedWilayah === "Lainnya") return;
 
         if (drillLevel === 'nasional') {
             setSelectedProv(clickedWilayah);
@@ -141,13 +163,12 @@ export default function MustahikMap({ points }: MapProps) {
         }
     };
 
-    // Breadcrumb Actions
     const handleCrumbNasional = () => {
         setDrillLevel('nasional');
         setSelectedProv(null);
         setSelectedKab(null);
         setSelectedKec(null);
-    }
+    };
 
     const handleCrumbProvinsi = () => {
         if (selectedProv) {
@@ -155,48 +176,59 @@ export default function MustahikMap({ points }: MapProps) {
             setSelectedKab(null);
             setSelectedKec(null);
         }
-    }
-    
+    };
+
     const handleCrumbKabupaten = () => {
         if (selectedKab) {
             setDrillLevel('kabupaten');
             setSelectedKec(null);
         }
-    }
+    };
 
     return (
         <div className="flex flex-col gap-6 w-full animate-in fade-in duration-700">
-            
-            {/* TOOLBAR FILTER & BREADCRUMBS */}
+
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                
-                {/* BREADCRUMBS OLAP */}
+
                 <div className="flex items-center flex-wrap gap-2 text-xs font-bold text-slate-500">
-                    <button 
+                    <button
                         onClick={handleCrumbNasional}
-                        className={`flex items-center gap-1 hover:text-indigo-600 transition-colors ${drillLevel === 'nasional' ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md' : ''}`}
+                        className={`flex items-center gap-1 hover:text-indigo-600 transition-colors ${
+                            drillLevel === 'nasional'
+                                ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md'
+                                : ''
+                        }`}
                     >
                         <MapPin className="h-3 w-3" /> Indonesia
                     </button>
-                    
-                    {(drillLevel === 'provinsi' || drillLevel === 'kabupaten' || drillLevel === 'kecamatan') && selectedProv && (
-                        <>
-                            <ChevronRight className="h-3 w-3 text-slate-300" />
-                            <button 
-                                onClick={handleCrumbProvinsi}
-                                className={`hover:text-indigo-600 transition-colors ${drillLevel === 'provinsi' ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md' : ''}`}
-                            >
-                                Prov. {selectedProv}
-                            </button>
-                        </>
-                    )}
+
+                    {(drillLevel === 'provinsi' || drillLevel === 'kabupaten' || drillLevel === 'kecamatan') &&
+                        selectedProv && (
+                            <>
+                                <ChevronRight className="h-3 w-3 text-slate-300" />
+                                <button
+                                    onClick={handleCrumbProvinsi}
+                                    className={`hover:text-indigo-600 transition-colors ${
+                                        drillLevel === 'provinsi'
+                                            ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md'
+                                            : ''
+                                    }`}
+                                >
+                                    Prov. {selectedProv}
+                                </button>
+                            </>
+                        )}
 
                     {(drillLevel === 'kabupaten' || drillLevel === 'kecamatan') && selectedKab && (
                         <>
                             <ChevronRight className="h-3 w-3 text-slate-300" />
-                            <button 
+                            <button
                                 onClick={handleCrumbKabupaten}
-                                className={`hover:text-indigo-600 transition-colors ${drillLevel === 'kabupaten' ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md' : ''}`}
+                                className={`hover:text-indigo-600 transition-colors ${
+                                    drillLevel === 'kabupaten'
+                                        ? 'text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md'
+                                        : ''
+                                }`}
                             >
                                 {selectedKab}
                             </button>
@@ -213,10 +245,9 @@ export default function MustahikMap({ points }: MapProps) {
                     )}
                 </div>
 
-                {/* FILTER KATEGORI */}
                 <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
                     <Filter className="h-4 w-4 text-emerald-600 ml-2" />
-                    <select 
+                    <select
                         value={selectedKategori}
                         onChange={(e) => setSelectedKategori(e.target.value)}
                         className="text-xs font-bold bg-transparent border-none focus:ring-0 outline-none pr-4 cursor-pointer text-slate-700"
@@ -229,19 +260,26 @@ export default function MustahikMap({ points }: MapProps) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* BAGIAN PETA */}
-                <div className="lg:col-span-2 relative bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden" style={{ minHeight: '500px' }}>
+
+                <div
+                    className="lg:col-span-2 relative bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden"
+                    style={{ minHeight: '500px' }}
+                >
                     <MapContainer
                         center={defaultCenter}
-                        zoom={drillLevel === 'nasional' ? 5 : drillLevel === 'provinsi' ? 7 : drillLevel === 'kabupaten' ? 9 : 11}
+                        zoom={
+                            drillLevel === 'nasional' ? 5
+                            : drillLevel === 'provinsi' ? 7
+                            : drillLevel === 'kabupaten' ? 9
+                            : 11
+                        }
                         style={{ height: '100%', width: '100%' }}
                         scrollWheelZoom={true}
                     >
                         <MapUpdater points={filteredPoints} defaultCenter={defaultCenter} />
                         <TileLayer
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; Dompet Ummat Kalbar'
+                            attribution="&copy; Dompet Ummat Kalbar"
                         />
 
                         <MarkerClusterGroup
@@ -253,11 +291,27 @@ export default function MustahikMap({ points }: MapProps) {
                                 <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
                                     <Popup>
                                         <div className="text-sm p-1 font-sans">
-                                            <p className="font-bold text-slate-800 uppercase tracking-tight">{p.nama}</p>
-                                            <p className="text-emerald-600 text-[10px] font-bold uppercase my-1 tracking-wider">{p.kategori}</p>
+                                            <p className="font-black text-slate-800 uppercase tracking-tight">
+                                                {p.nama}
+                                            </p>
+                                            <p className="text-emerald-600 text-[10px] font-black uppercase my-1">
+                                                {p.kategori}
+                                            </p>
                                             <p className="text-slate-500 text-xs leading-tight">{p.alamat}</p>
+                                            {p.tanggal && (
+                                                <p className="text-slate-400 text-[10px] mt-1">
+                                                    📅{' '}
+                                                    {new Date(p.tanggal).toLocaleDateString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                    })}
+                                                </p>
+                                            )}
                                             <div className="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-1 text-slate-400 text-[10px] italic">
-                                                <div className="flex items-center gap-1"><MapPin className="h-2 w-2" /> {p.kabupaten}</div>
+                                                <div className="flex items-center gap-1">
+                                                    <MapPin className="h-2 w-2" /> {p.kabupaten}
+                                                </div>
                                                 <div className="ml-3">- Kec. {p.kecamatan}</div>
                                                 <div className="ml-3">- Desa {p.desa}</div>
                                             </div>
@@ -269,14 +323,21 @@ export default function MustahikMap({ points }: MapProps) {
                     </MapContainer>
                 </div>
 
-                {/* BAGIAN CHART DRILL DOWN */}
                 <div className="rounded-2xl bg-white p-5 shadow-md border border-slate-100 flex flex-col">
                     <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter flex items-center justify-between">
-                        <div>Statistik <span className="text-emerald-600">Wilayah</span></div>
-                        
+                        <div>
+                            Statistik <span className="text-emerald-600">Wilayah</span>
+                        </div>
+
                         {drillLevel !== 'nasional' && (
-                            <button 
-                                onClick={drillLevel === 'kecamatan' ? handleCrumbKabupaten : drillLevel === 'kabupaten' ? handleCrumbProvinsi : handleCrumbNasional}
+                            <button
+                                onClick={
+                                    drillLevel === 'kecamatan'
+                                        ? handleCrumbKabupaten
+                                        : drillLevel === 'kabupaten'
+                                        ? handleCrumbProvinsi
+                                        : handleCrumbNasional
+                                }
                                 className="flex items-center gap-1 text-[10px] bg-slate-100 text-slate-500 hover:text-indigo-600 px-2 py-1 rounded transition-colors"
                             >
                                 <CornerLeftUp className="h-3 w-3" /> Roll Up
@@ -284,7 +345,14 @@ export default function MustahikMap({ points }: MapProps) {
                         )}
                     </h3>
                     <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Tingkat: {drillLevel === 'nasional' ? 'Provinsi' : drillLevel === 'provinsi' ? 'Kabupaten/Kota' : drillLevel === 'kabupaten' ? 'Kecamatan' : 'Desa/Kelurahan'}
+                        Tingkat:{' '}
+                        {drillLevel === 'nasional'
+                            ? 'Provinsi'
+                            : drillLevel === 'provinsi'
+                            ? 'Kabupaten/Kota'
+                            : drillLevel === 'kabupaten'
+                            ? 'Kecamatan'
+                            : 'Desa/Kelurahan'}
                     </p>
                     <p className="mb-6 text-[10px] font-bold text-indigo-500 italic">
                         *Klik pada grafik untuk mempersempit wilayah (Drill Down)
@@ -301,9 +369,15 @@ export default function MustahikMap({ points }: MapProps) {
                                     data={chartData}
                                     layout="vertical"
                                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                    style={{ cursor: drillLevel !== 'kecamatan' ? 'pointer' : 'default' }}
+                                    style={{
+                                        cursor: drillLevel !== 'kecamatan' ? 'pointer' : 'default',
+                                    }}
                                 >
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        horizontal={false}
+                                        stroke="#f1f5f9"
+                                    />
                                     <XAxis type="number" hide />
                                     <YAxis
                                         type="category"
@@ -321,12 +395,12 @@ export default function MustahikMap({ points }: MapProps) {
                                             border: 'none',
                                             boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
                                             fontSize: '11px',
-                                            fontWeight: 'bold'
+                                            fontWeight: 'bold',
                                         }}
                                     />
-                                    <Bar 
-                                        dataKey="jumlahMustahik" 
-                                        radius={[0, 4, 4, 0]} 
+                                    <Bar
+                                        dataKey="jumlahMustahik"
+                                        radius={[0, 4, 4, 0]}
                                         barSize={20}
                                         onClick={handleBarClick}
                                     >
@@ -342,11 +416,13 @@ export default function MustahikMap({ points }: MapProps) {
                             </ResponsiveContainer>
                         </div>
                     )}
-                    
+
                     <div className="mt-4 pt-4 border-t border-slate-100">
                         <div className="flex justify-between items-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
                             <span>Total Objek Peta</span>
-                            <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{filteredPoints.length} Data</span>
+                            <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                                {filteredPoints.length} Data
+                            </span>
                         </div>
                     </div>
                 </div>
