@@ -16,8 +16,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import {
-  ArrowLeft, User, MapPin, ShieldAlert,
-  History, Calendar, Info, LineChart
+  ArrowLeft, User, MapPin, ShieldCheck,
+  History, Info, LineChart, Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -39,145 +39,197 @@ export default function DetailMustahikPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="text-center space-y-4">
-        <div className="h-10 w-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Profiling Mustahik...</p>
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Memuat data mustahik...</p>
       </div>
     </div>
   )
 
-  if (!data) return <div className="p-10 text-center font-bold">Data Kosong</div>
+  if (!data) return (
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="text-center">
+        <p className="text-sm font-bold text-slate-700">Data mustahik tidak ditemukan</p>
+        <Button variant="outline" size="sm" onClick={() => router.back()} className="mt-4">
+          <ArrowLeft size={14} className="mr-1.5" /> Kembali
+        </Button>
+      </div>
+    </div>
+  )
 
   const { mustahik, history } = data
 
   return (
-    <div className="p-4 md:p-8 space-y-6 bg-slate-50 min-h-screen font-sans">
-      <div className="space-y-3">
-        <Button variant="ghost" onClick={() => router.back()} className="font-bold gap-2 hover:bg-white">
-          <ArrowLeft size={16} /> Kembali
-        </Button>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/mustahik">Mustahik</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{mustahik.nama}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className="min-h-screen bg-slate-50/50 font-sans">
+      {/* TOP NAV BAR */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 space-y-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="-ml-2 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-900"
+          >
+            <ArrowLeft size={14} className="mr-1.5" /> Kembali ke Daftar
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/mustahik">Mustahik</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="font-semibold text-slate-700">{mustahik.nama}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* KIRI: BIODATA & SKORING */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="border border-slate-200 rounded-2xl shadow-lg bg-white">
-            <CardContent className="pt-8 flex flex-col items-center">
-              <div className="h-24 w-24 bg-blue-100 rounded-2xl border border-blue-200 flex items-center justify-center mb-4">
-                <User size={48} className="text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-black uppercase text-slate-900 text-center leading-tight">{mustahik.nama}</h2>
-              <Badge size="md" className="mt-2 bg-slate-800 text-white">{mustahik.id_mustahik}</Badge>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-              <div className="w-full mt-8 space-y-4">
-                <div className="p-4 bg-slate-800 text-white rounded-xl flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <ShieldAlert size={18} className="text-yellow-400" />
-                    <span className="text-[10px] font-black uppercase tracking-wider">Vulnerability Score</span>
-                  </div>
-                  <span className="text-2xl font-black">{mustahik.skoring}</span>
+        {/* PROFILE HEADER */}
+        <Card className="border border-slate-200 shadow-sm overflow-hidden bg-white">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row gap-6">
+              {/* Avatar */}
+              <div className="flex flex-col items-center sm:items-start gap-3">
+                <div className="h-24 w-24 bg-blue-100 rounded-2xl border border-blue-200 flex items-center justify-center shrink-0">
+                  <User size={48} className="text-blue-600" />
                 </div>
-
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-start gap-3">
-                    <MapPin size={16} className="text-slate-400 mt-1" />
-                    <div>
-                      <p className="text-[9px] font-black uppercase text-slate-400">Wilayah Sebaran</p>
-                      <p className="text-xs font-bold uppercase">{mustahik.kecamatan}, {mustahik.kabupaten_kota}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Info size={16} className="text-slate-400 mt-1" />
-                    <div>
-                      <p className="text-[9px] font-black uppercase text-slate-400">Kategori PM</p>
-                      <p className="text-xs font-bold uppercase">{mustahik.kategori_pm || 'Umum'}</p>
-                    </div>
-                  </div>
+                <div className="text-center sm:text-left">
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                    {mustahik.nama}
+                  </h1>
+                  <Badge variant="outline" className="mt-2 bg-slate-50 text-slate-700 border-slate-200">
+                    {mustahik.id_mustahik}
+                  </Badge>
                 </div>
               </div>
+              {/* Quick Info */}
+              <div className="flex-1 grid grid-cols-2 gap-4">
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Vulnerability Score</p>
+                  <p className="text-2xl font-bold text-emerald-700">{mustahik.skoring}</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Kategori PM</p>
+                  <p className="text-sm font-bold text-slate-700">{mustahik.kategori_pm || 'Umum'}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* QUICK STATS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Wilayah</p>
+              <p className="text-sm sm:text-base font-bold text-slate-900">{mustahik.kecamatan}</p>
             </CardContent>
           </Card>
-
-          {/* ASPEK SCD TYPE 2 */}
-          <Card className="border border-blue-200 bg-blue-50 rounded-2xl shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[10px] font-black uppercase flex items-center gap-2 text-blue-800">
-                <History size={14} /> Riwayat Perubahan Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-[11px] font-bold text-blue-900 leading-relaxed italic">
-                Sistem merekam {history.length} versi riwayat kondisi ekonomi untuk mustahik ini guna analisis efektivitas penyaluran zakat.
-              </p>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Kabupaten</p>
+              <p className="text-sm sm:text-base font-bold text-slate-900">{mustahik.kabupaten_kota}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Status Pernikahan</p>
+              <p className="text-sm sm:text-base font-bold text-slate-900">{mustahik.status_pernikahan || '-'}</p>
+            </CardContent>
+          </Card>
+          <Card className="border border-slate-200 shadow-sm bg-white">
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Jenis Kelamin</p>
+              <p className="text-sm sm:text-base font-bold text-slate-900">{mustahik.gender || '-'}</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* KANAN: TRACKING & HISTORY */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* ANALISIS KONDISI SAAT INI */}
-          <Card className="border border-slate-200 rounded-2xl shadow-sm bg-white">
-            <CardHeader className="border-b border-slate-200 bg-slate-50 rounded-t-2xl">
-              <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <LineChart size={16} /> Parameter Kelayakan Terkini
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="space-y-1">
-                 <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Status Pernikahan</p>
-                 <p className="font-bold text-slate-800 uppercase">{mustahik.status_pernikahan || '-'}</p>
-               </div>
-               <div className="space-y-1">
-                 <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Jenis Kelamin</p>
-                 <p className="font-bold text-slate-800 uppercase">{mustahik.gender || '-'}</p>
-               </div>
-               <div className="md:col-span-2 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl">
-                  <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Alamat Lengkap Records</p>
-                  <p className="text-sm font-medium text-slate-700 leading-relaxed">{mustahik.alamat || '-'}</p>
-               </div>
-            </CardContent>
-          </Card>
+        {/* INFO CARDS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* MAIN CONTENT */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* ALAMAT SECTION */}
+            <Card className="border border-slate-200 shadow-sm bg-white">
+              <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6">
+                <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+                  <MapPin size={14} className="text-slate-500" /> Alamat Lengkap
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-sm text-slate-700 leading-relaxed">{mustahik.alamat || '-'}</p>
+              </CardContent>
+            </Card>
 
-          {/* HISTORI SCD (SAMA SEPERTI DONATUR) */}
-          {history.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 pl-2">
-                <History size={14} /> Riwayat Perubahan Data
-              </h4>
-              {history.map((h: any, i: number) => (
-                <div key={i} className="bg-white border-2 border-slate-200 border-l-blue-600 p-4 shadow-sm flex justify-between items-center group hover:border-blue-200 transition-all">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-xs font-black text-slate-800 uppercase">{h.nama}</p>
-                      <Badge size="sm" variant="outline" className="bg-slate-100 text-slate-600 border-slate-200">ARSIP</Badge>
-                    </div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                      Skor: {h.skoring} • {h.kecamatan}
-                    </p>
-                  </div>
-                  <div className="text-right border-l-2 border-slate-100 pl-4">
-                    <p className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Periode Berlaku</p>
-                    <p className="text-[10px] font-black text-blue-700 font-mono">
-                      {new Date(h.valid_from).toLocaleDateString('id-ID')} → {new Date(h.valid_to).toLocaleDateString('id-ID')}
-                    </p>
-                  </div>
+            {/* HISTORY SECTION */}
+            {history.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <History size={16} className="text-slate-500" /> Riwayat Perubahan Data
+                </h3>
+                <div className="space-y-3">
+                  {history.map((h: any, i: number) => (
+                    <Card key={i} className="border border-slate-200 shadow-sm bg-white">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col sm:flex-row justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className="text-sm font-bold text-slate-900">{h.nama}</p>
+                              <Badge size="sm" variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                                ARSIP
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-slate-500 font-semibold">
+                              Skor: {h.skoring} • {h.kecamatan}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Periode Berlaku</p>
+                            <p className="text-sm font-semibold text-slate-700 font-mono">
+                              {new Date(h.valid_from).toLocaleDateString('id-ID')} → {new Date(h.valid_to).toLocaleDateString('id-ID')}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+
+          {/* SIDEBAR */}
+          <div className="space-y-6">
+            <Card className="border border-slate-200 shadow-sm bg-white">
+              <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6">
+                <CardTitle className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 text-slate-600">
+                  <History size={14} className="text-slate-500" /> Data Warehouse
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Sistem merekam {history.length} versi riwayat kondisi ekonomi untuk mustahik ini guna analisis efektivitas penyaluran zakat.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-slate-200 shadow-sm bg-white">
+              <CardContent className="p-6">
+                <h4 className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <ShieldCheck size={14} className="text-emerald-600" /> Integritas Data
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Data ini bersifat persisten dan merupakan bagian dari tabel dimensi master. Setiap perubahan dicatat dengan SCD Type 2 untuk audit trail lengkap.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

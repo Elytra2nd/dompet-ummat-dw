@@ -381,7 +381,12 @@ export default function MonitoringAmbulanPage() {
             {loading && data.length === 0 ? (
               <div className="py-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-rose-400 mx-auto" /></div>
             ) : currentItems.length === 0 ? (
-              <div className="py-10 text-center text-slate-400 italic text-sm">Belum ada data.</div>
+              <div className="p-8">
+                <EmptyState
+                  title="Belum ada layanan ambulan"
+                  description="Tambahkan data layanan baru untuk memulai monitoring."
+                />
+              </div>
             ) : (
               currentItems.map((item) => (
                 <div key={item.sk_fakta_layanan_ambulan} className="p-4 hover:bg-slate-50">

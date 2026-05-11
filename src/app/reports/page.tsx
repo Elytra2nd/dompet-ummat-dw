@@ -607,7 +607,7 @@ export default function ReportsPage() {
                       <div className="text-center w-36">
                         <p className="text-[9px] text-slate-400 mb-8">Mengetahui,</p>
                         <div className="border-b border-slate-400 mb-1" />
-                        <p className="text-[8px] font-bold text-slate-600 uppercase">Kepala Divisi BIDA</p>
+                        <p className="text-xs font-bold text-slate-600 uppercase">Kepala Divisi BIDA</p>
                       </div>
                     </div>
                   </div>

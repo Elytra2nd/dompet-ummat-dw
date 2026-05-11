@@ -288,7 +288,7 @@ export default function UserManagementPage() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <Button disabled variant="ghost" size="icon" className="h-8 w-8" title="Anda tidak bisa menghapus diri sendiri">
+                            <Button disabled variant="ghost" size="icon" className="h-8 w-8" aria-label="Tidak bisa menghapus akun sendiri">
                               <Shield className="h-4 w-4 text-slate-400" />
                             </Button>
                           )}

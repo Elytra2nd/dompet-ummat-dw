@@ -223,84 +223,152 @@ export default function SurveyMainPage() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-slate-50/80">
-                <TableRow>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left pl-6">Mustahik & Reg</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[120px] text-center">Skor Akhir</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center">Status Kelayakan</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left">Rekomendasi Bantuan</TableHead>
-                  <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[140px] text-center pr-6">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
+            {/* DESKTOP TABLE VIEW */}
+            <div className="hidden sm:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-50/80">
                   <TableRow>
-                    <TableCell colSpan={5} className="h-40 text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mx-auto" />
-                      <p className="mt-2 text-xs font-bold text-slate-400">Memuat data...</p>
-                    </TableCell>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left pl-6">Mustahik & Reg</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[120px] text-center">Skor Akhir</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[150px] text-center">Status Kelayakan</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 min-w-[200px] text-left">Rekomendasi Bantuan</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-slate-500 w-[140px] text-center pr-6">Aksi</TableHead>
                   </TableRow>
-                ) : currentSurveys.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-20">
-                      <EmptyState asTableRow={false} title="Belum ada data survey" description="Buat survey baru untuk memulai penilaian kelayakan." />
-                    </TableCell>
-                  </TableRow>
-                ) : currentSurveys.map((item) => (
-                  <TableRow key={item.sk_survey} className="group hover:bg-indigo-50/30 transition-colors">
-                    <TableCell className="pl-6 py-4 text-left">
-                      <p className="font-semibold text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || '-'}</p>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">
-                          {item.no_register}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400">
-                          {item.dim_mustahik?.id_mustahik}
-                        </span>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-40 text-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mx-auto" />
+                        <p className="mt-2 text-xs font-bold text-slate-400">Memuat data...</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : currentSurveys.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-20">
+                        <EmptyState asTableRow={false} title="Belum ada data survey" description="Buat survey baru untuk memulai penilaian kelayakan." />
+                      </TableCell>
+                    </TableRow>
+                  ) : currentSurveys.map((item) => (
+                    <TableRow key={item.sk_survey} className="group hover:bg-indigo-50/30 transition-colors">
+                      <TableCell className="pl-6 py-4 text-left">
+                        <p className="font-semibold text-slate-900 uppercase text-sm leading-tight">{item.dim_mustahik?.nama || '-'}</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">
+                            {item.no_register}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400">
+                            {item.dim_mustahik?.id_mustahik}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="inline-flex items-center justify-center min-w-[3rem] p-2 bg-slate-100 rounded-lg">
+                          <span className="text-lg font-semibold text-slate-700">{item.total_skor_sistem}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className={`font-semibold text-[10px] px-3 py-1 rounded-lg ${KELAYAKAN_COLOR[item.kelayakan_sistem] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                          {item.kelayakan_sistem?.replace(/_/g, ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-left">
+                        <div className="flex items-start gap-2">
+                          <ClipboardCheck className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                          <p className="text-xs font-bold text-slate-600 max-w-[200px] leading-relaxed">
+                            {item.kategori_rekomendasi?.replace(/__/g, ' (').replace(/_/g, ' ').replace(/ \(/g, '(')}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center pr-6">
+                        <div className="flex items-center justify-end gap-1">
+                          <Link href={`/survey/hasil/${item.sk_survey}`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Detail Survey">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link href={`/survey/edit/${item.sk_survey}`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Edit Survey">
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          {isAdmin && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" onClick={() => confirmDelete(item)} title="Hapus Survey">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* MOBILE CARD VIEW */}
+            <div className="sm:hidden">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+                  <p className="text-xs font-bold text-slate-400">Memuat data...</p>
+                </div>
+              ) : currentSurveys.length === 0 ? (
+                <div className="py-20">
+                  <EmptyState title="Belum ada data survey" description="Buat survey baru untuk memulai penilaian kelayakan." />
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {currentSurveys.map((item) => (
+                    <div key={item.sk_survey} className="p-4 hover:bg-slate-50 transition-colors flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-900 text-sm truncate">{item.dim_mustahik?.nama || '-'}</p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded">
+                              {item.no_register}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-semibold">
+                              {item.dim_mustahik?.id_mustahik}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="inline-flex items-center justify-center min-w-[2.5rem] p-1.5 bg-slate-100 rounded">
+                            <span className="text-sm font-semibold text-slate-700">{item.total_skor_sistem}</span>
+                          </div>
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="inline-flex items-center justify-center min-w-[3rem] p-2 bg-slate-100 rounded-lg">
-                        <span className="text-lg font-semibold text-slate-700">{item.total_skor_sistem}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="outline" className={`font-semibold text-[10px] px-3 py-1 rounded-lg ${KELAYAKAN_COLOR[item.kelayakan_sistem] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                        {item.kelayakan_sistem?.replace(/_/g, ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-left">
-                      <div className="flex items-start gap-2">
-                        <ClipboardCheck className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-                        <p className="text-xs font-bold text-slate-600 max-w-[200px] leading-relaxed">
-                          {item.kategori_rekomendasi?.replace(/__/g, ' (').replace(/_/g, ' ').replace(/ \(/g, '(')}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${KELAYAKAN_COLOR[item.kelayakan_sistem] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                          {item.kelayakan_sistem?.replace(/_/g, ' ')}
+                        </Badge>
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
+                          <ClipboardCheck className="h-3 w-3 shrink-0" />
+                          {(item.kategori_rekomendasi?.replace(/__/g, ' (').replace(/_/g, ' ').replace(/ \(/g, '(') || '').slice(0, 50)}
                         </p>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-center pr-6">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex gap-2 justify-end">
                         <Link href={`/survey/hasil/${item.sk_survey}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Detail Survey">
-                            <Eye className="h-4 w-4" />
+                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold">
+                            <Eye className="h-3.5 w-3.5 mr-1" /> Detail
                           </Button>
                         </Link>
                         <Link href={`/survey/edit/${item.sk_survey}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Edit Survey">
-                            <Edit3 className="h-4 w-4" />
+                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold">
+                            <Edit3 className="h-3.5 w-3.5 mr-1" /> Edit
                           </Button>
                         </Link>
                         {isAdmin && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" onClick={() => confirmDelete(item)} title="Hapus Survey">
-                            <Trash2 className="h-4 w-4" />
+                          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item)}>
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <Pagination
               currentPage={currentPage}
