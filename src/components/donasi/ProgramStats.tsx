@@ -325,10 +325,10 @@ export default function ProgramStats() {
   }
 
   return (
-    <Card className="border-none shadow-md">
+    <Card className="border border-slate-200 shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-7">
         <div>
-          <CardTitle className="text-xl font-black text-slate-800">
+          <CardTitle className="text-xl font-bold text-slate-800">
             {selectedParent ? 'Distribusi Donasi Sub Program' : 'Distribusi Donasi per Program'}
           </CardTitle>
           <CardDescription>
@@ -373,7 +373,7 @@ export default function ProgramStats() {
             <div className="absolute right-0 top-12 z-20 w-[320px] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
               <div className="mb-4 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-500" />
-                <p className="text-sm font-black text-slate-800">Filter Waktu</p>
+                <p className="text-sm font-bold text-slate-800">Filter Waktu</p>
               </div>
 
               <div className="space-y-3">

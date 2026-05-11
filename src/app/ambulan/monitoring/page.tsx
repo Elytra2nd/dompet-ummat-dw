@@ -212,7 +212,7 @@ export default function MonitoringAmbulanPage() {
 
       {/* FORM EDIT SECTION (Tetap muncul saat Edit diklik) */}
       {isFormOpen && isEditing && (
-        <Card className="border-none shadow-lg animate-in fade-in zoom-in-95 duration-200 bg-white rounded-xl">
+        <Card className="border border-slate-200 shadow-sm bg-white rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
               <Edit3 className="h-4 w-4 text-indigo-500" /> Koreksi Data Transaksi

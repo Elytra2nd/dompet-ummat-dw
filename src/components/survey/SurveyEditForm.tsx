@@ -160,8 +160,8 @@ export default function SurveyEditForm({ id_survey }: { id_survey: string }) {
         {/* Mustahik Info */}
         <div className="border-b bg-indigo-50/50 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Informasi Mustahik</p>
-            <h3 className="text-lg font-black text-slate-900 mt-1">{mustahikName || 'Data Mustahik'}</h3>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Informasi Mustahik</p>
+            <h3 className="text-lg font-bold text-slate-900 mt-1">{mustahikName || 'Data Mustahik'}</h3>
           </div>
           <Badge className="bg-indigo-100 text-indigo-700 border-0 font-mono self-start sm:self-auto">
             {mustahikId}
@@ -294,7 +294,7 @@ function StepEkonomi({ data, setData }: { data: any; setData: any }) {
           defisit ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
         }`}>
           <span>{defisit ? '⚠ Defisit' : '✓ Surplus'}</span>
-          <span className="font-black">{fmt(Math.abs(selisih))}</span>
+          <span className="font-bold">{fmt(Math.abs(selisih))}</span>
         </div>
       )}
     </div>

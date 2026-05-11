@@ -253,8 +253,8 @@ export default function MustahikMap({ points }: MapProps) {
                                 <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
                                     <Popup>
                                         <div className="text-sm p-1 font-sans">
-                                            <p className="font-black text-slate-800 uppercase tracking-tight">{p.nama}</p>
-                                            <p className="text-emerald-600 text-[10px] font-black uppercase my-1">{p.kategori}</p>
+                                            <p className="font-bold text-slate-800 uppercase tracking-tight">{p.nama}</p>
+                                            <p className="text-emerald-600 text-[10px] font-bold uppercase my-1 tracking-wider">{p.kategori}</p>
                                             <p className="text-slate-500 text-xs leading-tight">{p.alamat}</p>
                                             <div className="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-1 text-slate-400 text-[10px] italic">
                                                 <div className="flex items-center gap-1"><MapPin className="h-2 w-2" /> {p.kabupaten}</div>

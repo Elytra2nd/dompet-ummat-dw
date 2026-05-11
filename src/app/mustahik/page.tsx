@@ -137,7 +137,7 @@ export default function ManajemenMustahikPage() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-8">
-        <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-xl">
+        <Card className="border border-slate-200 shadow-sm overflow-hidden bg-white">
           <CardHeader className="border-b py-4 bg-slate-50/50">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative w-full max-w-md">

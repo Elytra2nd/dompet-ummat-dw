@@ -163,7 +163,7 @@ export default function ImportButton({ modul, onImportSuccess, className = '', f
       <Dialog open={dragDialogOpen} onOpenChange={(open) => !uploading && setDragDialogOpen(open)}>
         <DialogContent className="sm:max-w-md font-sans">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-800">
+            <DialogTitle className="text-xl font-bold text-slate-800">
               Import Data {labelMap[modul]}
             </DialogTitle>
             <DialogDescription className="font-medium text-slate-500">

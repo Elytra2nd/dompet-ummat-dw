@@ -182,7 +182,7 @@ export default function AddDonasiForm() {
       <div className="space-y-6 md:col-span-1">
         <Card className="border-indigo-200 bg-indigo-50/30 shadow-md">
           <CardHeader className="border-b border-indigo-100">
-            <CardTitle className="flex items-center gap-2 text-sm font-black text-indigo-900">
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-indigo-900 tracking-wider">
               <CreditCard className="h-4 w-4" /> NOMINAL TRANSAKSI
             </CardTitle>
           </CardHeader>
@@ -194,7 +194,7 @@ export default function AddDonasiForm() {
               <Input
                 type="number"
                 placeholder="Rp 0"
-                className="h-16 border-2 text-2xl font-black text-indigo-700 shadow-inner transition-all focus:border-indigo-500"
+                className="h-14 border text-xl font-bold text-indigo-700 transition-all focus:border-indigo-500"
                 value={formData.nominal_donasi}
                 onChange={(e) =>
                   setFormData({ ...formData, nominal_donasi: e.target.value })

@@ -224,7 +224,7 @@ export default function RiwayatAktivitasPage() {
 
       {/* FORM EDIT (Hanya terbuka untuk Koreksi Data/isEditing) */}
       {isFormOpen && isEditing && (
-        <Card className="border-none shadow-lg animate-in fade-in zoom-in-95 duration-200 bg-white rounded-2xl overflow-hidden">
+        <Card className="border border-slate-200 shadow-sm bg-white rounded-2xl overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 pb-4">
             <CardTitle className="text-sm font-bold flex items-center gap-2 uppercase tracking-tight">
               <Settings2 className="h-4 w-4 text-rose-500" /> Koreksi Log Aktivitas
@@ -265,7 +265,7 @@ export default function RiwayatAktivitasPage() {
       )}
 
       {/* TABLE SECTION */}
-      <Card className="border-slate-200 shadow-sm overflow-hidden bg-white rounded-xl">
+      <Card className="border border-slate-200 shadow-sm overflow-hidden bg-white">
         <CardHeader className="border-b py-4 bg-slate-50/50">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative w-full max-w-md">
@@ -339,7 +339,7 @@ export default function RiwayatAktivitasPage() {
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50" aria-label="Hapus data"><Trash2 size={16}/></Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-2xl border-2">
+                            <AlertDialogContent className="rounded-2xl border border-slate-200">
                               <AlertDialogHeader>
                                 <AlertDialogTitle className="font-bold text-lg">Hapus Record Biaya?</AlertDialogTitle>
                                 <AlertDialogDescription className="text-sm text-slate-500 font-medium leading-relaxed">

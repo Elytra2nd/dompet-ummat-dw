@@ -94,7 +94,7 @@ function AddDonaturFormContent() {
             <Link href="/donasi/donatur"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
           </Button>
           <div className="flex flex-col gap-2">
-            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
               <Heart className="h-8 w-8 text-indigo-600" /> {isEditing ? 'Update Profil' : 'Registrasi Baru'} <span className="text-indigo-600">Donatur</span>
             </h1>
             <p className="text-sm font-medium text-slate-500">
@@ -105,9 +105,9 @@ function AddDonaturFormContent() {
       </div>
 
       <div className="mx-auto max-w-3xl px-4 sm:px-8">
-        <Card className="border-2 border-indigo-100 shadow-xl bg-white overflow-hidden">
+        <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
           <CardHeader className="bg-indigo-50/50 border-b py-4">
-            <CardTitle className="text-sm font-black text-indigo-700 uppercase tracking-widest">
+            <CardTitle className="text-sm font-bold text-indigo-700 uppercase tracking-wider">
               Formulir Data Donatur
             </CardTitle>
           </CardHeader>
@@ -123,8 +123,8 @@ function AddDonaturFormContent() {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase text-slate-600">Kategori</Label>
-                <select 
-                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500"
+                <select
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium focus:ring-2 focus:ring-indigo-500"
                   value={formData.kategori_donatur}
                   onChange={(e) => setFormData({...formData, kategori_donatur: e.target.value})}
                 >

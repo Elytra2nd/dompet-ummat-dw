@@ -236,7 +236,7 @@ export default function AddPenyaluranForm() {
             <Input
               type="number"
               placeholder="0"
-              className="h-14 border-2 text-2xl font-black text-emerald-700 transition-all focus:border-emerald-500"
+              className="h-14 border text-xl font-bold text-emerald-700 transition-all focus:border-emerald-500"
               value={formData.dana_tersalur}
               onChange={(e) =>
                 setFormData({ ...formData, dana_tersalur: e.target.value })
@@ -261,7 +261,7 @@ export default function AddPenyaluranForm() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-16 w-full bg-emerald-600 text-xl font-black shadow-lg shadow-emerald-100 transition-all hover:bg-emerald-700 active:scale-95"
+              className="h-11 w-full bg-emerald-600 text-sm font-bold shadow-sm transition-all hover:bg-emerald-700 active:scale-95"
             >
               {loading ? (
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />

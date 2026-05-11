@@ -21,7 +21,7 @@ export default function PenyaluranBaruPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
               <HandCoins className="h-8 w-8 text-emerald-600" />
               Input <span className="text-emerald-600">Penyaluran Bantuan</span>
             </h1>

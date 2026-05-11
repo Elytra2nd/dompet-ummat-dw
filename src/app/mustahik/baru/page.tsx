@@ -324,7 +324,7 @@ export function AddMustahikFormContent() {
             <Link href="/mustahik"><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
           </Button>
           <div className="flex flex-col gap-2">
-            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
+            <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-slate-900">
               <ClipboardList className="h-8 w-8 text-emerald-600" /> {isEditing ? 'Update Data Mustahik' : 'Registrasi Entitas Baru'}
             </h1>
             <p className="text-sm font-medium text-slate-500">
@@ -341,7 +341,7 @@ export function AddMustahikFormContent() {
             {[1, 2, 3].map((num) => (
               <div
                 key={num}
-                className={`flex-1 py-4 text-center border-b-2 text-[10px] md:text-xs font-black uppercase tracking-wider transition-colors ${
+                className={`flex-1 py-4 text-center border-b-2 text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors ${
                   step === num
                     ? 'border-emerald-500 text-emerald-700 bg-emerald-50/50'
                     : step > num
@@ -358,7 +358,7 @@ export function AddMustahikFormContent() {
           <div className="p-6 md:p-8">
             {/* STEP 1: IDENTITAS */}
             {step === 1 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-right-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-slate-700">Kelompok Entitas</Label>
@@ -453,7 +453,7 @@ export function AddMustahikFormContent() {
 
             {/* STEP 2: LOKASI & PETA */}
             {step === 2 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-right-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-slate-700">Provinsi & Kabupaten *</Label>
@@ -533,9 +533,9 @@ export function AddMustahikFormContent() {
 
             {/* STEP 3: REVIEW */}
             {step === 3 && (
-              <div className="animate-in fade-in slide-in-from-right-4 space-y-6">
+              <div className="space-y-6">
                 <div className="bg-slate-50/50 rounded-xl border p-6 space-y-6">
-                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest border-b pb-2">Ringkasan Data</h3>
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider border-b pb-2">Ringkasan Data</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex gap-3 items-start bg-white border p-4 rounded-xl shadow-sm">
@@ -559,7 +559,7 @@ export function AddMustahikFormContent() {
                     <div className="flex gap-3 items-start bg-emerald-50 border border-emerald-100 p-4 rounded-xl shadow-sm">
                       <ClipboardList className="h-6 w-6 text-emerald-500 shrink-0" />
                       <div>
-                        <p className="text-[10px] font-black text-emerald-600 uppercase">Program</p>
+                        <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Program</p>
                         <p className="font-bold text-slate-900 text-sm">{formData.program_induk}</p>
                         <p className="text-xs text-slate-500">{formData.sub_program}</p>
                       </div>
@@ -569,7 +569,7 @@ export function AddMustahikFormContent() {
                       <div className="flex gap-3 items-start bg-amber-50 border border-amber-100 p-4 rounded-xl shadow-sm">
                         <Banknote className="h-6 w-6 text-amber-500 shrink-0" />
                         <div>
-                          <p className="text-[10px] font-black text-amber-600 uppercase">Dana Tersalur (Create Fact)</p>
+                          <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Dana Tersalur (Create Fact)</p>
                           <p className="font-bold text-slate-900 text-lg leading-none mt-1">Rp {formData.dana_tersalur.toLocaleString('id-ID')}</p>
                         </div>
                       </div>
@@ -577,7 +577,7 @@ export function AddMustahikFormContent() {
                       <div className="flex gap-3 items-start bg-white border p-4 rounded-xl shadow-sm">
                         <MapPin className="h-6 w-6 text-rose-400 shrink-0" />
                         <div>
-                          <p className="text-[10px] font-black text-rose-600 uppercase">Geolokasi</p>
+                          <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Geolokasi</p>
                           <p className="font-mono text-sm font-bold text-slate-700 mt-1">{formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}</p>
                           <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100 mt-2 text-[10px]">LOKASI TERKUNCI</Badge>
                         </div>

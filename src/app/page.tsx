@@ -121,8 +121,8 @@ export default function DashboardPage() {
                   Analisis AI Aktif
                 </Badge>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-                Dashboard <span className="text-emerald-600 font-extrabold">Amil</span> Analitik
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
+                Dashboard <span className="text-emerald-600 font-bold">Amil</span> Analitik
               </h1>
               <p className="text-slate-500 font-medium max-w-xl text-sm md:text-base leading-relaxed">
                 Sistem pendukung keputusan berbasis <span className="text-slate-900">Data Warehouse</span> untuk optimalisasi penghimpunan ZISWAF.

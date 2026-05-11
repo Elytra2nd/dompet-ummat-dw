@@ -171,7 +171,7 @@ export function AppSidebar() {
             className="h-10 w-auto object-contain scale-110 origin-left group-data-[collapsible=icon]:scale-100 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 transition-all duration-300"
           />
           <div className="flex flex-col group-data-[collapsible=icon]:hidden border-l-2 border-slate-200 pl-3">
-            <span className="font-black tracking-tighter text-emerald-600 leading-none text-sm">BIDA</span>
+            <span className="font-bold tracking-tight text-emerald-600 leading-none text-sm">BIDA</span>
             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Analytics</span>
           </div>
         </div>
@@ -186,7 +186,7 @@ export function AppSidebar() {
 
       <SidebarContent className="py-4 scrollbar-hide">
         <SidebarGroup>
-          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 px-4">
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-4 px-4">
             {isAdmin ? 'Main Repository' : 'Menu Relawan'}
           </SidebarGroupLabel>
           <SidebarMenu className="px-2 space-y-1">
@@ -254,8 +254,8 @@ export function AppSidebar() {
             {isAdmin ? <Shield className="h-4 w-4" /> : <UserCircle2 className="h-4 w-4" />}
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-xs font-black text-slate-900 leading-none truncate max-w-[140px]">{userName}</span>
-            <span className={`text-[9px] font-black uppercase tracking-widest mt-1 ${isAdmin ? 'text-indigo-500' : 'text-amber-500'}`}>
+            <span className="text-xs font-bold text-slate-900 leading-none truncate max-w-[140px]">{userName}</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${isAdmin ? 'text-indigo-500' : 'text-amber-500'}`}>
               {isAdmin ? 'Administrator' : 'Relawan'}
             </span>
           </div>
@@ -270,26 +270,26 @@ export function AppSidebar() {
                 >
                   <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-600 transition-colors" />
                   <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden ml-2">
-                    <span className="text-xs font-black text-slate-900 leading-none">Logout</span>
+                    <span className="text-xs font-bold text-slate-900 leading-none">Logout</span>
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1 italic">End Session</span>
                   </div>
                 </SidebarMenuButton>
               </AlertDialogTrigger>
-              <AlertDialogContent className="rounded-2xl border-2 sm:max-w-[400px]">
+              <AlertDialogContent className="rounded-2xl border border-slate-200 sm:max-w-[400px]">
                 <AlertDialogHeader>
                   <div className="flex items-center gap-3 text-rose-600 mb-2">
                     <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
-                    <AlertDialogTitle className="font-black text-xl uppercase tracking-tighter">Konfirmasi Logout</AlertDialogTitle>
+                    <AlertDialogTitle className="font-bold text-xl uppercase tracking-tight">Konfirmasi Logout</AlertDialogTitle>
                   </div>
                   <AlertDialogDescription className="font-medium text-slate-500 text-sm">
                     Apakah Anda yakin ingin mengakhiri sesi ini dan keluar dari aplikasi BIDA Analytics?
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-6 gap-2">
-                  <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px]">Batal</AlertDialogCancel>
-                  <AlertDialogAction 
+                  <AlertDialogCancel className="rounded-xl font-bold uppercase text-[10px]">Batal</AlertDialogCancel>
+                  <AlertDialogAction
                     onClick={handleLogout}
-                    className="bg-rose-600 hover:bg-rose-700 rounded-xl font-black uppercase text-[10px]"
+                    className="bg-rose-600 hover:bg-rose-700 rounded-xl font-bold uppercase text-[10px]"
                   >
                     Ya, Keluar
                   </AlertDialogAction>

@@ -166,7 +166,7 @@ export default function SurveyDetailPage() {
         {/* ── Page Header ── */}
         <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row mb-2">
           <div className="min-w-0">
-            <h1 className="flex items-center gap-2 text-2xl sm:text-3xl font-black text-slate-900 truncate tracking-tight">
+            <h1 className="flex items-center gap-2 text-2xl sm:text-3xl font-bold text-slate-900 truncate tracking-tight">
               <ClipboardCheck className="h-7 w-7 text-indigo-600 shrink-0" />
               <span className="truncate">Detail Survey Kelayakan</span>
             </h1>
@@ -181,21 +181,21 @@ export default function SurveyDetailPage() {
         </div>
 
         {/* ── Verdict Banner ── */}
-        <div className={`rounded-2xl border-2 p-5 sm:p-6 ${kelayakan.bg}`}>
+        <div className={`rounded-2xl border p-5 sm:p-6 ${kelayakan.bg}`}>
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
               {kelayakan.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hasil Penilaian</p>
-              <p className={`text-2xl sm:text-3xl font-black leading-tight ${kelayakan.color}`}>{kelayakan.label}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hasil Penilaian</p>
+              <p className={`text-2xl sm:text-3xl font-bold leading-tight ${kelayakan.color}`}>{kelayakan.label}</p>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 line-clamp-2">
                 {toLabel(survey.kategori_rekomendasi?.replace(/__/g, ' (').replace(/_/g, ' ').replace(/ \(/g, '('))}
               </p>
             </div>
             <div className="text-center shrink-0">
-              <div className="text-4xl sm:text-5xl font-black text-slate-800">{skor.toFixed(1)}</div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">/ 100</div>
+              <div className="text-4xl sm:text-5xl font-bold text-slate-800">{skor.toFixed(1)}</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">/ 100</div>
               <div className="mt-1.5 h-1.5 w-20 sm:w-28 rounded-full bg-white/60 mx-auto overflow-hidden">
                 <div
                   className="h-1.5 rounded-full bg-indigo-500 transition-all"
@@ -250,7 +250,7 @@ export default function SurveyDetailPage() {
                           defisit ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'
                         }`}>
                           <span>{defisit ? '⚠ Defisit' : '✓ Surplus'}</span>
-                          <span className="font-black">{fmt(Math.abs(surplus))}</span>
+                          <span className="font-bold">{fmt(Math.abs(surplus))}</span>
                         </div>
                       )
                     })()}
@@ -273,7 +273,7 @@ export default function SurveyDetailPage() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-indigo-500" />
-              <h2 className="font-black text-slate-800 text-lg">Detail Penilaian Lapangan</h2>
+              <h2 className="font-bold text-slate-800 text-lg">Detail Penilaian Lapangan</h2>
             </div>
 
             {Object.entries(grouped).map(([group, qs]) => (
@@ -294,7 +294,7 @@ export default function SurveyDetailPage() {
                       <div key={q.sk_pertanyaan} className="px-4 sm:px-5 py-3 sm:py-4 hover:bg-slate-50">
                         {/* Baris atas: kode + pertanyaan */}
                         <div className="flex items-start gap-2 mb-2">
-                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-black text-slate-500 uppercase">
+                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 uppercase">
                             {q.kode_pertanyaan}
                           </span>
                           <p className="text-sm font-medium text-slate-700 leading-snug">{q.teks_pertanyaan}</p>
@@ -309,7 +309,7 @@ export default function SurveyDetailPage() {
                               />
                             ))}
                           </div>
-                          <span className={`ml-1 text-sm font-black w-5 text-center ${
+                          <span className={`ml-1 text-sm font-bold w-5 text-center ${
                             s >= 4 ? 'text-emerald-600' : s === 3 ? 'text-amber-600' : 'text-rose-600'
                           }`}>
                             {s || '-'}
@@ -348,7 +348,7 @@ function InfoRow({ label, value, bold, mono }: { label: string; value: string; b
         {label}
       </span>
       <span className={`text-right text-sm flex-1 min-w-0 break-words ${
-        bold ? 'font-black text-slate-900' : 'font-medium text-slate-700'
+        bold ? 'font-bold text-slate-900' : 'font-medium text-slate-700'
       } ${mono ? 'font-mono text-xs' : ''}`}>
         {value}
       </span>

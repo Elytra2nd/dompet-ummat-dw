@@ -186,16 +186,16 @@ export default function PenyaluranStats({ totalDana = 0, totalTransaksi = 0 }: P
           </div>
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Total Tersalurkan</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Total Tersalurkan</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <ArrowUpRight className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3 overflow-hidden">
-              <h3 className="text-sm sm:text-base md:text-lg font-black leading-tight break-all">
+              <h3 className="text-sm sm:text-base md:text-lg font-bold leading-tight break-all">
                 {formatRupiah(totalDana)}
               </h3>
-              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-white/20 text-white/80">
                 Realisasi Penyaluran
               </div>
             </div>
@@ -205,17 +205,17 @@ export default function PenyaluranStats({ totalDana = 0, totalTransaksi = 0 }: P
         <Card className="relative overflow-hidden border-none bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-xl">
           <CardContent className="relative z-10 p-5">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-black text-white/70 uppercase tracking-wider">Jumlah Transaksi</p>
+              <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">Jumlah Transaksi</p>
               <div className="rounded-full bg-white/20 p-2 backdrop-blur-md">
                 <BarChart2 className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="mt-3">
-              <h3 className="text-base sm:text-lg md:text-xl font-black truncate">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold truncate">
                 {totalTransaksi.toLocaleString()}
                 <span className="text-[10px] ml-1 text-white/70">Record</span>
               </h3>
-              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-white/20 text-white/80">
+              <div className="mt-1 inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-white/20 text-white/80">
                 Fact Penyaluran
               </div>
             </div>
@@ -224,10 +224,10 @@ export default function PenyaluranStats({ totalDana = 0, totalTransaksi = 0 }: P
       </div>
 
       {/* Chart Card */}
-      <Card className="border-none shadow-md">
+      <Card className="border border-slate-200 shadow-sm">
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-7">
           <div>
-            <CardTitle className="text-xl font-black text-slate-800">Grafik Penyaluran Dana</CardTitle>
+            <CardTitle className="text-xl font-bold text-slate-800">Grafik Penyaluran Dana</CardTitle>
             <CardDescription>Visualisasi distribusi penyaluran ZISWAF dari waktu ke waktu</CardDescription>
             <div className="mt-3 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
               {activeFilterLabel}
@@ -291,7 +291,7 @@ export default function PenyaluranStats({ totalDana = 0, totalTransaksi = 0 }: P
               <div className="absolute right-0 top-12 z-20 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl">
                 <div className="mb-4 flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-slate-500" />
-                  <p className="text-sm font-black text-slate-800">Filter Waktu</p>
+                  <p className="text-sm font-bold text-slate-800">Filter Waktu</p>
                 </div>
 
                 <div className="space-y-3">
