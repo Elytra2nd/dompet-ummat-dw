@@ -221,13 +221,13 @@ export default function TransactionHistoryTable() {
                     <td className="px-6 py-4 text-xs hidden lg:table-cell text-left">{item.no_ref || '-'}</td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)} title="Detail Transaksi">
+                        <Button variant="outline" size="icon" className="h-10 w-10 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)} aria-label="Detail transaksi">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)} title="Edit Transaksi">
+                        <Button variant="outline" size="icon" className="h-10 w-10 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)} aria-label="Edit transaksi">
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)} title="Hapus Transaksi">
+                        <Button variant="outline" size="icon" className="h-10 w-10 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)} aria-label="Hapus transaksi">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -267,13 +267,13 @@ export default function TransactionHistoryTable() {
                       </p>
                     </div>
                     <div className="flex gap-1.5 shrink-0">
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)}>
+                      <Button variant="outline" size="icon" className="h-10 w-10 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => openDetailModal(item)} aria-label="Detail transaksi">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)}>
+                      <Button variant="outline" size="icon" className="h-10 w-10 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => openEditModal(item)} aria-label="Edit transaksi">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)}>
+                      <Button variant="outline" size="icon" className="h-10 w-10 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => confirmDelete(item.sk_fakta_donasi)} aria-label="Hapus transaksi">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

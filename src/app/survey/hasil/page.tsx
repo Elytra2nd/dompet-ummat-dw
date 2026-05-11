@@ -283,17 +283,17 @@ export default function SurveyMainPage() {
                       <TableCell className="text-center pr-6">
                         <div className="flex items-center justify-end gap-1">
                           <Link href={`/survey/hasil/${item.sk_survey}`}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" title="Detail Survey">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600" aria-label="Detail survey">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
                           <Link href={`/survey/edit/${item.sk_survey}`}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" title="Edit Survey">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-emerald-600" aria-label="Edit survey">
                               <Edit3 className="h-4 w-4" />
                             </Button>
                           </Link>
                           {isAdmin && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" onClick={() => confirmDelete(item)} title="Hapus Survey">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-rose-600" onClick={() => confirmDelete(item)} aria-label="Hapus survey">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           )}

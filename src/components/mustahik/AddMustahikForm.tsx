@@ -213,10 +213,11 @@ export default function AddMustahikForm({
         <CardContent className="space-y-5 pt-6">
           <div className="grid gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4 shadow-inner">
             <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase">
+              <Label htmlFor="main-category" className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase">
                 <LayoutGrid className="h-3 w-3" /> 1. Kelompok Entitas
               </Label>
               <select
+                id="main-category"
                 className="flex h-11 w-full cursor-pointer rounded-md border bg-white px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500"
                 value={mainCategory}
                 onChange={(e) => setMainCategory(e.target.value)}
@@ -227,10 +228,11 @@ export default function AddMustahikForm({
               </select>
             </div>
             <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 uppercase">
+              <Label htmlFor="selected-program" className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 uppercase">
                 <ClipboardList className="h-3 w-3" /> 2. Program Induk
               </Label>
               <select
+                id="selected-program"
                 className="flex h-11 w-full cursor-pointer rounded-md border-2 border-emerald-100 bg-white px-3 py-2 text-sm font-semibold text-emerald-900 outline-none focus:ring-2 focus:ring-emerald-500"
                 value={selectedProgram}
                 onChange={(e) => setSelectedProgram(e.target.value)}
@@ -245,10 +247,11 @@ export default function AddMustahikForm({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="flex items-center gap-1.5 text-[10px] font-bold text-blue-600 uppercase">
+                <Label htmlFor="sub-program" className="flex items-center gap-1.5 text-[10px] font-bold text-blue-600 uppercase">
                   <Layers className="h-3 w-3" /> 3. Sub-Program
                 </Label>
                 <select
+                  id="sub-program"
                   className="flex h-11 w-full cursor-pointer rounded-md border-2 border-blue-100 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.sub_program}
                   onChange={(e) =>

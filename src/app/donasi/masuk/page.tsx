@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import DonationStats from '@/components/donasi/DonationStats'
 import TransactionHistoryTable from '@/components/donasi/TransactionHistoryTable'
+import FilterBar, { type FilterState, buildDefaultFilter, PROGRAM_FILTER_DEFAULT, type ProgramFilter } from '@/components/donasi/FilterBar'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, HeartHandshake, Loader2, Plus } from 'lucide-react'
 import Link from 'next/link'
 import ImportButton from '@/components/import/ImportButton'
 
 export default function DonasiMasukPage() {
+  const [appliedFilter, setAppliedFilter] = useState<FilterState>(buildDefaultFilter())
+  const [programFilter, setProgramFilter] = useState<ProgramFilter>(PROGRAM_FILTER_DEFAULT)
   const [stats, setStats] = useState({
     totalDonasi: 0,
     jumlahDonatur: 0,
@@ -17,7 +20,7 @@ export default function DonasiMasukPage() {
     targetBulanan: 100000000,
     pertumbuhan: 0,
   })
-  
+
   const [loading, setLoading] = useState(true)
 
   const fetchStats = async () => {
@@ -85,11 +88,8 @@ export default function DonasiMasukPage() {
 
       <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
         <DonationStats
-          totalDonasi={stats.totalDonasi}
-          jumlahDonatur={stats.jumlahDonatur}
-          jumlahMustahik={stats.jumlahMustahik}
-          danaTersalur={stats.danaTersalur}
-          pertumbuhan={stats.pertumbuhan}
+          appliedFilter={appliedFilter}
+          programFilter={programFilter}
         />
 
         <TransactionHistoryTable />

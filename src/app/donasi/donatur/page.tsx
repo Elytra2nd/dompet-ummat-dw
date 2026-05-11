@@ -222,14 +222,14 @@ export default function ManajemenDonaturPage() {
                           </Link>
 
                           <Link href={`/donasi/donatur/baru?id=${d.id_donatur}`}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" aria-label="Edit donatur">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600" aria-label="Edit donatur">
                               <Edit3 className="h-4 w-4" />
                             </Button>
                           </Link>
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Hapus donatur">
+                              <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-rose-600" aria-label="Hapus donatur">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
@@ -306,13 +306,13 @@ export default function ManajemenDonaturPage() {
                           </Button>
                         </Link>
                         <Link href={`/donasi/donatur/baru?id=${d.id_donatur}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600" aria-label="Edit donatur">
                             <Edit3 className="h-4 w-4" />
                           </Button>
                         </Link>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-rose-600" aria-label="Hapus donatur">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>

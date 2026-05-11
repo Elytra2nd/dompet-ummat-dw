@@ -89,7 +89,7 @@ export default function AddDonasiForm() {
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-600 uppercase">
+              <Label htmlFor="donatur-select" className="text-xs font-bold text-slate-600 uppercase">
                 Cari Donatur
               </Label>
               <DonaturSelector
@@ -100,10 +100,11 @@ export default function AddDonasiForm() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-600 uppercase">
+                <Label htmlFor="jenis-donasi" className="text-xs font-bold text-slate-600 uppercase">
                   Jenis Donasi
                 </Label>
                 <select
+                  id="jenis-donasi"
                   className="flex h-10 w-full rounded-md border bg-white px-3 text-sm font-medium"
                   value={formData.jenis_donasi}
                   onChange={(e) =>
@@ -118,10 +119,11 @@ export default function AddDonasiForm() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-600 uppercase">
+                <Label htmlFor="metode-pembayaran" className="text-xs font-bold text-slate-600 uppercase">
                   Metode Pembayaran
                 </Label>
                 <select
+                  id="metode-pembayaran"
                   className="flex h-10 w-full rounded-md border bg-white px-3 text-sm font-medium"
                   value={formData.metode_pembayaran}
                   onChange={(e) =>
@@ -141,10 +143,11 @@ export default function AddDonasiForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
+              <Label htmlFor="bank-tujuan" className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
                 <Landmark className="h-3 w-3" /> Bank Tujuan / Kas Penerimaan
               </Label>
               <select
+                id="bank-tujuan"
                 className="flex h-10 w-full rounded-md border bg-white px-3 text-sm font-medium"
                 value={formData.bank_tujuan}
                 onChange={(e) =>
@@ -163,10 +166,11 @@ export default function AddDonasiForm() {
 
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="pt-6">
-            <Label className="text-xs font-bold text-slate-600 uppercase">
+            <Label htmlFor="keterangan" className="text-xs font-bold text-slate-600 uppercase">
               Keterangan / Doa Donatur (Opsional)
             </Label>
             <Textarea
+              id="keterangan"
               placeholder="Contoh: Titipan sedekah untuk anak yatim atau doa dari donatur..."
               className="mt-2 min-h-[100px]"
               value={formData.keterangan}
@@ -188,10 +192,11 @@ export default function AddDonasiForm() {
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-2">
-              <Label className="font-bold text-indigo-900">
+              <Label htmlFor="nominal-donasi" className="font-bold text-indigo-900">
                 Masukkan Jumlah Donasi
               </Label>
               <Input
+                id="nominal-donasi"
                 type="number"
                 placeholder="Rp 0"
                 className="h-14 border text-xl font-bold text-indigo-700 transition-all focus:border-indigo-500"

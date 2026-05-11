@@ -176,9 +176,10 @@ export function AppSidebar() {
           </div>
         </div>
         
-        <button 
+        <button
           onClick={toggleSidebar}
           className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 group-data-[collapsible=icon]:hidden transition-colors shrink-0"
+          aria-label="Tutup sidebar"
         >
           <PanelLeftClose size={18} />
         </button>

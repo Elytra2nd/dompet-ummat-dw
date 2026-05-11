@@ -363,7 +363,7 @@ export default function DonasiKeluarPage() {
                             variant="ghost" size="icon"
                             className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
                             onClick={() => setDetailItem(item)}
-                            title="Detail"
+                            aria-label="Detail penyaluran"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -371,7 +371,7 @@ export default function DonasiKeluarPage() {
                             variant="ghost" size="icon"
                             className="h-8 w-8 text-slate-400 hover:text-amber-600 hover:bg-amber-50"
                             onClick={() => openEdit(item)}
-                            title="Edit"
+                            aria-label="Edit penyaluran"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -379,7 +379,7 @@ export default function DonasiKeluarPage() {
                             variant="ghost" size="icon"
                             className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
                             onClick={() => setDeleteTarget(item)}
-                            title="Hapus"
+                            aria-label="Hapus penyaluran"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -409,13 +409,13 @@ export default function DonasiKeluarPage() {
                       <p className="text-[10px] font-mono text-slate-400">{item.id_transaksi}</p>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-500" onClick={() => setDetailItem(item)} aria-label="Detail">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-indigo-500" onClick={() => setDetailItem(item)} aria-label="Detail">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500" onClick={() => openEdit(item)} aria-label="Edit">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-amber-500" onClick={() => openEdit(item)} aria-label="Edit">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => setDeleteTarget(item)} aria-label="Hapus">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-red-400" onClick={() => setDeleteTarget(item)} aria-label="Hapus">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

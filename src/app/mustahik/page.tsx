@@ -211,20 +211,20 @@ export default function ManajemenMustahikPage() {
                     <TableCell className="text-center pr-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/mustahik/${m.id_mustahik}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail dan riwayat">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-emerald-600" aria-label="Lihat detail dan riwayat">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
 
                         <Link href={`/mustahik/baru?id=${m.id_mustahik}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600" aria-label="Edit data dan lokasi spasial">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600" aria-label="Edit data dan lokasi spasial">
                             <Edit3 className="h-4 w-4" />
                           </Button>
                         </Link>
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600" aria-label="Nonaktifkan mustahik">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-rose-600" aria-label="Nonaktifkan mustahik">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>

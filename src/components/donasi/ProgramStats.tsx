@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -41,6 +41,7 @@ interface ProgramStatsProps {
 }
 
 export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FILTER_DEFAULT }: ProgramStatsProps) {
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [chartData, setChartData] = useState<ChartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,10 +50,15 @@ export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FI
 
   const fetchProgramData = async (filter: FilterState) => {
     try {
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
       setLoading(true)
       setError(null)
       const params = appendProgramParams(buildQueryParams(filter), programFilter)
-      const res = await fetch(`/api/donasi/program?${params.toString()}`, { cache: 'no-store' })
+      const res = await fetch(`/api/donasi/program?${params.toString()}`, {
+        cache: 'no-store',
+        signal: abortControllerRef.current.signal
+      })
       if (!res.ok) throw new Error('Gagal memuat distribusi program')
       const json: ProgramItem[] = await res.json()
       setChartData((json || []).map((item) => ({
@@ -64,8 +70,10 @@ export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FI
       setSelectedParent(null)
       setSelectedParentKey(null)
     } catch (err: any) {
-      setError(err?.message ?? 'Terjadi kesalahan saat memuat distribusi program')
-      setChartData([])
+      if (err.name !== 'AbortError') {
+        setError(err?.message ?? 'Terjadi kesalahan saat memuat distribusi program')
+        setChartData([])
+      }
     } finally {
       setLoading(false)
     }
@@ -73,11 +81,16 @@ export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FI
 
   const fetchSubProgramData = async (parentKey: string, parentLabel: string, filter: FilterState) => {
     try {
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
       setLoading(true)
       setError(null)
       const params = buildQueryParams(filter)
       params.set('parent', parentKey)
-      const res = await fetch(`/api/donasi/subprogram?${params.toString()}`, { cache: 'no-store' })
+      const res = await fetch(`/api/donasi/subprogram?${params.toString()}`, {
+        cache: 'no-store',
+        signal: abortControllerRef.current.signal
+      })
       const rawText = await res.text()
       let body: any = null
       try { body = rawText ? JSON.parse(rawText) : null } catch { body = rawText }
@@ -96,8 +109,10 @@ export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FI
       setSelectedParent(parentLabel)
       setSelectedParentKey(parentKey)
     } catch (err: any) {
-      setError(err?.message ?? 'Terjadi kesalahan saat memuat distribusi sub program')
-      setChartData([])
+      if (err.name !== 'AbortError') {
+        setError(err?.message ?? 'Terjadi kesalahan saat memuat distribusi sub program')
+        setChartData([])
+      }
     } finally {
       setLoading(false)
     }
@@ -125,6 +140,10 @@ export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FI
       fetchSubProgramData(selectedParentKey, selectedParent, appliedFilter)
     } else {
       fetchProgramData(appliedFilter)
+    }
+
+    return () => {
+      abortControllerRef.current?.abort()
     }
   }, [appliedFilter, programFilter])
 

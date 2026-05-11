@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { Loader2 } from 'lucide-react'
 import { type FilterState, buildQueryParams, PROGRAM_FILTER_DEFAULT, appendProgramParams, type ProgramFilter } from '@/components/donasi/FilterBar'
 
 type WilayahItem = { label: string; total: number }
