@@ -139,7 +139,7 @@ export default function SurveyMainPage() {
                 <ClipboardCheck className="h-7 w-7 text-indigo-600 shrink-0" />
                 Hasil <span className="text-indigo-600">Survey Kelayakan</span>
               </h1>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">
                 Sistem Pendukung Keputusan
               </p>
             </div>

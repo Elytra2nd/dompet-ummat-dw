@@ -139,7 +139,7 @@ export default function ProgramStats({ appliedFilter, programFilter = PROGRAM_FI
   }
 
   return (
-    <Card className="border-none shadow-md">
+    <Card className="border border-slate-200 shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-7">
         <div>
           <CardTitle className="text-xl font-black text-slate-800">

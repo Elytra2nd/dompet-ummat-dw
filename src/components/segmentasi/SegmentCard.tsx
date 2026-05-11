@@ -49,7 +49,7 @@ export function SegmentCard({ segment }: SegmentCardProps) {
 
   return (
     <Link href={`/segmentasi/${segment.key}`} className="group">
-      <Card className={`relative overflow-hidden border-2 ${config.borderColor} bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.02]`}>
+      <Card className={`relative overflow-hidden border ${config.borderColor} bg-white shadow-sm transition-all hover:shadow-md`}>
         <CardContent className="p-5">
           {/* Header: Icon + Count */}
           <div className="flex items-start justify-between">
@@ -57,16 +57,16 @@ export function SegmentCard({ segment }: SegmentCardProps) {
               <IconComponent className={`h-5 w-5 ${config.color}`} />
             </div>
             <div className="text-right">
-              <p className="text-2xl font-black text-slate-900">{segment.count.toLocaleString()}</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase">{segment.percentage}% donatur</p>
+              <p className="text-2xl font-bold text-slate-900">{segment.count.toLocaleString()}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{segment.percentage}% donatur</p>
             </div>
           </div>
 
           {/* Title + Status Badge (a11y) + Description */}
           <div className="mt-3">
             <div className="flex items-center gap-2">
-              <h3 className={`text-sm font-black ${config.color}`}>{segment.label}</h3>
-              <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${status.badgeClass}`}>
+              <h3 className={`text-sm font-bold ${config.color}`}>{segment.label}</h3>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${status.badgeClass}`}>
                 {status.text}
               </span>
             </div>
@@ -78,16 +78,16 @@ export function SegmentCard({ segment }: SegmentCardProps) {
           {/* Mini Stats */}
           <div className="mt-3 grid grid-cols-3 gap-2 pt-3 border-t border-slate-100">
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Hari Terakhir</p>
-              <p className="text-xs font-black text-slate-700">{segment.avg_recency}h</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hari Terakhir</p>
+              <p className="text-xs font-bold text-slate-700">{segment.avg_recency}h</p>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Jumlah Donasi</p>
-              <p className="text-xs font-black text-slate-700">{segment.avg_frequency}x</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Jumlah Donasi</p>
+              <p className="text-xs font-bold text-slate-700">{segment.avg_frequency}x</p>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Rata-rata</p>
-              <p className="text-xs font-black text-slate-700">{formatRupiah(segment.avg_monetary)}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Rata-rata</p>
+              <p className="text-xs font-bold text-slate-700">{formatRupiah(segment.avg_monetary)}</p>
             </div>
           </div>
 

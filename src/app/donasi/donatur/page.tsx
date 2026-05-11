@@ -193,7 +193,7 @@ export default function ManajemenDonaturPage() {
                     <TableRow key={d.sk_donatur} className="group hover:bg-indigo-50/30 transition-colors">
                       <TableCell className="px-6 text-left">
                         <p className="font-mono text-[10px] font-semibold text-indigo-400 leading-none mb-1">{d.id_donatur}</p>
-                        <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
                           {d.tipe?.replace('_', ' ')}
                         </span>
                       </TableCell>
@@ -233,7 +233,7 @@ export default function ManajemenDonaturPage() {
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-2xl border-2">
+                            <AlertDialogContent className="rounded-2xl border border-slate-200">
                               <AlertDialogHeader>
                                 <div className="flex items-center gap-3 text-rose-600 mb-2">
                                   <div className="p-2 bg-rose-50 rounded-full"><AlertTriangle className="h-6 w-6" /></div>
@@ -282,7 +282,7 @@ export default function ManajemenDonaturPage() {
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs font-bold text-indigo-400 font-mono">{d.id_donatur}</span>
                           <span className="text-[10px] text-slate-400">•</span>
-                          <span className="px-1.5 py-0.5 text-[8px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded uppercase bg-slate-100 text-slate-600 border border-slate-200">
                             {d.tipe?.replace('_', ' ')}
                           </span>
                         </div>

@@ -45,10 +45,10 @@ export default function PenyaluranSummary({
 
           {/* Display Nominal Besar */}
           <div className="border-y border-emerald-100/50 py-2">
-            <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">
+            <p className="mb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
               Total Dana Disalurkan
             </p>
-            <h2 className="text-3xl font-black tracking-tight text-emerald-700">
+            <h2 className="text-3xl font-bold tracking-tight text-emerald-700">
               {formatRupiah(numericNominal)}
             </h2>
           </div>

@@ -79,7 +79,7 @@ export default function AmbulanExecutivePage() {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl md:text-3xl font-black tracking-tight">
+          <h1 className="flex items-center gap-2 text-2xl md:text-3xl font-bold tracking-tight">
             <Car className="h-7 w-7 text-rose-600 shrink-0" />
             Dashboard <span className="text-rose-600">Ambulan</span>
           </h1>
@@ -100,7 +100,7 @@ export default function AmbulanExecutivePage() {
             <div className="flex justify-between items-start">
               <div className="min-w-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Alokasi Biaya</p>
-                <h3 className="text-lg sm:text-xl font-black mt-1 text-rose-600 tracking-tighter break-all">
+                <h3 className="text-lg sm:text-xl font-bold mt-1 text-rose-600 tracking-tight break-all">
                   {loading ? <Loader2 className="animate-spin h-5 w-5" /> : formatIDR(stats?.totalExp || 0)}
                 </h3>
               </div>
@@ -116,7 +116,7 @@ export default function AmbulanExecutivePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aktivitas Terdata</p>
-                <h3 className="text-2xl sm:text-3xl font-black mt-1 text-slate-900 tracking-tighter">
+                <h3 className="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 tracking-tight">
                   {loading ? '...' : (stats?.totalCount || 0)}
                   <span className="text-xs font-bold text-slate-400 ml-1">Log</span>
                 </h3>
@@ -134,7 +134,7 @@ export default function AmbulanExecutivePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Kesiapan Armada</p>
-                <h3 className="text-lg sm:text-xl font-black mt-1 tracking-tighter text-yellow-400 flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-bold mt-1 tracking-tight text-yellow-400 flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-400 animate-pulse" /> OPTIMAL
                 </h3>
               </div>
@@ -309,7 +309,7 @@ export default function AmbulanExecutivePage() {
                 <HandHeart size={22} />
               </div>
               <div className="space-y-1 flex-1 min-w-0">
-                <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">Fakta Layanan Pasien</h3>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">Fakta Layanan Pasien</h3>
                 <p className="text-slate-500 text-[11px] leading-relaxed">Data interaksi eksternal mencakup pasien, status ekonomi, dan geolokasi.</p>
                 <div className="pt-2 flex flex-col gap-2">
                   <Link href="/ambulan/monitoring">
@@ -327,7 +327,7 @@ export default function AmbulanExecutivePage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <div className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />
-            <h2 className="font-black uppercase text-xs tracking-[0.15em] text-slate-500">Internal Operational</h2>
+            <h2 className="font-bold uppercase text-xs tracking-wider text-slate-500">Internal Operational</h2>
           </div>
           <div className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-5 hover:border-rose-500 transition-all shadow-sm group">
             <div className="flex gap-3 items-start flex-col sm:flex-row">
@@ -335,7 +335,7 @@ export default function AmbulanExecutivePage() {
                 <Activity size={22} />
               </div>
               <div className="space-y-1 flex-1 min-w-0">
-                <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight group-hover:text-rose-600 transition-colors">Log Biaya & Aktivitas</h3>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight group-hover:text-rose-600 transition-colors">Log Biaya & Aktivitas</h3>
                 <p className="text-slate-500 text-[11px] leading-relaxed">Pencatatan beban operasional armada: BBM, servis, ganti oli, pemeliharaan.</p>
                 <div className="pt-2 flex flex-col gap-2">
                   <Link href="/ambulan/riwayat">
@@ -353,11 +353,11 @@ export default function AmbulanExecutivePage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <div className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
-            <h2 className="font-black uppercase text-xs tracking-[0.15em] text-slate-500">Live Tracker</h2>
+            <h2 className="font-bold uppercase text-xs tracking-wider text-slate-500">Live Tracker</h2>
           </div>
           <Card className="border-none shadow-md rounded-2xl bg-white overflow-hidden flex flex-col h-full lg:max-h-[240px]">
             <CardHeader className="border-b border-slate-100 py-3 bg-slate-50/50 px-4">
-              <CardTitle className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 flex items-center gap-2">
+              <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                 <History size={14} className="text-indigo-500" /> Log Aktivitas Terakhir
               </CardTitle>
             </CardHeader>
@@ -382,7 +382,7 @@ export default function AmbulanExecutivePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-xs font-black text-slate-900 uppercase truncate">{log.id_transaksi}</p>
+                    <p className="text-xs font-bold text-slate-900 uppercase truncate">{log.id_transaksi}</p>
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-bold uppercase shrink-0">
                       {log.armada?.includes('1') ? 'AMB-1' : 'AMB-2'}
                     </span>

@@ -76,7 +76,7 @@ export default function SurveySummary({ score, status }: SurveySummaryProps) {
 
           <div className="relative flex items-center justify-center">
             <div
-              className={`text-5xl font-black tracking-tighter ${config.color}`}
+              className={`text-5xl font-bold tracking-tight ${config.color}`}
             >
               {score.toFixed(1)}
               <span className="ml-1 text-sm font-normal text-slate-400">

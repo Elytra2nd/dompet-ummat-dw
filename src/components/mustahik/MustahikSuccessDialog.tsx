@@ -61,7 +61,7 @@ export default function MustahikSuccessDialog({
               <CheckCircle2 className="h-6 w-6 text-white" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-black text-white leading-none">
+              <DialogTitle className="text-xl font-bold text-white leading-none">
                 {data.isEdit ? 'Data Berhasil Diperbarui' : 'Mustahik Terdaftar'}
               </DialogTitle>
               <p className="text-emerald-200 text-xs font-medium mt-0.5">
@@ -76,7 +76,7 @@ export default function MustahikSuccessDialog({
               {data.id_generated || '—'}
             </code>
             {hasSpatial && (
-              <Badge className="bg-white/20 border-white/30 text-white text-[10px] font-black uppercase tracking-wider hover:bg-white/20">
+              <Badge className="bg-white/20 border-white/30 text-white text-[10px] font-bold uppercase tracking-wider hover:bg-white/20">
                 <MapPin className="h-2.5 w-2.5 mr-1" />
                 SPATIAL READY
               </Badge>
@@ -86,7 +86,7 @@ export default function MustahikSuccessDialog({
 
         {/* ── Ringkasan data ───────────────────────────────────────────── */}
         <div className="px-6 py-5 space-y-3 bg-white">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">
             Ringkasan Data Tersimpan
           </p>
 
@@ -95,7 +95,7 @@ export default function MustahikSuccessDialog({
             <div className="col-span-2 flex items-start gap-3 rounded-lg bg-slate-50 border border-slate-100 px-4 py-3">
               <User className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
               <div>
-                <p className="font-black text-slate-900 text-sm leading-tight">{data.nama}</p>
+                <p className="font-bold text-slate-900 text-sm leading-tight">{data.nama}</p>
                 <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                   {data.kategori_pm}
                 </p>
@@ -106,7 +106,7 @@ export default function MustahikSuccessDialog({
             <div className="flex items-start gap-3 rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-3">
               <ClipboardList className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Program</p>
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Program</p>
                 <p className="font-bold text-slate-800 text-xs mt-0.5 leading-snug">
                   {data.program_induk}
                 </p>
@@ -118,7 +118,7 @@ export default function MustahikSuccessDialog({
             <div className="flex items-start gap-3 rounded-lg bg-blue-50 border border-blue-100 px-4 py-3">
               <Home className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Wilayah</p>
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Wilayah</p>
                 <p className="font-bold text-slate-800 text-xs mt-0.5 leading-snug">{data.kabupaten_kota}</p>
                 <p className="text-[10px] text-slate-500">{data.provinsi}</p>
               </div>
@@ -129,7 +129,7 @@ export default function MustahikSuccessDialog({
               <div className="flex items-start gap-3 rounded-lg bg-rose-50 border border-rose-100 px-4 py-3">
                 <MapPin className="h-4 w-4 text-rose-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-black text-rose-600 uppercase tracking-wider">Koordinat</p>
+                  <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Koordinat</p>
                   <p className="font-mono font-bold text-slate-800 text-[11px] mt-0.5">
                     {data.latitude.toFixed(6)}
                   </p>
@@ -145,8 +145,8 @@ export default function MustahikSuccessDialog({
               <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-100 px-4 py-3">
                 <Banknote className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-wider">Dana Tersalur</p>
-                  <p className="font-black text-slate-900 text-sm mt-0.5">
+                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Dana Tersalur</p>
+                  <p className="font-bold text-slate-900 text-sm mt-0.5">
                     Rp {data.dana_tersalur.toLocaleString('id-ID')}
                   </p>
                   <p className="text-[10px] text-slate-400">→ fact_penyaluran</p>

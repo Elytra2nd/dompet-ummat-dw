@@ -261,7 +261,7 @@ function DemografiGender({ appliedFilter, programFilter = PROGRAM_FILTER_DEFAULT
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 rounded-3xl bg-white shadow-md">
+      <div className="flex items-center justify-center h-64 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
           <p className="text-sm text-slate-400 font-medium">Memuat data...</p>
@@ -272,7 +272,7 @@ function DemografiGender({ appliedFilter, programFilter = PROGRAM_FILTER_DEFAULT
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64 rounded-3xl bg-white shadow-md border border-red-100">
+      <div className="flex items-center justify-center h-64 rounded-2xl bg-white shadow-sm border border-red-100">
         <div className="text-center">
           <p className="text-sm font-semibold text-red-500 mb-1">Gagal memuat data</p>
           <p className="text-xs text-slate-400">{error}</p>
@@ -282,9 +282,9 @@ function DemografiGender({ appliedFilter, programFilter = PROGRAM_FILTER_DEFAULT
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-8 space-y-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
       <div>
-        <h2 className="text-2xl font-extrabold text-slate-900">Demografi Mustahik</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Demografi Mustahik</h2>
         <p className="text-sm text-slate-400 mt-1">Distribusi berdasarkan gender</p>
       </div>
 

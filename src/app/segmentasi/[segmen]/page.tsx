@@ -424,12 +424,12 @@ export default function SegmentDetailPage({
               <IconComponent className={`h-8 w-8 ${config.color}`} />
             </div>
             <div>
-              <h1 className={`text-3xl font-black tracking-tight ${config.color}`}>{config.label}</h1>
+              <h1 className={`text-3xl font-bold tracking-tight ${config.color}`}>{config.label}</h1>
               <p className="mt-1 font-medium text-slate-500">{config.description}</p>
             </div>
             {segment && (
               <div className="ml-auto text-right">
-                <p className="text-3xl font-black text-slate-900">{segment.count.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-slate-900">{segment.count.toLocaleString()}</p>
                 <p className="text-[10px] font-bold uppercase text-slate-400">{segment.percentage}% dari total</p>
               </div>
             )}
@@ -451,8 +451,8 @@ export default function SegmentDetailPage({
                   <div className="flex items-center gap-4 rounded-xl border border-slate-100 p-4">
                     <div className="rounded-lg bg-blue-50 p-3"><Clock className="h-5 w-5 text-blue-600" /></div>
                     <div className="flex-1">
-                      <p className="text-xs font-bold uppercase text-slate-400">Waktu Sejak Donasi Terakhir</p>
-                      <p className="text-xl font-black text-slate-900">{segment.avg_recency.toLocaleString()} hari</p>
+                      <p className="text-xs font-bold uppercase text-slate-500 tracking-wider">Waktu Sejak Donasi Terakhir</p>
+                      <p className="text-xl font-bold text-slate-900">{segment.avg_recency.toLocaleString()} hari</p>
                     </div>
                     <p className="text-xs text-slate-400">avg keseluruhan: {overallStats.avg_recency} hari</p>
                   </div>
@@ -460,8 +460,8 @@ export default function SegmentDetailPage({
                   <div className="flex items-center gap-4 rounded-xl border border-slate-100 p-4">
                     <div className="rounded-lg bg-emerald-50 p-3"><Repeat className="h-5 w-5 text-emerald-600" /></div>
                     <div className="flex-1">
-                      <p className="text-xs font-bold uppercase text-slate-400">Frekuensi Donasi</p>
-                      <p className="text-xl font-black text-slate-900">{segment.avg_frequency}x</p>
+                      <p className="text-xs font-bold uppercase text-slate-500 tracking-wider">Frekuensi Donasi</p>
+                      <p className="text-xl font-bold text-slate-900">{segment.avg_frequency}x</p>
                     </div>
                     <p className="text-xs text-slate-400">avg keseluruhan: {overallStats.avg_frequency.toFixed(1)}x</p>
                   </div>
@@ -469,8 +469,8 @@ export default function SegmentDetailPage({
                   <div className="flex items-center gap-4 rounded-xl border border-slate-100 p-4">
                     <div className="rounded-lg bg-amber-50 p-3"><Banknote className="h-5 w-5 text-amber-600" /></div>
                     <div className="flex-1">
-                      <p className="text-xs font-bold uppercase text-slate-400">Total Kontribusi</p>
-                      <p className="text-xl font-black text-slate-900">{formatRupiah(segment.avg_monetary)}</p>
+                      <p className="text-xs font-bold uppercase text-slate-500 tracking-wider">Total Kontribusi</p>
+                      <p className="text-xl font-bold text-slate-900">{formatRupiah(segment.avg_monetary)}</p>
                     </div>
                     <p className="text-xs text-slate-400">avg: {formatRupiah(overallStats.avg_monetary)}</p>
                   </div>
